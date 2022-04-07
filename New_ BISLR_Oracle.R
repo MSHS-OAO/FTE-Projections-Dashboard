@@ -32,13 +32,13 @@ repo_max_date <- as.numeric(format(max(repo$END.DATE), "%m") )
 
 
 ## Run this if we need to update a new data set
-#repo <- repo %>% filter()
+#repo <- repo %>% filter(END.DATE <= )
 
 
 dir <- "J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/Universal Data/Labor/Raw Data/"
 # Import the most recent data
 details = file.info(list.files(path = paste0(dir,"BISLR Oracle/"), pattern="*.csv", full.names = T)) 
-details = details[with(details, order(as.POSIXct(ctime),  decreasing = T)), ]
+details = details[with(details, order(as.POSIXct(ctime),  decreasing = F)), ]
 
 
 # get the month of the most recent data set
@@ -50,7 +50,7 @@ dif_time <- new_data_date - repo_max_date
 
 
 
-BISLR_file_list <- rownames(details)[1:dif_time]
+BISLR_file_list <- rownames(tail(details, n = dif_time ))
 #BISLR_file_list <- paste0(dir, "BISLR Oracle/", "11_MSBISLW_FEMA_FEB-22_02_16_2022_0246.csv" )
 
 BISLR_data_raw <- lapply(BISLR_file_list, function(x){read.csv(x, as.is= T, strip.white = T)})
