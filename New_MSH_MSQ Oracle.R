@@ -42,7 +42,7 @@ repo_max_date <- as.numeric(format(max(repo$END.DATE), "%m") )
 
 # Import the most recent data
 details = file.info(list.files(path = paste0(dir,"/Raw Data/MSHQ Oracle/"), pattern="*.txt", full.names = T)) %>% arrange(mtime)
-details = details[with(details, order(as.POSIXct(ctime),  decreasing = T)), ]
+details = details[with(details, order(as.POSIXct(ctime),  decreasing = F)), ]
 
 # get the month of the most recent data set
 new_data_date <- rownames(details)[which.max(details$ctime)]
@@ -52,7 +52,7 @@ new_data_date <- as.numeric(substr(gsub('.*-([0-9]+)_','\\', new_data_date ), 1,
 dif_time <- new_data_date - repo_max_date
 
 
-Oracle_file_list <- rownames(details)[1:dif_time]
+Oracle_file_list <- rownames(tail(details, n = dif_time ))
 
 #Read files in MSQ Raw as csv
 Oracle <- lapply(Oracle_file_list, function(x){read.csv(x, sep = "~", header=T,
@@ -65,10 +65,10 @@ Oracle <- lapply(Oracle, transform, End.Date =  as.Date(End.Date, format = "%m/%
 
 
 
-start_dates <- as.Date(c("2022-01-29", "2022-01-01" ))
+start_dates <- as.Date(c("2022-01-01", "2022-01-29" ))
 
 #End date is 1 week after the end of the current Premier Distribution
-end_dates <- as.Date(c( "2022-02-26", "2022-01-29"))
+end_dates <- as.Date(c("2022-01-29", "2022-02-26"))
 
 
 #Filtering each file by start/end date specified
