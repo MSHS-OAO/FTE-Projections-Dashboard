@@ -30,6 +30,16 @@ coa <- read.csv(paste0("J:/deans/Presidents/SixSigma/MSHS Productivity/Productiv
                        "MSHS-FEMA-Reimbursement/Reference Tables/COA.csv"), header = T, stringsAsFactors = F, strip.white = TRUE)
 
 
+# import pay cycle data and filter required date
+Pay_Cycle_data <- read_xlsx(paste0(universal_dir,  "Mapping/MSHS_Pay_Cycle.xlsx"))
+Pay_Cycle_data <- Pay_Cycle_data %>% filter(PREMIER.DISTRIBUTION== "TRUE")
+
+
+# get unique end date
+unique_end_date <- unique(Pay_Cycle_data$END.DATE)
+unique_end_date <- as.Date(unique_end_date)
+
+
 
 #Import the latest aggregated file 
 repo <- file.info(list.files(path = paste0(dir,"/New Data/MSHQ_Oracle_Repo"), full.names = T , pattern = "data_MSH_MSQ_oracle"))
@@ -64,11 +74,14 @@ Oracle <- lapply(Oracle, transform, End.Date =  as.Date(End.Date, format = "%m/%
                          Start.Date = as.Date(Start.Date, format = "%m/%d/%Y"))
 
 
+# get the required end_date and start date
+#start_dates <- as.Date(c("2022-01-01", "2022-01-29" ))
+#end_dates <- as.Date(c("2022-01-29", "2022-02-26"))
+end_dates <- tail(unique_end_date, n = dif_time )
+start_dates <- lag(unique_end_date, n=1)
+start_dates <- tail(start_dates, n = dif_time )
 
-start_dates <- as.Date(c("2022-01-01", "2022-01-29" ))
 
-#End date is 1 week after the end of the current Premier Distribution
-end_dates <- as.Date(c("2022-01-29", "2022-02-26"))
 
 
 #Filtering each file by start/end date specified

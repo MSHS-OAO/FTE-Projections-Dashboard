@@ -18,12 +18,29 @@ suppressMessages({
 
 memory.limit(size = 8000000)
 
-# Working directory
-dir <- "C:/Users/aghaer01/Downloads/FTE-Projections-Dashboard-Oracle_CC"
+# Working directory -------------------------------------------------------------
+repo_dir <- "C:/Users/aghaer01/Downloads/FTE-Projections-Dashboard-Oracle_CC"
+
+# data directory
+dir <- "J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/Universal Data/Labor/Raw Data/"
+
+#universal directory
+universal_dir <- "J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/Universal Data/"
+
+# Import data sets --------------------------------------------------------------
+
+# import pay cycle data and filter required date
+Pay_Cycle_data <- read_xlsx(paste0(universal_dir,  "Mapping/MSHS_Pay_Cycle.xlsx"))
+Pay_Cycle_data <- Pay_Cycle_data %>% filter(PREMIER.DISTRIBUTION== "TRUE")
+
+
+# get unique end date
+unique_end_date <- unique(Pay_Cycle_data$END.DATE)
+unique_end_date <- as.Date(unique_end_date)
 
 
 #Import the latest aggregated file 
-repo <- file.info(list.files(path = paste0(dir,"/New Data/BISLR_Repo"), full.names = T , pattern = "data_BISLR"))
+repo <- file.info(list.files(path = paste0(repo_dir,"/New Data/BISLR_Repo"), full.names = T , pattern = "data_BISLR"))
 repo_file <- rownames(repo)[which.max(repo$ctime)]
 repo <- readRDS(repo_file)
 
@@ -31,9 +48,6 @@ repo <- readRDS(repo_file)
 repo_max_date <- as.numeric(format(max(repo$END.DATE), "%m") )
 
 
-
-
-dir <- "J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/Universal Data/Labor/Raw Data/"
 # Import the most recent data
 details = file.info(list.files(path = paste0(dir,"BISLR Oracle/"), pattern="*.csv", full.names = T)) 
 details = details[with(details, order(as.POSIXct(ctime),  decreasing = F)), ]
@@ -57,15 +71,17 @@ BISLR_data_raw <- lapply(BISLR_data_raw, transform, End.Date =  as.Date(End.Date
                                                      Start.Date = as.Date(Start.Date, format = "%m/%d/%Y"))
 
 
-
-
+# get the required end_date and start date
 
 #Start date is 1 day after the end of the last Premier Distribution
-start_dates <- as.Date(c("2022-01-02", "2022-01-30" ))
+#start_dates <- as.Date(c("2022-01-02", "2022-01-30" ))
+start_dates <- lag(unique_end_date, n=1)
+start_dates <- tail(start_dates, n = dif_time )+1
+
 
 #End date is 1 week after the end of the current Premier Distribution
-end_dates <- as.Date(c( "2022-02-05", "2022-03-05"))
-
+#end_dates <- as.Date(c( "2022-02-05", "2022-03-05"))
+end_dates <- tail(unique_end_date, n = dif_time )+ 7
 
 
 #Filtering each file by start/end date specified
