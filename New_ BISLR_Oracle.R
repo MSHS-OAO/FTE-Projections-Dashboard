@@ -30,8 +30,8 @@ universal_dir <- "J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/Un
 # Import data sets --------------------------------------------------------------
 
 # import pay cycle data and filter required date
-Pay_Cycle_data <- read_xlsx(paste0(universal_dir,  "Mapping/MSHS_Pay_Cycle.xlsx"))
-Pay_Cycle_data <- Pay_Cycle_data %>% filter(PREMIER.DISTRIBUTION== "TRUE")
+Pay_Cycle_data <- read_xlsx(paste0(universal_dir,  "Mapping/MSHS_Pay_Cycle.xlsx"), col_types =c("date" ,"date" , "date" , "numeric"))
+Pay_Cycle_data <- Pay_Cycle_data %>% filter(PREMIER.DISTRIBUTION== 1)
 
 
 # get unique end date
