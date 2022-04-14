@@ -31,8 +31,6 @@ repo <- readRDS(repo_file)
 repo_max_date <- as.numeric(format(max(repo$END.DATE), "%m") )
 
 
-## Run this if we need to update a new data set
-#repo <- repo %>% filter(END.DATE <= )
 
 
 dir <- "J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/Universal Data/Labor/Raw Data/"
@@ -51,7 +49,6 @@ dif_time <- new_data_date - repo_max_date
 
 
 BISLR_file_list <- rownames(tail(details, n = dif_time ))
-#BISLR_file_list <- paste0(dir, "BISLR Oracle/", "11_MSBISLW_FEMA_FEB-22_02_16_2022_0246.csv" )
 
 BISLR_data_raw <- lapply(BISLR_file_list, function(x){read.csv(x, as.is= T, strip.white = T)})
 
@@ -60,11 +57,16 @@ BISLR_data_raw <- lapply(BISLR_data_raw, transform, End.Date =  as.Date(End.Date
                                                      Start.Date = as.Date(Start.Date, format = "%m/%d/%Y"))
 
 
+
+
+
 #Start date is 1 day after the end of the last Premier Distribution
-start_dates <- as.Date(c("2022-01-30", "2022-01-02" ))
+start_dates <- as.Date(c("2022-01-02", "2022-01-30" ))
 
 #End date is 1 week after the end of the current Premier Distribution
-end_dates <- as.Date(c( "2022-03-05", "2022-02-05"))
+end_dates <- as.Date(c( "2022-02-05", "2022-03-05"))
+
+
 
 #Filtering each file by start/end date specified
 data_BISLR <- lapply(1:length(BISLR_data_raw), function(x)
@@ -102,7 +104,7 @@ delete_weekly <- function(df, pay_cycles){
 data_BISLR <- lapply(data_BISLR, function(x) delete_weekly(x, weekly_pc)) 
 
 
-data_BISLR <- do.call("rbind", BISLR_data_raw )
+data_BISLR <- do.call("rbind", data_BISLR )
 
   
   
