@@ -29,23 +29,13 @@ universal_dir <- "J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/Un
 
 # Import data sets --------------------------------------------------------------
 
-# import pay cycle data and filter required date
-Pay_Cycle_data <- read_xlsx(paste0(universal_dir,  "Mapping/MSHS_Pay_Cycle.xlsx"), col_types =c("date" ,"date" , "date" , "numeric"))
-Pay_Cycle_data <- Pay_Cycle_data %>% filter(PREMIER.DISTRIBUTION== 1)
-
-
-# get unique end date
-unique_end_date <- unique(Pay_Cycle_data$END.DATE)
-unique_end_date <- as.Date(unique_end_date)
-
-
 #Import the latest aggregated file 
 repo <- file.info(list.files(path = paste0(repo_dir,"/New Data/BISLR_Repo"), full.names = T , pattern = "data_BISLR"))
 repo_file <- rownames(repo)[which.max(repo$ctime)]
 repo <- readRDS(repo_file)
 
-# Get the max date in repo
-repo_max_date <- as.numeric(format(max(repo$END.DATE), "%m") )
+# get max date in repo
+#repo_max_date <- as.numeric(format(max(repo$END.DATE), "%m") )
 
 
 # Import the most recent data
@@ -54,34 +44,36 @@ details = details[with(details, order(as.POSIXct(ctime),  decreasing = F)), ]
 
 
 # get the month of the most recent data set
-new_data_date <- rownames(details)[which.max(details$ctime)]
-new_data_date <- as.numeric(substr(gsub('.*-([0-9]+)_','\\', new_data_date ), 1,2))
+#new_data_date <- rownames(details)[which.max(details$ctime)]
+#new_data_date <- as.numeric(substr(gsub('.*-([0-9]+)_','\\', new_data_date ), 1,2))
 
 # Find the difference between the max date in repo and the current data
-dif_time <- new_data_date - repo_max_date
+#dif_time <- new_data_date - repo_max_date
+
+#BISLR_file_list <- rownames(tail(details, n = dif_time ))
 
 
-
-BISLR_file_list <- rownames(tail(details, n = dif_time ))
-
-BISLR_data_raw <- lapply(BISLR_file_list, function(x){read.csv(x, as.is= T, strip.white = T)})
+BISLR_file_list <- rownames(details)[!(rownames(details) %in% repo$Filename) ]
 
 
-BISLR_data_raw <- lapply(BISLR_data_raw, transform, End.Date =  as.Date(End.Date, format = "%m/%d/%Y"),
-                                                     Start.Date = as.Date(Start.Date, format = "%m/%d/%Y"))
+# add a column including the name of the data set 
+BISLR_data_raw <- lapply(BISLR_file_list, function(x){data <- read.csv(x, as.is= T, strip.white = T)%>%
+  mutate( Filename = x,
+         #Filename = str_extract(x, '\\d+\\_MSBISLW_FEMA_[A-Z]{3}'),
+         End.Date =  as.Date(End.Date, format = "%m/%d/%Y"),
+         Start.Date = as.Date(Start.Date, format = "%m/%d/%Y"))
+})
+
 
 
 # get the required end_date and start date
 
 #Start date is 1 day after the end of the last Premier Distribution
-#start_dates <- as.Date(c("2022-01-02", "2022-01-30" ))
-start_dates <- lag(unique_end_date, n=1)
-start_dates <- tail(start_dates, n = dif_time )+1
+start_dates <- as.Date(c("2022-01-02", "2022-01-30" ))
 
 
 #End date is 1 week after the end of the current Premier Distribution
-#end_dates <- as.Date(c( "2022-02-05", "2022-03-05"))
-end_dates <- tail(unique_end_date, n = dif_time )+ 7
+end_dates <- as.Date(c( "2022-02-05", "2022-03-05"))
 
 
 #Filtering each file by start/end date specified
@@ -124,7 +116,7 @@ data_BISLR <- do.call("rbind", data_BISLR )
 
   
   
-  #Assigning Payroll values and Removing duplicates
+#Assigning Payroll values and Removing duplicates
 data_BISLR <- data_BISLR %>%
   mutate(PAYROLL = case_when(
     Facility.Hospital.Id_Worked == "NY2162" ~ "MSW",
@@ -231,7 +223,7 @@ new_repo <- new_repo  %>% distinct()
 
 
 #save RDS
-saveRDS(new_repo , file = paste0("C:\\Users\\aghaer01\\Downloads\\FTE-Projections-Dashboard-Oracle_CC\\New Data\\data_BISLR-", Sys.Date(),".rds"))
+saveRDS(new_repo , file = paste0("C:\\Users\\aghaer01\\Downloads\\FTE-Projections-Dashboard-Oracle_CC\\New Data\\BISLR_Repo\\data_BISLR-", Sys.Date(),".rds"))
 
 
 
