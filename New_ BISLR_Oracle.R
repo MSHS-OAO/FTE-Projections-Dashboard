@@ -12,6 +12,7 @@ suppressMessages({
   library(here)
   library(gsubfn)
   library(rstudioapi)
+  library(mondate)
 })
 
 
@@ -19,45 +20,43 @@ suppressMessages({
 memory.limit(size = 8000000)
 
 # Working directory -------------------------------------------------------------
-repo_dir <- "C:/Users/aghaer01/Downloads/FTE-Projections-Dashboard-Oracle_CC"
 
-# data directory
-dir <- "J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/Universal Data/Labor/Raw Data/"
+dir <- "J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/Universal Data/Labor/"
 
 #universal directory
 universal_dir <- "J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/Universal Data/"
 
 # Import data sets --------------------------------------------------------------
+Pay_Cycle_data <- read_xlsx(paste0(universal_dir,  "Mapping/MSHS_Pay_Cycle.xlsx"), col_types =c("date" ,"date" , "date" , "numeric"))
+
+Pay_Cycle_data <- Pay_Cycle_data %>% mutate(DATE =as.Date(DATE),
+                                            START.DATE= as.Date(START.DATE),
+                                            END.DATE= as.Date(END.DATE))
+
 
 #Import the latest aggregated file 
-repo <- file.info(list.files(path = paste0(repo_dir,"/New Data/BISLR_Repo"), full.names = T , pattern = "data_BISLR"))
+repo <- file.info(list.files(path = paste0(dir,"/REPOS/BISLR_Repo"), full.names = T , pattern = "data_BISLR"))
 repo_file <- rownames(repo)[which.max(repo$ctime)]
 repo <- readRDS(repo_file)
 
 # get max date in repo
-#repo_max_date <- as.numeric(format(max(repo$END.DATE), "%m") )
+max(repo$END.DATE)
+
+
+# Run this if you need to update a data in repo
+#repo <- repo %>% filter(Filename != "J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/Universal Data/Labor/Raw Data/BISLR Oracle/12_MSBISLW_FEMA_MAR-22_03_16_2022_0210.csv")
 
 
 # Import the most recent data
-details = file.info(list.files(path = paste0(dir,"BISLR Oracle/"), pattern="*.csv", full.names = T)) 
+details = file.info(list.files(path = paste0(dir,"Raw Data/BISLR Oracle/"), pattern="*.csv", full.names = T)) 
 details = details[with(details, order(as.POSIXct(ctime),  decreasing = F)), ]
-
-
-# get the month of the most recent data set
-#new_data_date <- rownames(details)[which.max(details$ctime)]
-#new_data_date <- as.numeric(substr(gsub('.*-([0-9]+)_','\\', new_data_date ), 1,2))
-
-# Find the difference between the max date in repo and the current data
-#dif_time <- new_data_date - repo_max_date
-
-#BISLR_file_list <- rownames(tail(details, n = dif_time ))
 
 
 BISLR_file_list <- rownames(details)[!(rownames(details) %in% repo$Filename) ]
 
 
 # add a column including the name of the data set 
-BISLR_data_raw <- lapply(BISLR_file_list, function(x){data <- read.csv(x, as.is= T, strip.white = T)%>%
+BISLR_data_raw <- lapply(BISLR_file_list, function(x){data <- read.csv(x, as.is= T, strip.white = T) %>%
   mutate( Filename = x,
          #Filename = str_extract(x, '\\d+\\_MSBISLW_FEMA_[A-Z]{3}'),
          End.Date =  as.Date(End.Date, format = "%m/%d/%Y"),
@@ -69,12 +68,12 @@ BISLR_data_raw <- lapply(BISLR_file_list, function(x){data <- read.csv(x, as.is=
 # get the required end_date and start date
 
 #Start date is 1 day after the end of the last Premier Distribution
-start_dates <- as.Date(c("2022-01-02", "2022-01-30" ))
-
+#start_dates <- as.Date(c("2022-01-02", "2022-01-30" ))
+start_dates <- as.Date("2022-02-26")+1
 
 #End date is 1 week after the end of the current Premier Distribution
-end_dates <- as.Date(c( "2022-02-05", "2022-03-05"))
-
+#end_dates <- as.Date(c( "2022-02-05", "2022-03-05"))
+end_dates <- as.Date("2022-03-26")+7
 
 #Filtering each file by start/end date specified
 data_BISLR <- lapply(1:length(BISLR_data_raw), function(x)
@@ -183,14 +182,7 @@ data_BISLR <- data_BISLR %>%
                            substr(Full.COA.for.Home,5,7),
                            substr(Full.COA.for.Home,12,16)))
 
-#Add in reverse mapping for Legacy cost centers worked and home
-# data_BISLR_oracle <- data_BISLR_oracle %>%
-#   mutate(DPT.WRKD = paste0(substr(Reverse.Map.for.Worked, 1, 4),
-#                            substr(Reverse.Map.for.Worked, 13, 14),
-#                            substr(Reverse.Map.for.Worked, 16, 19)),
-#          DPT.HOME = paste0(substr(Reverse.Map.for.Home, 1, 4),
-#                            substr(Reverse.Map.for.Home, 13, 14),
-#                            substr(Reverse.Map.for.Home, 16, 19)))
+
 
 #Formatting column data types
 data_BISLR <- data_BISLR %>%

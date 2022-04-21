@@ -17,7 +17,7 @@ suppressMessages({
 
 memory.limit(size = 8000000)
 
-# Working directory
+# Working directory -------------------------------------------------------------
 #dir <- "J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/Universal Data/Labor/Raw Data/"
 dir <- "C:/Users/aghaer01/Downloads/FTE-Projections-Dashboard-Oracle_CC"
 
@@ -25,19 +25,15 @@ dir <- "C:/Users/aghaer01/Downloads/FTE-Projections-Dashboard-Oracle_CC"
 universal_dir <- "J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/Universal Data/"
 
 
+# Import data -------------------------------------------------------------
 #Read COA for department location
 coa <- read.csv(paste0("J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/Analysis/FEMA Reimbursement/",
                        "MSHS-FEMA-Reimbursement/Reference Tables/COA.csv"), header = T, stringsAsFactors = F, strip.white = TRUE)
 
 
 # import pay cycle data and filter required date
-Pay_Cycle_data <- read_xlsx(paste0(universal_dir,  "Mapping/MSHS_Pay_Cycle.xlsx"), col_types =c("date" ,"date" , "date" , "numeric") )
-Pay_Cycle_data <- Pay_Cycle_data %>% filter(PREMIER.DISTRIBUTION== 1)
+#Pay_Cycle_data <- read_xlsx(paste0(universal_dir,  "Mapping/MSHS_Pay_Cycle.xlsx"), col_types =c("date" ,"date" , "date" , "numeric") )
 
-
-# get unique end date
-unique_end_date <- unique(Pay_Cycle_data$END.DATE)
-unique_end_date <- as.Date(unique_end_date)
 
 
 
@@ -47,7 +43,7 @@ repo_file <- rownames(repo)[which.max(repo$ctime)]
 repo <- readRDS(repo_file)
 
 # Get the max date in repo
-repo_max_date <- as.numeric(format(max(repo$END.DATE), "%m") )
+#repo_max_date <- as.numeric(format(max(repo$END.DATE), "%m") )
 
 
 # Import the most recent data
@@ -55,14 +51,16 @@ details = file.info(list.files(path = paste0(dir,"/Raw Data/MSHQ Oracle/"), patt
 details = details[with(details, order(as.POSIXct(ctime),  decreasing = F)), ]
 
 # get the month of the most recent data set
-new_data_date <- rownames(details)[which.max(details$ctime)]
-new_data_date <- as.numeric(substr(gsub('.*-([0-9]+)_','\\', new_data_date ), 1,2))
+#new_data_date <- rownames(details)[which.max(details$ctime)]
+#new_data_date <- as.numeric(substr(gsub('.*-([0-9]+)_','\\', new_data_date ), 1,2))
 
 # Find the difference between the max date in repo and the current data
-dif_time <- new_data_date - repo_max_date
+#dif_time <- new_data_date - repo_max_date
 
 
-Oracle_file_list <- rownames(tail(details, n = dif_time ))
+#Oracle_file_list <- rownames(tail(details, n = dif_time ))
+
+Oracle_file_list <- rownames(details)[!(rownames(details) %in% repo$Filename) ]
 
 #Read files in MSQ Raw as csv
 Oracle <- lapply(Oracle_file_list, function(x){read.csv(x, sep = "~", header=T,
@@ -73,13 +71,22 @@ Oracle <- lapply(Oracle_file_list, function(x){read.csv(x, sep = "~", header=T,
 Oracle <- lapply(Oracle, transform, End.Date =  as.Date(End.Date, format = "%m/%d/%Y"),
                          Start.Date = as.Date(Start.Date, format = "%m/%d/%Y"))
 
+Oracle <- lapply(Oracle_file_list, function(x){
+                  data <- read.csv(x, sep = "~", header=T,
+                                      stringsAsFactors = F,
+                                      colClasses = rep("character",32),
+                                      strip.white = TRUE) %>%
+                               mutate( Filename = x,
+                               #Filename = str_extract(x, '\\d+\\_MSBISLW_FEMA_[A-Z]{3}'),
+                               End.Date =  as.Date(End.Date, format = "%m/%d/%Y"),
+                               Start.Date = as.Date(Start.Date, format = "%m/%d/%Y"))
+})
+
+
 
 # get the required end_date and start date
-#start_dates <- as.Date(c("2022-01-01", "2022-01-29" ))
-#end_dates <- as.Date(c("2022-01-29", "2022-02-26"))
-end_dates <- tail(unique_end_date, n = dif_time )
-start_dates <- lag(unique_end_date, n=1)
-start_dates <- tail(start_dates, n = dif_time )
+start_dates <- as.Date(c("2022-01-01", "2022-01-29" ))
+end_dates <- as.Date(c("2022-01-29", "2022-02-26"))
 
 
 
