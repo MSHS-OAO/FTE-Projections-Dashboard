@@ -6,11 +6,13 @@ library(here)
 #Start date is 1 day after the end of the last Premier Distribution "year-month-day"
 filter_start_dates <- c("2021-02-28", "2021-03-28", "2021-04-25", "2021-05-23",
                         "2021-06-20", "2021-08-01", "2021-08-29", "2021-09-26",
-                        "2021-10-24", "2021-11-21", "2022-01-02", "2022-01-30")
+                        "2021-10-24", "2021-11-21", "2022-01-02", "2022-01-30",
+                        "2022-02-27")
 #End date is 1 week after the end of the current Premier Distribution
 filter_end_dates <- c("2021-04-03", "2021-05-01", "2021-05-29", "2021-06-26",
                       "2021-08-07","2021-09-04", "2021-10-02",  "2021-10-30",
-                      "2021-11-27", "2022-01-08", "2022-02-05", "2022-03-05")
+                      "2021-11-27", "2022-01-08", "2022-02-05", "2022-03-05",
+                      "2022-04-02")
 
 #Premier Distribution ex: 2/28/21- 3/27/21, 3/28/21 - 4/24/21
 # First weekly cycle for each BISLR Oracle file (ex. 3/28 - 4/3) is deleted
