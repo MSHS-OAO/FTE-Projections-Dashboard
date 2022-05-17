@@ -7,7 +7,8 @@ Source_Summary <- function(data){
   library(readxl)
   library(rstudioapi)
   #Read paycode mapping file and Pay cycle file
-  System_Paycode <- read_xlsx("J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/Universal Data/Mapping/MSHS_Paycode_Mapping.xlsx")
+  System_Paycode <- read.xlsx2("J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/Universal Data/Mapping/MSHS_Paycode_Mapping.xlsx",
+                               sheetIndex = 1)
   System_Paycode <- System_Paycode %>% select(RAW.PAY.CODE, PAY.CODE.NAME,
                                               PAY.CODE.CATEGORY, INCLUDE.HOURS, 
                                               INCLUDE.EXPENSES)
