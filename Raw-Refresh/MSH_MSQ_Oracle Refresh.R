@@ -8,10 +8,11 @@ memory.limit(size = 8000000)
 #PP end dates for filtering each raw file
 PPend_list <- list("04/25/2020","05/23/2020","06/20/2020","08/01/2020",
                    "08/29/2020","09/26/2020","10/24/2020","11/21/2020",
-                   "01/02/2021","01/23/2021","01/30/2021","02/27/2021",
+                   "01/02/2021","01/23/2021","02/27/2021",
                    "03/27/2021","04/24/2021","05/22/2021","06/19/2021",
                    "07/31/2021","08/28/2021","09/25/2021","10/23/2021",
-                   "11/20/2021","01/01/2022")
+                   "11/20/2021","01/01/2022","01/29/2022","02/26/2022",
+                   "03/26/2022","04/23/2022")
 #file path for all raw files
 folderOracle <- paste0(here(),"/Raw Data/MSHQ Oracle/")
 #List files from MSHQ Raw folder
@@ -26,18 +27,22 @@ ORACLElist = lapply(Oracle_file_list,
                                         strip.white = TRUE))
 #Remove overlapping dates from raw txt files
 for(i in 1:length(ORACLElist)){
-  if(i == 1 | i == 11){
+  if(i == 1){
     ORACLElist[[i]] <- ORACLElist[[i]] %>%
       filter(as.Date(End.Date, format = "%m/%d/%Y") <= as.Date(PPend_list[[i]], format = "%m/%d/%Y"))
-  } else if(i == 2){
+  } else if(i == 2 | i == 11){
     ORACLElist[[i]] <- ORACLElist[[i]] %>%
-      filter(as.Date(End.Date, format = "%m/%d/%Y") <= as.Date(PPend_list[[i]], format = "%m/%d/%Y"))
+      filter(as.Date(End.Date, format = "%m/%d/%Y") <= as.Date(PPend_list[[i]], format = "%m/%d/%Y"),
+             as.Date(End.Date, format = "%m/%d/%Y") >= max(as.Date(ORACLElist[[i-1]]$End.Date,format = "%m/%d/%Y")))
   } else {
     ORACLElist[[i]] <- ORACLElist[[i]] %>%
       filter(as.Date(End.Date, format = "%m/%d/%Y") <= as.Date(PPend_list[[i]], format = "%m/%d/%Y"),
              as.Date(Start.Date, format = "%m/%d/%Y") > max(as.Date(ORACLElist[[i-1]]$End.Date,format = "%m/%d/%Y")))
   }
 }
+
+
+
 #Bind all MSHQ files
 Oracle = do.call("rbind", ORACLElist)
 #Remove Duplicate rows and add worked entity column
@@ -67,4 +72,4 @@ check <- Oracle %>%
   arrange(End.Date) 
 check1 <- pivot_wider(check,id_cols = PAYROLL,values_from = Hours,names_from = End.Date)
 #Save .rds
-saveRDS(Oracle,file = "J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/Universal Data/Labor/RDS/data_MSH_MSQ_oracle_check.rds")
+saveRDS(Oracle,file = "J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/Universal Data/Labor/RDS/data_MSH_MSQ_oracle.rds")

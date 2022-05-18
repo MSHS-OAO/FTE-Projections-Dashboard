@@ -7,7 +7,7 @@ library(here)
 source("System_Summary.R")
 
 #Enter max PP end date for dashboard
-end <- "01/01/2022"
+end <- "01/29/2022"
 
 #Save System Summary table
 saveRDS(System_Summary,file=paste0("J:/deans/Presidents/SixSigma/",

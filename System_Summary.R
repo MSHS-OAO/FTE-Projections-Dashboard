@@ -10,7 +10,7 @@ source("Source_Summary_FTE Trend.R")
 #Run source function
 System_Source <- lapply(preprocess,function(x)Source_Func(x))
 System_Preprocess <- list(BISLR_Oracle = data_BISLR_oracle,MSH_MSQ = data_MSH_MSQ,MSBIB = data_MSBI_MSB,MSSLW = data_MSSL_MSW,MSH_MSQ_Oracle = data_msh_msq_oracle)
-rm(data_BISLR_oracle, data_MSBI_MSB, data_MSH_MSQ, data_MSH_MSQ_oracle, data_MSSL_MSW)
+rm(data_BISLR_oracle, data_MSBI_MSB, data_MSH_MSQ, data_msh_msq_oracle, data_MSSL_MSW)
 #summarize all preprocessed dataframes
 System_Preprocess <- lapply(System_Preprocess, function(x)Source_Summary(x))
 #bind all summary tables into system summary
