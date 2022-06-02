@@ -65,14 +65,13 @@ BISLR_data_raw <- lapply(BISLR_file_list, function(x){data <- read.csv(x, as.is=
 
 
 
-# get the required end_date and start date
-
+# get the required end date and start date
 #Start date is 1 day after the end of the last Premier Distribution
-#start_dates <- as.Date(c("2022-01-02", "2022-01-30" ))
+#start_dates <- Pay_Cycle_data$START.DATE[Pay_Cycle_data$DATE== Sys.Date()]+1
 start_dates <- as.Date("2022-02-26")+1
 
 #End date is 1 week after the end of the current Premier Distribution
-#end_dates <- as.Date(c( "2022-02-05", "2022-03-05"))
+#end_dates <- Pay_Cycle_data$END.DATE[Pay_Cycle_data$DATE== Sys.Date()]+7
 end_dates <- as.Date("2022-03-26")+7
 
 #Filtering each file by start/end date specified

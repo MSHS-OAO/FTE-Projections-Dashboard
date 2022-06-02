@@ -32,7 +32,10 @@ coa <- read.csv(paste0("J:/deans/Presidents/SixSigma/MSHS Productivity/Productiv
 
 
 # import pay cycle data and filter required date
-#Pay_Cycle_data <- read_xlsx(paste0(universal_dir,  "Mapping/MSHS_Pay_Cycle.xlsx"), col_types =c("date" ,"date" , "date" , "numeric") )
+# Pay_Cycle_data <- read_xlsx(paste0(universal_dir,  "Mapping/MSHS_Pay_Cycle.xlsx"), col_types =c("date" ,"date" , "date" , "numeric") )
+# Pay_Cycle_data <- Pay_Cycle_data %>% mutate(DATE =as.Date(DATE),
+#                                             START.DATE= as.Date(START.DATE),
+#                                             END.DATE= as.Date(END.DATE))
 
 
 #Read in job code descriptions
@@ -46,10 +49,17 @@ repo <- file.info(list.files(path = paste0(dir,"/REPOS/MSHQ_Oracle_Repo"), full.
 repo_file <- rownames(repo)[which.max(repo$ctime)]
 repo <- readRDS(repo_file)
 
+# get max date in repo
+max(repo$END.DATE)
+
+
+# Run this if you need to update a data in repo
+#repo <- repo %>% filter(Filename != "J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/Universal Data/Labor/Raw Data/MSHQ Oracle/MSHQ Oracle/25_MSH_LD_FTI_MAY-22_05_16_2022_0243.txt"")
+
 
 
 # Import the most recent data
-details = file.info(list.files(path = paste0(dir,"/Raw Data/MSHQ Oracle/"), pattern="*.txt", full.names = T)) %>% arrange(mtime)
+details = file.info(list.files(path = paste0(dir,"/Raw Data/MSHQ Oracle/MSHQ Oracle/"), pattern="*.txt", full.names = T)) %>% arrange(mtime)
 details = details[with(details, order(as.POSIXct(ctime),  decreasing = F)), ]
 
 
@@ -57,65 +67,49 @@ details = details[with(details, order(as.POSIXct(ctime),  decreasing = F)), ]
 Oracle_file_list <- rownames(details)[!(rownames(details) %in% repo$Filename) ]
 
 #Read files in MSQ Raw as csv
-Oracle <- lapply(Oracle_file_list, function(x){
+ORACLElist <- lapply(Oracle_file_list, function(x){
                   data <- read.csv(x, sep = "~", header=T,
                                       stringsAsFactors = F,
                                       colClasses = rep("character",32),
-                                      strip.white = TRUE) %>%
-                               mutate( Filename = x,
-                               #Filename = str_extract(x, '\\d+\\_MSBISLW_FEMA_[A-Z]{3}'),
-                               End.Date =  as.Date(End.Date, format = "%m/%d/%Y"),
-                               Start.Date = as.Date(Start.Date, format = "%m/%d/%Y"))
+                                      strip.white = TRUE) %>% mutate( Filename = x)
 })
 
 
 
 # get the required end_date and start date
-start_dates <- as.Date(c("2022-01-01", "2022-01-29" ))
-end_dates <- as.Date(c("2022-01-29", "2022-02-26"))
+#start_dates <- Pay_Cycle_data$START.DATE[Pay_Cycle_data$DATE== Sys.Date()]
+start_dates <- as.Date(c("02/26/2022", "03/26/2022" ), format = "%m/%d/%Y")
+                         
 
+#end_dates <- Pay_Cycle_data$END.DATE[Pay_Cycle_data$DATE== Sys.Date()]
+end_dates <- as.Date(c("03/26/2022","04/23/2022"), format = "%m/%d/%Y")
 
 
 
 #Filtering each file by start/end date specified
-Oracle <- lapply(1:length(Oracle), function(x)
-  Oracle[[x]] <- Oracle[[x]] %>%
-    filter(End.Date <= end_dates[x],
-           Start.Date >= start_dates[x]))
+ORACLElist <- lapply(1:length(ORACLElist), function(x)
+  ORACLElist[[x]] <- ORACLElist[[x]] %>%
+    filter(as.Date(End.Date, format = "%m/%d/%Y") <= end_dates[x],
+           as.Date(Start.Date, format = "%m/%d/%Y") > start_dates[x]))
 
 
 
-Oracle <- do.call("rbind", Oracle )
+
+Oracle <- do.call("rbind", ORACLElist )
 
 
 #Remove Duplicate rows and add worked entity column
 Oracle  <- Oracle  %>%  mutate(WRKD.ENTITY = substr(WD_COFT,1,3),
-                             Hours = as.numeric(Hours), Expense = as.numeric(Expense)) 
+                       Hours = as.numeric(Hours), Expense = as.numeric(Expense)) 
 
-Oracle  <- Oracle %>% relocate(Filename, .after = last_col()) %>% distinct()
-
-Oracle_with_filename <- Oracle
   
-Oracle  <- Oracle  %>% group_by_at(c(1:13,16:33)) %>% summarise(Hours = sum(Hours, na.rm = T),
+Oracle  <- Oracle  %>% group_by_at(c(1:13,16:34)) %>% summarise(Hours = sum(Hours, na.rm = T),
             Expense = sum(Expense,na.rm = T)) %>% ungroup() %>% distinct()
 
-Oracle <- left_join(Oracle, Oracle_with_filename)
-rm(Oracle_with_filename)
+
 
 #Determine PAYROLL based on WRKD.ENTITY
 Oracle  <- Oracle  %>% mutate(PAYROLL = case_when(WRKD.ENTITY == "102" ~ "MSQ", TRUE ~ "MSH"))
-
-
-
-#Check sum of hours by end date to make sure data follows proper pattern
-check <- Oracle  %>%
-  ungroup() %>%
-  group_by(PAYROLL,End.Date) %>%
-  summarise(Hours = sum(Hours)) %>%
-  mutate(End.Date = as.Date(End.Date, format = "%m/%d/%Y")) %>%
-  arrange(End.Date) 
-check1 <- pivot_wider(check,id_cols = PAYROLL,values_from = Hours,names_from = End.Date)
-
 
 
 
@@ -138,7 +132,7 @@ Oracle  <- Oracle  %>% mutate( Reverse.Map.for.Worked = case_when(nchar(Reverse.
 
 
 
-#Bring in department location
+#Bring in department location --------------------------------------------
 row_count <- nrow(Oracle )
 Oracle  <- left_join(Oracle , coa, by = c("Reverse.Map.for.Worked" = "Column2")) %>% select(1:36)
   
@@ -154,7 +148,7 @@ if(nrow(Oracle ) != row_count) {
 }
 
 
-#Bring in standardized JC Description
+#Bring in standardized JC Description -----------------------------------------------
 row_count <- nrow(Oracle )
 Oracle  <- left_join(Oracle , jc_desc, by = c("Job.Code" = "J.C"))
 if(nrow(Oracle ) != row_count) {
@@ -164,24 +158,39 @@ if(nrow(Oracle ) != row_count) {
 #Format necessary columns
 Oracle  <- Oracle  %>% mutate(End.Date = as.Date(End.Date, format = "%m/%d/%Y"),
                               Hours = as.numeric(Hours), Expense = as.numeric(Expense))
+
+# Move Filename to the end
 Oracle  <- Oracle %>% relocate(Filename, .after = last_col()) 
 
 #Column names
-new_col_names <- c("DPT.WRKD", "DPT.HOME", "START.DATE", "END.DATE", "J.C",
-                   "PAY.CODE", "HOME.DESCRIPTION", "WRKD.DESCRIPTION", "HOURS",
-                   "EXPENSE", "WRKD.LOCATION", "HOME.LOCATION", "J.C.DESCRIPTION")
+colnames(Oracle)[colnames(Oracle) =="Department.ID.Home.Department"] <- "DPT.HOME"
+colnames(Oracle)[colnames(Oracle) =="Department.IdWHERE.Worked"] <- "DPT.WRKD"
+
+new_col_names <- c("START.DATE", "END.DATE", "J.C", "PAY.CODE", "HOME.DESCRIPTION", "WRKD.DESCRIPTION",
+                   "HOURS", "EXPENSE", "WRKD.LOCATION", "HOME.LOCATION", "J.C.DESCRIPTION")
                    
-colnames(Oracle )[c(3, 5, 6, 7, 12:15, 32, 33, 35:37)] <- new_col_names
+colnames(Oracle )[c(6, 7, 12:15, 32, 33, 35:37)] <- new_col_names
 
 
-# Bind NEW data with repository
+# Bind NEW data with repository -----------------------------------------
 new_repo <- rbind(repo, Oracle)
 new_repo <- new_repo %>% distinct()
 
 
+#Check sum of hours by end date to make sure data follows proper pattern
+check <- new_repo  %>%
+  ungroup() %>%
+  group_by(PAYROLL,END.DATE) %>%
+  summarise(HOURS = sum(HOURS)) %>%
+ # mutate(End.Date = as.Date(End.Date, format = "%m/%d/%Y")) %>%
+  arrange(END.DATE) 
+check1 <- pivot_wider(check,id_cols = PAYROLL,values_from = HOURS,names_from = END.DATE)
 
-#save RDS
-#saveRDS(new_repo, file = paste0("C:\\Users\\aghaer01\\Downloads\\FTE-Projections-Dashboard-Oracle_CC\\New Data\\MSHQ_Oracle_Repo\\data_MSH_MSQ_oracle-", Sys.Date(),".rds"))
+rm(check, check1)
+
+
+
+#save RDS --------------------------------------------
 saveRDS(new_repo, file= paste0("J:\\deans\\Presidents\\SixSigma\\MSHS Productivity\\Productivity\\Universal Data\\Labor\\REPOS\\MSHQ_Oracle_Repo\\data_MSH_MSQ_oracle-", Sys.Date(),".rds"))
 
 
