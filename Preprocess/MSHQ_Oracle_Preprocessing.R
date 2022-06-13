@@ -9,8 +9,11 @@ universal_dir <- paste0("J:/deans/Presidents/SixSigma/MSHS Productivity/",
                         "Productivity/Universal Data/")
 
 #Read in raw MSHQ Oracle raw refresh
+# data_msh_msq_oracle <- readRDS(paste0(universal_dir,
+#                                       "Labor/RDS/data_msh_msq_oracle.rds"))
+
 data_msh_msq_oracle <- readRDS(paste0(universal_dir,
-                                      "Labor/RDS/data_msh_msq_oracle.rds"))
+                                      "Labor/REPOS/MSHQ_Oracle_Repo/data_MSH_MSQ_oracle-2022-06-06.rds"))
 
 #Read COA for department location
 coa <- read.csv(paste0("J:/deans/Presidents/SixSigma/MSHS Productivity/",
@@ -58,17 +61,25 @@ oracle <- oracle %>%
 
 #Bring in department location
 row_count <- nrow(oracle)
-oracle <- left_join(oracle, coa,
-                    by = c("Reverse.Map.for.Worked" = "Column2")) %>%
-  select(1:35)
+oracle <- left_join(oracle, coa %>% select(Column1, Column2) ,
+                    by = c("Reverse.Map.for.Worked" = "Column2"))
+
+# oracle <- left_join(oracle, coa ,
+#                     by = c("Reverse.Map.for.Worked" = "Column2")) %>%
+#   select(1:36)
 if(nrow(oracle) != row_count) {
   stop(paste("Row count failed at", basename(getSourceEditorContext()$path)))
   }
 
+
 row_count <- nrow(oracle)
-oracle <- left_join(oracle, coa,
-                    by = c("Reverse.Map.for.Home" = "Column2")) %>%
-  select(1:36)
+oracle <- left_join(oracle, coa  %>% select(Column1, Column2) ,
+                    by = c("Reverse.Map.for.Home" = "Column2"))
+
+
+# oracle <- left_join(oracle, coa ,
+#                     by = c("Reverse.Map.for.Home" = "Column2")) %>%
+#   select(1:37)
 if(nrow(oracle) != row_count) {
   stop(paste("Row count failed at", basename(getSourceEditorContext()$path)))
   }
@@ -85,12 +96,26 @@ oracle <- oracle %>%
   mutate(End.Date = as.Date(End.Date, format = "%m/%d/%Y"),
          Hours = as.numeric(Hours),
          Expense = as.numeric(Expense))
+
+
 #Column names
-new_col_names <- c("DPT.HOME", "DPT.WRKD", "START.DATE", "END.DATE", "J.C",
-                   "PAY.CODE", "HOME.DESCRIPTION", "WRKD.DESCRIPTION", "HOURS",
-                   "EXPENSE", "WRKD.LOCATION", "HOME.LOCATION",
-                   "J.C.DESCRIPTION")
-colnames(oracle)[c(3, 5, 6, 7, 12:15, 32, 33, 35:37)] <- new_col_names
+oracle <- oracle %>% rename(DPT.HOME= Department.ID.Home.Department, 
+                        DPT.WRKD= Department.IdWHERE.Worked,
+                        START.DATE= Start.Date, END.DATE= End.Date,
+                        J.C= Job.Code,  PAY.CODE= Pay.Code,
+                        HOME.DESCRIPTION= Department.Name.Home.Dept,
+                        WRKD.DESCRIPTION= Department.Name.Worked.Dept,
+                        HOURS= Hours,  EXPENSE= Expense, 
+                        WRKD.LOCATION= Column1.x, HOME.LOCATION= Column1.y, 
+                        J.C.DESCRIPTION= J.C.DESCRIPTION )
+
+
+# #Column names
+# new_col_names <- c("DPT.HOME", "DPT.WRKD", "START.DATE", "END.DATE", "J.C",
+#                    "PAY.CODE", "HOME.DESCRIPTION", "WRKD.DESCRIPTION", "HOURS",
+#                    "EXPENSE", "WRKD.LOCATION", "HOME.LOCATION",
+#                    "J.C.DESCRIPTION")
+# colnames(oracle)[c(3, 5, 6, 7, 12:15, 32, 33, 35:37)] <- new_col_names
 
 data_msh_msq_oracle <<- oracle
 

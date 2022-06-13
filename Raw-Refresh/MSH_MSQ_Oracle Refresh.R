@@ -15,6 +15,7 @@ PPend_list <- list("04/25/2020","05/23/2020","06/20/2020","08/01/2020",
                    "03/26/2022","04/23/2022")
 #file path for all raw files
 folderOracle <- paste0(here(),"/Raw Data/MSHQ Oracle/")
+folderOracle <- "J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/Universal Data/Labor/Raw Data/MSHQ Oracle/MSHQ Oracle"
 #List files from MSHQ Raw folder
 Oracle_file_list <- list.files(path=folderOracle, pattern="*.txt")
 details = file.info(list.files(path = folderOracle, pattern="*.txt", full.names = T)) %>% arrange(mtime)
@@ -55,7 +56,7 @@ Oracle <- Oracle %>%
          Hours = as.numeric(Hours),
          Expense = as.numeric(Expense))
 Oracle <- Oracle%>%
-  group_by_at(c(1:13,16:33)) %>%
+  group_by_at(c(1:13,16:34)) %>%
   summarise(Hours = sum(Hours, na.rm = T),
             Expense = sum(Expense,na.rm = T)) %>%
   ungroup() %>%

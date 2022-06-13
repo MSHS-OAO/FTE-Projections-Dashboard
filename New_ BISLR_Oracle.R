@@ -65,6 +65,13 @@ BISLR_data_raw <- lapply(BISLR_file_list, function(x){data <- read.csv(x, as.is=
 
 
 
+#Formatting start/end dates needed into date format
+end_dates <- as.Date(filter_end_dates)
+start_dates <- as.Date(filter_start_dates)
+
+
+
+
 # get the required end date and start date
 #Start date is 1 day after the end of the last Premier Distribution
 #start_dates <- Pay_Cycle_data$START.DATE[Pay_Cycle_data$DATE== Sys.Date()]+1
@@ -158,55 +165,6 @@ data_BISLR <- data_BISLR %>%
   )
 
 
-#Add in worked and home cost center based on Full COA - Oracle Format
-data_BISLR <- data_BISLR %>%
-  mutate(DPT.WRKD = paste0(substr(Full.COA.for.Worked,1,3),
-                           substr(Full.COA.for.Worked,41,44),
-                           substr(Full.COA.for.Worked,5,7),
-                           substr(Full.COA.for.Worked,12,16)),
-         DPT.HOME = paste0(substr(Full.COA.for.Home,1,3),
-                           substr(Full.COA.for.Home,41,44),
-                           substr(Full.COA.for.Home,5,7),
-                           substr(Full.COA.for.Home,12,16)))
-
-
-#Add in worked and home cost center based on Full COA - Oracle Format
-data_BISLR <- data_BISLR %>%
-  mutate(DPT.WRKD = paste0(substr(Full.COA.for.Worked,1,3),
-                           substr(Full.COA.for.Worked,41,44),
-                           substr(Full.COA.for.Worked,5,7),
-                           substr(Full.COA.for.Worked,12,16)),
-         DPT.HOME = paste0(substr(Full.COA.for.Home,1,3),
-                           substr(Full.COA.for.Home,41,44),
-                           substr(Full.COA.for.Home,5,7),
-                           substr(Full.COA.for.Home,12,16)))
-
-
-
-#Formatting column data types
-data_BISLR <- data_BISLR %>%
-  mutate(Hours = as.numeric(Hours),
-         Expense = as.numeric(Expense),
-         Pay.Code = as.character(Pay.Code))
-
-#Rename columns to FTE trend column names
-data_BISLR <- data_BISLR %>%
-  rename(J.C.DESCRIPTION = Position.Code.Description,
-         J.C = Job.Code,
-         PAY.CODE = Pay.Code,
-         Start.Date = Start.Date,
-         End.Date = End.Date,
-         HOME.LOCATION = Home.FacilityOR.Hospital.ID,
-         WRKD.LOCATION = Facility.Hospital.Id_Worked,
-         HOME.DESCRIPTION = Department.Name.Home.Dept,
-         WRKD.DESCRIPTION = Department.Name.Worked.Dept,
-         HOURS = Hours,
-         EXPENSE = Expense)
-
-
-
-data_BISLR <- data_BISLR %>% rename( START.DATE= Start.Date, 
-                                     END.DATE= End.Date )
 
 # Bind NEW data with repository
 new_repo <- rbind(repo, data_BISLR)
@@ -214,7 +172,5 @@ new_repo <- new_repo  %>% distinct()
 
 
 #save RDS
-#saveRDS(new_repo , file = paste0("C:\\Users\\aghaer01\\Downloads\\FTE-Projections-Dashboard-Oracle_CC\\New Data\\BISLR_Repo\\data_BISLR-", Sys.Date(),".rds"))
-
-saveRDS(new_repo, file= paste0("J:\\deans\\Presidents\\SixSigma\\MSHS Productivity\\Productivity\\Universal Data\\Labor\\REPOS\\BISLR_Repo\\data_BISLR-", Sys.Date(),".rds"))
+saveRDS(new_repo , file= paste0("J:\\deans\\Presidents\\SixSigma\\MSHS Productivity\\Productivity\\Universal Data\\Labor\\REPOS\\BISLR_Repo\\data_BISLR-", Sys.Date(),".rds"))
 
