@@ -8,7 +8,12 @@ dir_universal <- paste0("J:/deans/Presidents/SixSigma/MSHS Productivity",
 
 # Load Data ---------------------------------------------------------------
 #Import raw BISLR oracle data
-data_BISLR_oracle <- readRDS(paste0(dir_universal, "/Labor/RDS/data_BISLR_oracle.rds"))
+#data_BISLR_oracle <- readRDS(paste0(dir_universal, "/Labor/RDS/data_BISLR_oracle.rds"))
+
+data_BISLR_oracle <- readRDS(paste0(universal_dir,
+                          "Labor/REPOS/BISLR_Repo/data_BISLR_oracle.rds"))
+
+
 
 # Preprocessing -----------------------------------------------------------
 

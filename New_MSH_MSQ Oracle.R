@@ -17,19 +17,20 @@ suppressMessages({
 
 memory.limit(size = 8000000)
 
-# Working directory -------------------------------------------------------------
+# Working directory ------------------------------------------------------------
 dir <- "J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/Universal Data/Labor"
-#dir <- "C:/Users/aghaer01/Downloads/FTE-Projections-Dashboard-Oracle_CC"
+
+#universal directory
+#universal_dir <- "J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/Universal Data/"
 
 
-# Import data -------------------------------------------------------------
-
+# Import data ------------------------------------------------------------------
 # import pay cycle data and filter required date
 # Pay_Cycle_data <- read_xlsx(paste0(universal_dir,  "Mapping/MSHS_Pay_Cycle.xlsx"), col_types =c("date" ,"date" , "date" , "numeric") )
 
 
 #Import the latest aggregated file 
-repo <- file.info(list.files(path = paste0(dir,"/REPOS/MSHQ_Oracle_Repo"), full.names = T , pattern = "data_MSH_MSQ_oracle"))
+repo <- file.info(list.files(path = paste0(dir,"REPOS/"), full.names = T , pattern = "data_MSH_MSQ_oracle"))
 repo_file <- rownames(repo)[which.max(repo$ctime)]
 repo <- readRDS(repo_file)
 
@@ -39,7 +40,6 @@ max(repo$END.DATE)
 
 # Run this if you need to update a data in repo
 #repo <- repo %>% filter(Filename != "J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/Universal Data/Labor/Raw Data/MSHQ Oracle/MSHQ Oracle/25_MSH_LD_FTI_MAY-22_05_16_2022_0243.txt")
-
 
 
 # Import the most recent data
@@ -112,7 +112,7 @@ check1 <- pivot_wider(check,id_cols = PAYROLL,values_from = Hours,names_from = E
 
 
 #save RDS --------------------------------------------
-saveRDS(Oracle, file= paste0(dir, "/REPOS/MSHQ_Oracle_Repo/data_MSH_MSQ_oracle-", Sys.Date(),".rds"))
+saveRDS(Oracle, file= paste0(dir, "REPOS/data_MSH_MSQ_oracle.rds"))
 
 
 

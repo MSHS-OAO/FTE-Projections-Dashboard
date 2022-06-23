@@ -8,12 +8,16 @@ memory.limit(size = 8000000)
 universal_dir <- paste0("J:/deans/Presidents/SixSigma/MSHS Productivity/",
                         "Productivity/Universal Data/")
 
+dir <- "J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/Universal Data/Labor"
+
 #Read in raw MSHQ Oracle raw refresh
 # data_msh_msq_oracle <- readRDS(paste0(universal_dir,
 #                                       "Labor/RDS/data_msh_msq_oracle.rds"))
 
+
+
 data_msh_msq_oracle <- readRDS(paste0(universal_dir,
-                                      "Labor/REPOS/MSHQ_Oracle_Repo/data_MSH_MSQ_oracle-2022-06-06.rds"))
+                                      "Labor/REPOS/MSHQ_Oracle_Repo/data_MSH_MSQ_oracle.rds"))
 
 #Read COA for department location
 coa <- read.csv(paste0("J:/deans/Presidents/SixSigma/MSHS Productivity/",

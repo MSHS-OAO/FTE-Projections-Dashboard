@@ -24,27 +24,27 @@ memory.limit(size = 8000000)
 dir <- "J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/Universal Data/Labor/"
 
 #universal directory
-universal_dir <- "J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/Universal Data/"
+#universal_dir <- "J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/Universal Data/"
 
 # Import data sets --------------------------------------------------------------
-Pay_Cycle_data <- read_xlsx(paste0(universal_dir,  "Mapping/MSHS_Pay_Cycle.xlsx"), col_types =c("date" ,"date" , "date" , "numeric"))
-
-Pay_Cycle_data <- Pay_Cycle_data %>% mutate(DATE =as.Date(DATE),
-                                            START.DATE= as.Date(START.DATE),
-                                            END.DATE= as.Date(END.DATE))
+# Pay_Cycle_data <- read_xlsx(paste0(universal_dir,  "Mapping/MSHS_Pay_Cycle.xlsx"), col_types =c("date" ,"date" , "date" , "numeric"))
+# 
+# Pay_Cycle_data <- Pay_Cycle_data %>% mutate(DATE =as.Date(DATE),
+#                                             START.DATE= as.Date(START.DATE),
+#                                             END.DATE= as.Date(END.DATE))
 
 
 #Import the latest aggregated file 
-repo <- file.info(list.files(path = paste0(dir,"/REPOS/BISLR_Repo"), full.names = T , pattern = "data_BISLR"))
+repo <- file.info(list.files(path = paste0(dir,"REPOS/"), full.names = T , pattern = "data_BISLR"))
 repo_file <- rownames(repo)[which.max(repo$ctime)]
 repo <- readRDS(repo_file)
 
 # get max date in repo
-max(repo$END.DATE)
+max(repo$End.Date)
 
 
 # Run this if you need to update a data in repo
-#repo <- repo %>% filter(Filename != "J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/Universal Data/Labor/Raw Data/BISLR Oracle/12_MSBISLW_FEMA_MAR-22_03_16_2022_0210.csv")
+#repo <- repo %>% filter(Filename != "J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/Universal Data/Labor/Raw Data/BISLR Oracle/14_MSBISLW_FEMA_MAY-22_05_16_2022_0157.csv")
 
 
 # Import the most recent data
@@ -65,21 +65,15 @@ BISLR_data_raw <- lapply(BISLR_file_list, function(x){data <- read.csv(x, as.is=
 
 
 
-#Formatting start/end dates needed into date format
-end_dates <- as.Date(filter_end_dates)
-start_dates <- as.Date(filter_start_dates)
-
-
-
 
 # get the required end date and start date
 #Start date is 1 day after the end of the last Premier Distribution
 #start_dates <- Pay_Cycle_data$START.DATE[Pay_Cycle_data$DATE== Sys.Date()]+1
-start_dates <- as.Date("2022-02-26")+1
+start_dates <- as.Date("2022-03-26")+1
 
 #End date is 1 week after the end of the current Premier Distribution
 #end_dates <- Pay_Cycle_data$END.DATE[Pay_Cycle_data$DATE== Sys.Date()]+7
-end_dates <- as.Date("2022-03-26")+7
+end_dates <- as.Date("2022-04-23")+7
 
 #Filtering each file by start/end date specified
 data_BISLR <- lapply(1:length(BISLR_data_raw), function(x)
@@ -172,5 +166,5 @@ new_repo <- new_repo  %>% distinct()
 
 
 #save RDS
-saveRDS(new_repo , file= paste0("J:\\deans\\Presidents\\SixSigma\\MSHS Productivity\\Productivity\\Universal Data\\Labor\\REPOS\\BISLR_Repo\\data_BISLR-", Sys.Date(),".rds"))
+saveRDS(new_repo , file= paste0(dir, "REPOS/data_BISLR_oracle.rds"))
 
