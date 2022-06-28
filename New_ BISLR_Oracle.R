@@ -36,7 +36,7 @@ dir <- "J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/Universal Da
 
 #Import the latest aggregated file 
 repo <- file.info(list.files(path = paste0(dir,"REPOS/"), full.names = T , pattern = "data_BISLR"))
-repo_file <- rownames(repo)[which.max(repo$ctime)]
+repo_file <- rownames(repo)
 repo <- readRDS(repo_file)
 
 # get max date in repo
@@ -69,11 +69,11 @@ BISLR_data_raw <- lapply(BISLR_file_list, function(x){data <- read.csv(x, as.is=
 # get the required end date and start date
 #Start date is 1 day after the end of the last Premier Distribution
 #start_dates <- Pay_Cycle_data$START.DATE[Pay_Cycle_data$DATE== Sys.Date()]+1
-start_dates <- as.Date("2022-03-26")+1
+start_dates <- as.Date("2022-04-23")+1
 
 #End date is 1 week after the end of the current Premier Distribution
 #end_dates <- Pay_Cycle_data$END.DATE[Pay_Cycle_data$DATE== Sys.Date()]+7
-end_dates <- as.Date("2022-04-23")+7
+end_dates <- as.Date("2022-05-21")+7
 
 #Filtering each file by start/end date specified
 data_BISLR <- lapply(1:length(BISLR_data_raw), function(x)

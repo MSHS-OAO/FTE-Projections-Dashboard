@@ -21,21 +21,21 @@ memory.limit(size = 8000000)
 dir <- "J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/Universal Data/Labor"
 
 #universal directory
-#universal_dir <- "J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/Universal Data/"
+universal_dir <- "J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/Universal Data/"
 
 
 # Import data ------------------------------------------------------------------
 # import pay cycle data and filter required date
-# Pay_Cycle_data <- read_xlsx(paste0(universal_dir,  "Mapping/MSHS_Pay_Cycle.xlsx"), col_types =c("date" ,"date" , "date" , "numeric") )
+Pay_Cycle_data <- read_xlsx(paste0(universal_dir,  "Mapping/MSHS_Pay_Cycle.xlsx"), col_types =c("date" ,"date" , "date" , "numeric") )
 
 
 #Import the latest aggregated file 
-repo <- file.info(list.files(path = paste0(dir,"REPOS/"), full.names = T , pattern = "data_MSH_MSQ_oracle"))
-repo_file <- rownames(repo)[which.max(repo$ctime)]
+repo <- file.info(list.files(path = paste0(dir,"/REPOS/"), full.names = T , pattern = "data_MSH_MSQ_oracle"))
+repo_file <- rownames(repo)
 repo <- readRDS(repo_file)
 
 # get max date in repo
-max(repo$END.DATE)
+max(as.Date(repo$End.Date, format = "%m/%d/%Y"))
 
 
 # Run this if you need to update a data in repo
@@ -62,11 +62,11 @@ ORACLElist <- lapply(Oracle_file_list, function(x){
 
 # get the required end_date and start date
 #start_dates <- Pay_Cycle_data$START.DATE[Pay_Cycle_data$DATE== Sys.Date()]
-start_dates <- as.Date(c("02/26/2022", "03/26/2022" ), format = "%m/%d/%Y")
+start_dates <- as.Date(c("04/23/2022" ), format = "%m/%d/%Y")
                          
 
 #end_dates <- Pay_Cycle_data$END.DATE[Pay_Cycle_data$DATE== Sys.Date()]
-end_dates <- as.Date(c("03/26/2022","04/23/2022"), format = "%m/%d/%Y")
+end_dates <- as.Date(c("05/21/2022"), format = "%m/%d/%Y")
 
 
 
@@ -112,7 +112,7 @@ check1 <- pivot_wider(check,id_cols = PAYROLL,values_from = Hours,names_from = E
 
 
 #save RDS --------------------------------------------
-saveRDS(Oracle, file= paste0(dir, "REPOS/data_MSH_MSQ_oracle.rds"))
+saveRDS(Oracle, file= paste0(dir, "/REPOS/data_MSH_MSQ_oracle.rds"))
 
 
 

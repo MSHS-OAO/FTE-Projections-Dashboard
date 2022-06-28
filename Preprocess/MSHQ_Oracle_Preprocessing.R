@@ -17,7 +17,7 @@ dir <- "J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/Universal Da
 
 
 data_msh_msq_oracle <- readRDS(paste0(universal_dir,
-                                      "Labor/REPOS/MSHQ_Oracle_Repo/data_MSH_MSQ_oracle.rds"))
+                                      "Labor/REPOS/data_MSH_MSQ_oracle.rds"))
 
 #Read COA for department location
 coa <- read.csv(paste0("J:/deans/Presidents/SixSigma/MSHS Productivity/",
