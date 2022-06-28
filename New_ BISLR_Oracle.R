@@ -19,15 +19,18 @@ suppressMessages({
 
 memory.limit(size = 8000000)
 
-# Working directory -------------------------------------------------------------
+# Working directory ------------------------------------------------------------
 
-dir <- "J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/Universal Data/Labor/"
+dir <- paste0("J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/",
+                                                       "Universal Data/Labor/")
 
 #universal directory
-#universal_dir <- "J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/Universal Data/"
+# universal_dir <-paste0("J:/deans/Presidents/SixSigma/MSHS Productivity/",
+#                                                "Productivity/Universal Data/")
 
-# Import data sets --------------------------------------------------------------
-# Pay_Cycle_data <- read_xlsx(paste0(universal_dir,  "Mapping/MSHS_Pay_Cycle.xlsx"), col_types =c("date" ,"date" , "date" , "numeric"))
+# Import data sets -------------------------------------------------------------
+#Pay_Cycle_data <- read_xlsx(paste0(universal_dir, "Mapping/MSHS_Pay_Cycle.xlsx"),
+#        col_types =c("date", "date", "date", "numeric"))
 # 
 # Pay_Cycle_data <- Pay_Cycle_data %>% mutate(DATE =as.Date(DATE),
 #                                             START.DATE= as.Date(START.DATE),
@@ -35,7 +38,8 @@ dir <- "J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/Universal Da
 
 
 #Import the latest aggregated file 
-repo <- file.info(list.files(path = paste0(dir,"REPOS/"), full.names = T , pattern = "data_BISLR"))
+repo <- file.info(list.files(path = paste0(dir,"REPOS/"), full.names = T, 
+                                                    pattern = "data_BISLR"))
 repo_file <- rownames(repo)
 repo <- readRDS(repo_file)
 
@@ -44,11 +48,14 @@ max(repo$End.Date)
 
 
 # Run this if you need to update a data in repo
-#repo <- repo %>% filter(Filename != "J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/Universal Data/Labor/Raw Data/BISLR Oracle/14_MSBISLW_FEMA_MAY-22_05_16_2022_0157.csv")
+# repo <- repo %>% filter(Filename != paste0("J:/deans/Presidents/SixSigma/",
+#           "MSHS Productivity/Productivity/Universal Data/Labor/Raw Data/",
+#           "BISLR Oracle/14_MSBISLW_FEMA_MAY-22_05_16_2022_0157.csv"))
 
 
-# Import the most recent data
-details = file.info(list.files(path = paste0(dir,"Raw Data/BISLR Oracle/"), pattern="*.csv", full.names = T)) 
+# Import the most recent datasets ----------------------------------------------
+details = file.info(list.files(path = paste0(dir,"Raw Data/BISLR Oracle/"), 
+                                              pattern="*.csv", full.names = T)) 
 details = details[with(details, order(as.POSIXct(ctime),  decreasing = F)), ]
 
 
@@ -56,17 +63,18 @@ BISLR_file_list <- rownames(details)[!(rownames(details) %in% repo$Filename) ]
 
 
 # add a column including the name of the data set 
-BISLR_data_raw <- lapply(BISLR_file_list, function(x){data <- read.csv(x, as.is= T, strip.white = T) %>%
-  mutate( Filename = x,
-         #Filename = str_extract(x, '\\d+\\_MSBISLW_FEMA_[A-Z]{3}'),
-         End.Date =  as.Date(End.Date, format = "%m/%d/%Y"),
-         Start.Date = as.Date(Start.Date, format = "%m/%d/%Y"))
+BISLR_data_raw <- lapply(BISLR_file_list, function(x){
+             data <- read.csv(x, as.is= T, strip.white = T) %>%
+             mutate( Filename = x,
+             #Filename = str_extract(x, '\\d+\\_MSBISLW_FEMA_[A-Z]{3}'),
+             End.Date =  as.Date(End.Date, format = "%m/%d/%Y"),
+             Start.Date = as.Date(Start.Date, format = "%m/%d/%Y"))
 })
 
 
 
 
-# get the required end date and start date
+# get the required end and start date -----------------------------------------
 #Start date is 1 day after the end of the last Premier Distribution
 #start_dates <- Pay_Cycle_data$START.DATE[Pay_Cycle_data$DATE== Sys.Date()]+1
 start_dates <- as.Date("2022-04-23")+1
@@ -75,14 +83,14 @@ start_dates <- as.Date("2022-04-23")+1
 #end_dates <- Pay_Cycle_data$END.DATE[Pay_Cycle_data$DATE== Sys.Date()]+7
 end_dates <- as.Date("2022-05-21")+7
 
-#Filtering each file by start/end date specified
+#Filtering each file by start/end date specified-------------------------------
 data_BISLR <- lapply(1:length(BISLR_data_raw), function(x)
   BISLR_data_raw[[x]] <- BISLR_data_raw[[x]] %>%
     filter(End.Date <= end_dates[x],
            Start.Date >= start_dates[x]))
 
 
-
+# Filter overlapping weekly pay cycle in BISLR -------------------------------- 
 #Names of the weekly paycyle names in the payroll name column in data files
 weekly_pc <- c("WEST WEEKLY", "BIB WEEKLY")
 
@@ -110,12 +118,11 @@ delete_weekly <- function(df, pay_cycles){
 #Applying function
 data_BISLR <- lapply(data_BISLR, function(x) delete_weekly(x, weekly_pc)) 
 
-
 data_BISLR <- do.call("rbind", data_BISLR )
 
   
   
-#Assigning Payroll values and Removing duplicates
+#Assigning Payroll values and Removing duplicates-------------------------------
 data_BISLR <- data_BISLR %>%
   mutate(PAYROLL = case_when(
     Facility.Hospital.Id_Worked == "NY2162" ~ "MSW",
