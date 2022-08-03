@@ -1,7 +1,7 @@
 
 ### BISLR_Oracle
 
-rm(list=ls())
+rm(list = ls())
 
 # Import libraries
 suppressMessages({
@@ -9,7 +9,6 @@ suppressMessages({
   library(tidyverse)
   library(dplyr)
   library(tidyr)
-  library(here)
   library(gsubfn)
   library(rstudioapi)
   library(mondate)
@@ -29,43 +28,44 @@ dir <- paste0("J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/",
 #                                                "Productivity/Universal Data/")
 
 # Import data sets -------------------------------------------------------------
-#Pay_Cycle_data <- read_xlsx(paste0(universal_dir, "Mapping/MSHS_Pay_Cycle.xlsx"),
+#Pay_Cycle_data <- read_xlsx(paste0(universal_dir,
+#                            "Mapping/MSHS_Pay_Cycle.xlsx"),
 #        col_types =c("date", "date", "date", "numeric"))
-# 
+#
 # Pay_Cycle_data <- Pay_Cycle_data %>% mutate(DATE =as.Date(DATE),
 #                                             START.DATE= as.Date(START.DATE),
 #                                             END.DATE= as.Date(END.DATE))
 
-
-#Import the latest aggregated file 
-repo <- file.info(list.files(path = paste0(dir,"REPOS/"), full.names = T, 
+#Import the latest aggregated file
+repo <- file.info(list.files(path = paste0(dir, "REPOS/"), full.names = T,
                                                     pattern = "data_BISLR"))
 repo_file <- rownames(repo)
 repo <- readRDS(repo_file)
 
 # get max date in repo
-max(repo$End.Date)
+max(as.Date(repo$End.Date, format = "%m/%d/%Y"))
 
 
 # Run this if you need to update a data in repo
 # repo <- repo %>% filter(Filename != paste0("J:/deans/Presidents/SixSigma/",
 #           "MSHS Productivity/Productivity/Universal Data/Labor/Raw Data/",
-#           "BISLR Oracle/14_MSBISLW_FEMA_MAY-22_05_16_2022_0157.csv"))
+#           "BISLR Oracle/15_MSBISLW_FEMA_JUN-22_06_16_2022_0242.csv"))
 
 
 # Import the most recent datasets ----------------------------------------------
-details = file.info(list.files(path = paste0(dir,"Raw Data/BISLR Oracle/"), 
-                                              pattern="*.csv", full.names = T)) 
-details = details[with(details, order(as.POSIXct(ctime),  decreasing = F)), ]
+details <- file.info(list.files(path = paste0(dir, "Raw Data/BISLR Oracle/"),
+                                            pattern = "*.csv", full.names = T))
+details <- details[with(details, order(as.POSIXct(ctime),  decreasing = F)), ]
 
 
-BISLR_file_list <- rownames(details)[!(rownames(details) %in% repo$Filename) ]
+BISLR_file_list <- rownames(details)[!(rownames(details) %in% repo$Filename)]
 
 
-# add a column including the name of the data set 
-BISLR_data_raw <- lapply(BISLR_file_list, function(x){
-             data <- read.csv(x, as.is= T, strip.white = T) %>%
-             mutate( Filename = x,
+# add a column including the name of the data set
+BISLR_data_raw <- lapply(BISLR_file_list, function(x) {
+             data <- read.csv(x, as.is = T, strip.white = T,
+                              colClasses = rep("character", 32)) %>%
+             mutate(Filename = x,
              #Filename = str_extract(x, '\\d+\\_MSBISLW_FEMA_[A-Z]{3}'),
              End.Date =  as.Date(End.Date, format = "%m/%d/%Y"),
              Start.Date = as.Date(Start.Date, format = "%m/%d/%Y"))
@@ -77,28 +77,29 @@ BISLR_data_raw <- lapply(BISLR_file_list, function(x){
 # get the required end and start date -----------------------------------------
 #Start date is 1 day after the end of the last Premier Distribution
 #start_dates <- Pay_Cycle_data$START.DATE[Pay_Cycle_data$DATE== Sys.Date()]+1
-start_dates <- as.Date("2022-04-23")+1
+start_dates <- as.Date("2022-04-23") + 1
 
 #End date is 1 week after the end of the current Premier Distribution
 #end_dates <- Pay_Cycle_data$END.DATE[Pay_Cycle_data$DATE== Sys.Date()]+7
-end_dates <- as.Date("2022-05-21")+7
+end_dates <- as.Date("2022-05-21") + 7
 
 #Filtering each file by start/end date specified-------------------------------
-data_BISLR <- lapply(1:length(BISLR_data_raw), function(x)
+data_BISLR <- lapply(1 : length(BISLR_data_raw), function(x)
   BISLR_data_raw[[x]] <- BISLR_data_raw[[x]] %>%
     filter(End.Date <= end_dates[x],
            Start.Date >= start_dates[x]))
 
 
-# Filter overlapping weekly pay cycle in BISLR -------------------------------- 
+# Filter overlapping weekly pay cycle in BISLR --------------------------------
 #Names of the weekly paycyle names in the payroll name column in data files
 weekly_pc <- c("WEST WEEKLY", "BIB WEEKLY")
 
 
 #Function to delete overlapping weekly pay cycle in BISLR
-delete_weekly <- function(df, pay_cycles){
+delete_weekly <- function(df, pay_cycles) {
   #list out all weekly pay cycles in file from oldest to newest
-  delete_pc <- df %>% filter(Payroll.Name %in% pay_cycles) %>%
+  delete_pc <- df %>%
+    filter(Payroll.Name %in% pay_cycles) %>%
     arrange(Start.Date, End.Date) %>%
     mutate(Start_End = paste0(Start.Date, "_", End.Date)) %>%
     select(Start.Date, End.Date, Start_End) %>%
@@ -116,13 +117,15 @@ delete_weekly <- function(df, pay_cycles){
 
 
 #Applying function
-data_BISLR <- lapply(data_BISLR, function(x) delete_weekly(x, weekly_pc)) 
+data_BISLR <- lapply(data_BISLR, function(x) delete_weekly(x, weekly_pc))
 
-data_BISLR <- do.call("rbind", data_BISLR )
+data_BISLR <- do.call("rbind", data_BISLR)
+
+
 
   
   
-#Assigning Payroll values and Removing duplicates-------------------------------
+#Assigning Payroll values and Removing duplicates------------------------------
 data_BISLR <- data_BISLR %>%
   mutate(PAYROLL = case_when(
     Facility.Hospital.Id_Worked == "NY2162" ~ "MSW",
@@ -133,35 +136,59 @@ data_BISLR <- data_BISLR %>%
 
 data_BISLR <- data_BISLR %>%
   mutate(Position.Code.Description = case_when(
-    (Department.IdWHERE.Worked == 407210340412756 & Employee.Name == "CHIANG, JACQUELINE PE") ~ "DUS_REMOVE",
-    (Department.IdWHERE.Worked == 414000040312763 & Employee.Name == "BESTREICH, ERIN S") ~ "DUS_REMOVE",
-    (Department.IdWHERE.Worked == 414000040312755 & Employee.Name == "CHIANG, JACQUELINE PE") ~ "DUS_REMOVE",
-    (Department.IdWHERE.Worked == 414000040312755 & Employee.Name == "CRAIG, BRITTANY PIERCE") ~ "DUS_REMOVE",
-    (Department.IdWHERE.Worked == 414000040312756 & Employee.Name == "DELAPENHA, SANDRA ELAINE") ~ "DUS_REMOVE",
-    (Department.IdWHERE.Worked == 414000040312755 & Employee.Name == "GANZ, CINDY MARIE") ~ "DUS_REMOVE",
-    (Department.IdWHERE.Worked == 407210340412756 & Employee.Name == "MEEHAN, JENNIFER JOYCE") ~ "DUS_REMOVE",
-    (Department.IdWHERE.Worked == 414000040312702 & Employee.Name == "MEEHAN, JENNIFER JOYCE") ~ "DUS_REMOVE",
-    (Department.IdWHERE.Worked == 407210340412756 & Employee.Name == "OKAY, DEVIN JOSEPH") ~ "DUS_REMOVE",
-    (Department.IdWHERE.Worked == 407210340412756 & Employee.Name == "ROBBINS, STEPHANIE") ~ "DUS_REMOVE",
-    (Department.IdWHERE.Worked == 414000040312763 & Employee.Name == "WALKER, THERESA L") ~ "DUS_REMOVE",
-    (Department.IdWHERE.Worked == 414000040312763 & Employee.Name == "WALKER, THERESA L (Lauren)") ~ "DUS_REMOVE",
+    (Department.IdWHERE.Worked == 407210340412756 &
+       Employee.Name == "CHIANG, JACQUELINE PE") ~ "DUS_REMOVE",
+    (Department.IdWHERE.Worked == 414000040312763 &
+       Employee.Name == "BESTREICH, ERIN S") ~ "DUS_REMOVE",
+    (Department.IdWHERE.Worked == 414000040312755 &
+       Employee.Name == "CHIANG, JACQUELINE PE") ~ "DUS_REMOVE",
+    (Department.IdWHERE.Worked == 414000040312755 &
+       Employee.Name == "CRAIG, BRITTANY PIERCE") ~ "DUS_REMOVE",
+    (Department.IdWHERE.Worked == 414000040312756 &
+       Employee.Name == "DELAPENHA, SANDRA ELAINE") ~ "DUS_REMOVE",
+    (Department.IdWHERE.Worked == 414000040312755 &
+       Employee.Name == "GANZ, CINDY MARIE") ~ "DUS_REMOVE",
+    (Department.IdWHERE.Worked == 407210340412756 &
+       Employee.Name == "MEEHAN, JENNIFER JOYCE") ~ "DUS_REMOVE",
+    (Department.IdWHERE.Worked == 414000040312702 &
+       Employee.Name == "MEEHAN, JENNIFER JOYCE") ~ "DUS_REMOVE",
+    (Department.IdWHERE.Worked == 407210340412756 &
+       Employee.Name == "OKAY, DEVIN JOSEPH") ~ "DUS_REMOVE",
+    (Department.IdWHERE.Worked == 407210340412756 &
+       Employee.Name == "ROBBINS, STEPHANIE") ~ "DUS_REMOVE",
+    (Department.IdWHERE.Worked == 414000040312763 &
+       Employee.Name == "WALKER, THERESA L") ~ "DUS_REMOVE",
+    (Department.IdWHERE.Worked == 414000040312763 &
+       Employee.Name == "WALKER, THERESA L (Lauren)") ~ "DUS_REMOVE",
     TRUE ~ Position.Code.Description)
   )
 
 data_BISLR <- data_BISLR %>%
   mutate(Job.Code = case_when(
-    (Department.IdWHERE.Worked == 407210340412756 & Employee.Name == "CHIANG, JACQUELINE PE") ~ "DUS_RMV",
-    (Department.IdWHERE.Worked == 414000040312763 & Employee.Name == "BESTREICH, ERIN S") ~ "DUS_RMV",
-    (Department.IdWHERE.Worked == 414000040312755 & Employee.Name == "CHIANG, JACQUELINE PE") ~ "DUS_RMV",
-    (Department.IdWHERE.Worked == 414000040312755 & Employee.Name == "CRAIG, BRITTANY PIERCE") ~ "DUS_RMV",
-    (Department.IdWHERE.Worked == 414000040312756 & Employee.Name == "DELAPENHA, SANDRA ELAINE") ~ "DUS_RMV",
-    (Department.IdWHERE.Worked == 414000040312755 & Employee.Name == "GANZ, CINDY MARIE") ~ "DUS_RMV",
-    (Department.IdWHERE.Worked == 407210340412756 & Employee.Name == "MEEHAN, JENNIFER JOYCE") ~ "DUS_RMV",
-    (Department.IdWHERE.Worked == 414000040312702 & Employee.Name == "MEEHAN, JENNIFER JOYCE") ~ "DUS_RMV",
-    (Department.IdWHERE.Worked == 407210340412756 & Employee.Name == "OKAY, DEVIN JOSEPH") ~ "DUS_RMV",
-    (Department.IdWHERE.Worked == 407210340412756 & Employee.Name == "ROBBINS, STEPHANIE") ~ "DUS_RMV",
-    (Department.IdWHERE.Worked == 414000040312763 & Employee.Name == "WALKER, THERESA L") ~ "DUS_RMV",
-    (Department.IdWHERE.Worked == 414000040312763 & Employee.Name == "WALKER, THERESA L (Lauren)") ~ "DUS_RMV",
+    (Department.IdWHERE.Worked == 407210340412756 &
+       Employee.Name == "CHIANG, JACQUELINE PE") ~ "DUS_RMV",
+    (Department.IdWHERE.Worked == 414000040312763 &
+       Employee.Name == "BESTREICH, ERIN S") ~ "DUS_RMV",
+    (Department.IdWHERE.Worked == 414000040312755 &
+       Employee.Name == "CHIANG, JACQUELINE PE") ~ "DUS_RMV",
+    (Department.IdWHERE.Worked == 414000040312755 &
+       Employee.Name == "CRAIG, BRITTANY PIERCE") ~ "DUS_RMV",
+    (Department.IdWHERE.Worked == 414000040312756 &
+       Employee.Name == "DELAPENHA, SANDRA ELAINE") ~ "DUS_RMV",
+    (Department.IdWHERE.Worked == 414000040312755 &
+       Employee.Name == "GANZ, CINDY MARIE") ~ "DUS_RMV",
+    (Department.IdWHERE.Worked == 407210340412756 &
+       Employee.Name == "MEEHAN, JENNIFER JOYCE") ~ "DUS_RMV",
+    (Department.IdWHERE.Worked == 414000040312702 &
+       Employee.Name == "MEEHAN, JENNIFER JOYCE") ~ "DUS_RMV",
+    (Department.IdWHERE.Worked == 407210340412756 &
+       Employee.Name == "OKAY, DEVIN JOSEPH") ~ "DUS_RMV",
+    (Department.IdWHERE.Worked == 407210340412756 &
+       Employee.Name == "ROBBINS, STEPHANIE") ~ "DUS_RMV",
+    (Department.IdWHERE.Worked == 414000040312763 &
+       Employee.Name == "WALKER, THERESA L") ~ "DUS_RMV",
+    (Department.IdWHERE.Worked == 414000040312763 &
+       Employee.Name == "WALKER, THERESA L (Lauren)") ~ "DUS_RMV",
     TRUE ~ Job.Code)
   )
 
@@ -173,5 +200,4 @@ new_repo <- new_repo  %>% distinct()
 
 
 #save RDS
-saveRDS(new_repo , file= paste0(dir, "REPOS/data_BISLR_oracle.rds"))
-
+saveRDS(new_repo, file = paste0(dir, "REPOS/data_BISLR_oracle.rds"))
