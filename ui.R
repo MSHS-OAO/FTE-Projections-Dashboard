@@ -28,10 +28,10 @@ ui <- dashboardPage(
                        solidHeader = TRUE, collapsible = TRUE, closable = TRUE, br(),
                        fluidRow(
                          box(width = 4, height = "100px", title = "Select Campus:", solidHeader = F,
-                             pickerInput("selectedPayroll",label= NULL, multiple= F,
+                             pickerInput("selectedPayroll",label= NULL, multiple= T, options = pickerOptions(actionsBox = TRUE),
                                          choices = sort( unique(as.character(data$PAYROLL))),  selected = "MSH")),
                          box(width = 4, height = "100px", title = "Select Services:", solidHeader = F,
-                             pickerInput("selectedService",label= NULL, multiple= F,
+                             pickerInput("selectedService",label= NULL, multiple= T, options = pickerOptions(actionsBox = TRUE),
                                          choices = sort( unique(as.character( data$CORPORATE.SERVICE.LINE))),  selected = "Pharmacy")),
                          
                          box(width = 4, height = "100px",

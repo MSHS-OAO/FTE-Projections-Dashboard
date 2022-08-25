@@ -1,9 +1,9 @@
 
-### BISLR_Oracle
+# BISLR_Oracle
 
 rm(list = ls())
 
-# Import libraries
+# Import libraries -------------------------------------------------------
 suppressMessages({
   library(readxl)
   library(tidyverse)
@@ -18,51 +18,51 @@ suppressMessages({
 
 memory.limit(size = 8000000)
 
-# Working directory ------------------------------------------------------------
-
+# Working directory --------------------------------------------------------
 dir <- paste0("J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/",
-                                                       "Universal Data/Labor/")
+                                                       "Universal Data/")
 
-#universal directory
-# universal_dir <-paste0("J:/deans/Presidents/SixSigma/MSHS Productivity/",
-#                                                "Productivity/Universal Data/")
 
-# Import data sets -------------------------------------------------------------
-#Pay_Cycle_data <- read_xlsx(paste0(universal_dir,
+# Import data sets ----------------------------------------------------------
+## Import Pay cycle data
+# Pay_Cycle_data <- read_xlsx(paste0(dir,
 #                            "Mapping/MSHS_Pay_Cycle.xlsx"),
 #        col_types =c("date", "date", "date", "numeric"))
-#
+
+
 # Pay_Cycle_data <- Pay_Cycle_data %>% mutate(DATE =as.Date(DATE),
 #                                             START.DATE= as.Date(START.DATE),
 #                                             END.DATE= as.Date(END.DATE))
 
-#Import the latest aggregated file
-repo <- file.info(list.files(path = paste0(dir, "REPOS/"), full.names = T,
+## Import the latest aggregated file -----------------------------------------
+repo <- file.info(list.files(path = paste0(dir, "Labor/REPOS/"), full.names = T,
                                                     pattern = "data_BISLR"))
 repo_file <- rownames(repo)
 repo <- readRDS(repo_file)
 
-# get max date in repo
+## get max date in repo --------------------------------------------------------
 max(as.Date(repo$End.Date, format = "%m/%d/%Y"))
 
 
-# Run this if you need to update a data in repo
+## Run this if you need to update a data in repo ------------------------------
 # repo <- repo %>% filter(Filename != paste0("J:/deans/Presidents/SixSigma/",
 #           "MSHS Productivity/Productivity/Universal Data/Labor/Raw Data/",
 #           "BISLR Oracle/15_MSBISLW_FEMA_JUN-22_06_16_2022_0242.csv"))
 
 
-# Import the most recent datasets ----------------------------------------------
-details <- file.info(list.files(path = paste0(dir, "Raw Data/BISLR Oracle/"),
-                                            pattern = "*.csv", full.names = T))
+## Import the most recent datasets --------------------------------------------
+details <- file.info(list.files(path =
+                                  paste0(dir, "Labor/Raw Data/BISLR Oracle/"),
+                                          pattern = "*.csv", full.names = T))
+
 details <- details[with(details, order(as.POSIXct(ctime),  decreasing = F)), ]
 
 
-BISLR_file_list <- rownames(details)[!(rownames(details) %in% repo$Filename)]
+bislr_file_list <- rownames(details)[!(rownames(details) %in% repo$Filename)]
 
 
 # add a column including the name of the data set
-BISLR_data_raw <- lapply(BISLR_file_list, function(x) {
+bislr_data_raw <- lapply(bislr_file_list, function(x) {
              data <- read.csv(x, as.is = T, strip.white = T,
                               colClasses = rep("character", 32)) %>%
              mutate(Filename = x,
@@ -77,15 +77,15 @@ BISLR_data_raw <- lapply(BISLR_file_list, function(x) {
 # get the required end and start date -----------------------------------------
 #Start date is 1 day after the end of the last Premier Distribution
 #start_dates <- Pay_Cycle_data$START.DATE[Pay_Cycle_data$DATE== Sys.Date()]+1
-start_dates <- as.Date("2022-04-23") + 1
+start_dates <- as.Date(c("2022-05-21", "2022-07-02")) + 1
 
 #End date is 1 week after the end of the current Premier Distribution
 #end_dates <- Pay_Cycle_data$END.DATE[Pay_Cycle_data$DATE== Sys.Date()]+7
-end_dates <- as.Date("2022-05-21") + 7
+end_dates <- as.Date("2022-07-02", "2022-07-30") + 7
 
-#Filtering each file by start/end date specified-------------------------------
-data_BISLR <- lapply(1 : length(BISLR_data_raw), function(x)
-  BISLR_data_raw[[x]] <- BISLR_data_raw[[x]] %>%
+# Filtering each file by start/end date specified------------------------------
+data_bislr <- lapply(1 : seq_len(bislr_data_raw), function(x)
+  bislr_data_raw[[x]] <- bislr_data_raw[[x]] %>%
     filter(End.Date <= end_dates[x],
            Start.Date >= start_dates[x]))
 
@@ -115,18 +115,15 @@ delete_weekly <- function(df, pay_cycles) {
 
 
 
-
 #Applying function
-data_BISLR <- lapply(data_BISLR, function(x) delete_weekly(x, weekly_pc))
+data_bislr <- lapply(data_bislr, function(x) delete_weekly(x, weekly_pc))
 
-data_BISLR <- do.call("rbind", data_BISLR)
-
+data_bislr <- do.call("rbind", data_bislr)
 
 
   
-  
-#Assigning Payroll values and Removing duplicates------------------------------
-data_BISLR <- data_BISLR %>%
+# Assigning Payroll values and Removing duplicates ----------------------------
+data_bislr <- data_bislr %>%
   mutate(PAYROLL = case_when(
     Facility.Hospital.Id_Worked == "NY2162" ~ "MSW",
     Facility.Hospital.Id_Worked == "NY2163" ~ "MSM",
@@ -134,7 +131,9 @@ data_BISLR <- data_BISLR %>%
     TRUE ~ "MSBI")) %>%
   distinct()
 
-data_BISLR <- data_BISLR %>%
+
+# Clean Position.Code.Description -----------------------------------------
+data_bislr <- data_bislr %>%
   mutate(Position.Code.Description = case_when(
     (Department.IdWHERE.Worked == 407210340412756 &
        Employee.Name == "CHIANG, JACQUELINE PE") ~ "DUS_REMOVE",
@@ -163,7 +162,8 @@ data_BISLR <- data_BISLR %>%
     TRUE ~ Position.Code.Description)
   )
 
-data_BISLR <- data_BISLR %>%
+# Clean Job Code -----------------------------------------
+data_bislr <- data_bislr %>%
   mutate(Job.Code = case_when(
     (Department.IdWHERE.Worked == 407210340412756 &
        Employee.Name == "CHIANG, JACQUELINE PE") ~ "DUS_RMV",
@@ -194,10 +194,10 @@ data_BISLR <- data_BISLR %>%
 
 
 
-# Bind NEW data with repository
-new_repo <- rbind(repo, data_BISLR)
+# Bind NEW data with repository ---------------------------------------------
+new_repo <- rbind(repo, data_bislr)
 new_repo <- new_repo  %>% distinct()
 
 
-#save RDS
+# save RDS -----------------------------------------------------------------
 saveRDS(new_repo, file = paste0(dir, "REPOS/data_BISLR_oracle.rds"))

@@ -24,7 +24,7 @@ server <- function(input, output, session) {
       updatePickerInput(session,
                         inputId = "selectedService",
                         choices = service_choices,
-                        selected = service_choices)
+                        selected = service_choices[1])
   },
   ignoreInit = TRUE,
   ignoreNULL = FALSE)
@@ -100,19 +100,18 @@ server <- function(input, output, session) {
     
   
 
-      ggplot(data = kdata, aes(x=DATES,y=FTE))+
-        geom_line(size=1.5)+
-        geom_point(size=2.75)+
+      ggplot(data = kdata)+
+        geom_line(aes(x=DATES, y=FTE), size=1.5)+
+        geom_point(aes(x=DATES, y=FTE), size=2.75)+
         ggtitle(paste(input$selectedPayroll, input$selectedService, "Worked FTE's By Pay Period"))+
         xlab("Pay Period")+
         ylab("FTE (Full Time Equivalent)")+
-        scale_color_manual(values=MountSinai_pal("main")(length(unique(kdata$FTE))))+
+        #scale_color_manual(values=MountSinai_pal("main")(length(unique(kdata$FTE))))+
         theme(plot.title=element_text(hjust = 0.5, size = 20),
               axis.title = element_text(face="bold"),
               legend.text=element_text(size = 6)) #create and style service line graph
 
-    
-    
+
   
   
   })  
