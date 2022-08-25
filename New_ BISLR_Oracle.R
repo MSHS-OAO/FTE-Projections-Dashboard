@@ -25,8 +25,7 @@ dir <- paste0("J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/",
 
 # Import data sets ----------------------------------------------------------
 ## Import Pay cycle data
-# Pay_Cycle_data <- read_xlsx(paste0(dir,
-#                            "Mapping/MSHS_Pay_Cycle.xlsx"),
+# Pay_Cycle_data <- read_xlsx(paste0(dir, "Mapping/MSHS_Pay_Cycle.xlsx"),
 #        col_types =c("date", "date", "date", "numeric"))
 
 
@@ -70,7 +69,6 @@ bislr_data_raw <- lapply(bislr_file_list, function(x) {
              End.Date =  as.Date(End.Date, format = "%m/%d/%Y"),
              Start.Date = as.Date(Start.Date, format = "%m/%d/%Y"))
 })
-
 
 
 

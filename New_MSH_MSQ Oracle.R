@@ -80,7 +80,7 @@ end_dates <- as.Date(c("05/21/2022"), format = "%m/%d/%Y")
 
 
 #Filtering each file by start/end date specified
-oracle_list <- lapply(1:seq_len(oracle_list), function(x)
+oracle_list <- lapply(1:length(oracle_list), function(x)
   oracle_list[[x]] <- oracle_list[[x]] %>%
     filter(as.Date(End.Date, format = "%m/%d/%Y") <= end_dates[x],
            as.Date(Start.Date, format = "%m/%d/%Y") > start_dates[x]))
