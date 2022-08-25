@@ -79,10 +79,10 @@ start_dates <- as.Date(c("2022-05-21", "2022-07-02")) + 1
 
 #End date is 1 week after the end of the current Premier Distribution
 #end_dates <- Pay_Cycle_data$END.DATE[Pay_Cycle_data$DATE== Sys.Date()]+7
-end_dates <- as.Date("2022-07-02", "2022-07-30") + 7
+end_dates <- as.Date(c("2022-07-02", "2022-07-30")) + 7
 
 # Filtering each file by start/end date specified------------------------------
-data_bislr <- lapply(1 : seq_len(bislr_data_raw), function(x)
+data_bislr <- lapply(1 : length(bislr_data_raw), function(x)
   bislr_data_raw[[x]] <- bislr_data_raw[[x]] %>%
     filter(End.Date <= end_dates[x],
            Start.Date >= start_dates[x]))
