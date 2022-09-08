@@ -35,12 +35,6 @@ repo <- readRDS(repo_file)
 max(as.Date(repo$End.Date, format = "%m/%d/%Y"))
 
 
-## Run this if you need to update a data in repo ------------------------------
-# repo <- repo %>% filter(Filename != paste0("J:/deans/Presidents/SixSigma/",
-#           "MSHS Productivity/Productivity/Universal Data/Labor/Raw Data/",
-#           "BISLR Oracle/15_MSBISLW_FEMA_JUN-22_06_16_2022_0242.csv"))
-
-
 ## Import the most recent datasets --------------------------------------------
 details <- file.info(list.files(path =
                                   paste0(dir, "Labor/Raw Data/BISLR Oracle/"),
@@ -83,20 +77,9 @@ if (answer == "Yes") {
   details <- file.info(list.files(path =
                                     paste0(dir, "Labor/Raw Data/BISLR Oracle/"),
                                   pattern = "*.csv", full.names = T))
-  
   details <- details[with(details, order(as.POSIXct(ctime),  decreasing = F)), ]
   bislr_file_list <- rownames(details)[!(rownames(details) %in% repo$Filename)]
 }
-
-
-
-
-
-
-
-
-
-
 
 
 
