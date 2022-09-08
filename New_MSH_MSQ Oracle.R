@@ -24,13 +24,6 @@ dir <- paste0("J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/",
 
 
 # Import data --------------------------------------------------------
-## import pay cycle data and filter required date
-# Pay_Cycle_data <- read_xlsx(paste0(dir,
-#                            "Mapping/MSHS_Pay_Cycle.xlsx"),
-#                             col_types =c("date", "date", "date", "numeric"))
-
-
-
 ## Import the latest aggregated file
 repo <- file.info(list.files(path = paste0(dir, "Labor/REPOS/"), full.names = T,
                              pattern = "data_MSH_MSQ_oracle"))
@@ -39,12 +32,6 @@ repo <- readRDS(repo_file)
 
 # get max date in repo
 max(as.Date(repo$End.Date, format = "%m/%d/%Y"))
-
-
-# Run this if you need to update a data in repo
-# repo <- repo %>% filter(Filename != paste0("J:/deans/Presidents/SixSigma/",
-#   "MSHS Productivity/Productivity/Universal Data/Labor/Raw Data/MSHQ Oracle/",
-#                      "MSHQ Oracle/25_MSH_LD_FTI_MAY-22_05_16_2022_0243.txt"))
 
 
 # Import the most recent data
@@ -58,6 +45,43 @@ details <- details[with(details, order(as.POSIXct(ctime), decreasing = F)), ]
 # read the file that is not in the repos
 oracle_file_list <- rownames(details)[!(rownames(details) %in% repo$Filename)]
 
+
+# check if a new data set is available
+if (length(oracle_file_list) == 0) {
+  stop(paste("The repo is already updated."))
+  }
+
+answer <- select.list(choices = c("Yes", "No"),
+                      preselect = "Yes",
+                      multiple = F,
+                      title = "Is there a new data?",
+                      graphics = T)
+
+
+if (answer == "No") {
+  file_list <-  select.list(choices = rownames(details),
+                              multiple = F,
+                              title = "Select the data you want to update",
+                              graphics = T)
+  repo <- repo %>% filter(Filename != file_list)
+  oracle_file_list <- rownames(details)[!(rownames(details) %in% repo$Filename)]
+} else{
+  paste("Please update the folder first.")
+  }
+
+
+if (answer == "Yes") {
+  details <- file.info(list.files(path = paste0(dir,
+                                    "Labor/Raw Data/MSHQ Oracle/MSHQ Oracle/"),
+                                  pattern = "*.txt", full.names = T)) %>%
+                                          arrange(mtime)
+  details <- details[with(details, order(as.POSIXct(ctime), decreasing = F)), ]
+  # read the file that is not in the repos
+  oracle_file_list <- rownames(details)[!(rownames(details) %in% repo$Filename)]
+}
+
+
+
 #Read files in MSQ Raw as csv
 oracle_list <- lapply(oracle_file_list, function(x) {
                   data <- read.csv(x, sep = "~", header = T,
@@ -70,11 +94,8 @@ oracle_list <- lapply(oracle_file_list, function(x) {
 
 
 # get the required end_date and start date-------------------------------------
-#start_dates <- Pay_Cycle_data$START.DATE[Pay_Cycle_data$DATE== Sys.Date()]
 start_dates <- as.Date(c("04/23/2022"), format = "%m/%d/%Y")
                          
-
-#end_dates <- Pay_Cycle_data$END.DATE[Pay_Cycle_data$DATE== Sys.Date()]
 end_dates <- as.Date(c("05/21/2022"), format = "%m/%d/%Y")
 
 
@@ -96,7 +117,8 @@ oracle  <- oracle  %>% mutate(WRKD.ENTITY = substr(WD_COFT, 1, 3),
 
   
 oracle  <- oracle  %>%
-  group_by_at(c(1:13, 16:34)) %>%
+  #group_by_at(c(1:13, 16:34)) %>%
+  group_by_at(vars(-Hours, -Expense)) %>%
     summarise(Hours = sum(Hours, na.rm = T),
               Expense = sum(Expense, na.rm = T)) %>%
                ungroup() %>%
@@ -129,4 +151,4 @@ check1 <- pivot_wider(check, id_cols = PAYROLL, values_from = Hours,
 
 
 #save RDS ----------------------------------------------------------------------
-saveRDS(new_repo, file = paste0(dir, "/REPOS/data_MSH_MSQ_oracle.rds"))
+saveRDS(new_repo, file = paste0(dir, "Labor/REPOS/data_MSH_MSQ_oracle.rds"))

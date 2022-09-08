@@ -24,14 +24,6 @@ dir <- paste0("J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/",
 
 
 # Import data sets ----------------------------------------------------------
-## Import Pay cycle data
-# Pay_Cycle_data <- read_xlsx(paste0(dir, "Mapping/MSHS_Pay_Cycle.xlsx"),
-#        col_types =c("date", "date", "date", "numeric"))
-
-
-# Pay_Cycle_data <- Pay_Cycle_data %>% mutate(DATE =as.Date(DATE),
-#                                             START.DATE= as.Date(START.DATE),
-#                                             END.DATE= as.Date(END.DATE))
 
 ## Import the latest aggregated file -----------------------------------------
 repo <- file.info(list.files(path = paste0(dir, "Labor/REPOS/"), full.names = T,
@@ -60,6 +52,54 @@ details <- details[with(details, order(as.POSIXct(ctime),  decreasing = F)), ]
 bislr_file_list <- rownames(details)[!(rownames(details) %in% repo$Filename)]
 
 
+
+
+
+# check if a new data set is available
+if (length(bislr_file_list) == 0) {
+  stop(paste("The repo is already updated."))
+}
+
+answer <- select.list(choices = c("Yes", "No"),
+                      preselect = "Yes",
+                      multiple = F,
+                      title = "Is there a new data?",
+                      graphics = T)
+
+
+if (answer == "No") {
+  file_list <-  select.list(choices = rownames(details),
+                            multiple = F,
+                            title = "Select the data you want to update",
+                            graphics = T)
+  repo <- repo %>% filter(Filename != file_list)
+  bislr_file_list <- rownames(details)[!(rownames(details) %in% repo$Filename)]
+} else{
+  paste("Please update the folder first.")
+}
+
+
+if (answer == "Yes") {
+  details <- file.info(list.files(path =
+                                    paste0(dir, "Labor/Raw Data/BISLR Oracle/"),
+                                  pattern = "*.csv", full.names = T))
+  
+  details <- details[with(details, order(as.POSIXct(ctime),  decreasing = F)), ]
+  bislr_file_list <- rownames(details)[!(rownames(details) %in% repo$Filename)]
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 # add a column including the name of the data set
 bislr_data_raw <- lapply(bislr_file_list, function(x) {
              data <- read.csv(x, as.is = T, strip.white = T,
@@ -74,11 +114,9 @@ bislr_data_raw <- lapply(bislr_file_list, function(x) {
 
 # get the required end and start date -----------------------------------------
 #Start date is 1 day after the end of the last Premier Distribution
-#start_dates <- Pay_Cycle_data$START.DATE[Pay_Cycle_data$DATE== Sys.Date()]+1
 start_dates <- as.Date(c("2022-05-21", "2022-07-02")) + 1
 
 #End date is 1 week after the end of the current Premier Distribution
-#end_dates <- Pay_Cycle_data$END.DATE[Pay_Cycle_data$DATE== Sys.Date()]+7
 end_dates <- as.Date(c("2022-07-02", "2022-07-30")) + 7
 
 # Filtering each file by start/end date specified------------------------------
@@ -198,4 +236,4 @@ new_repo <- new_repo  %>% distinct()
 
 
 # save RDS -----------------------------------------------------------------
-saveRDS(new_repo, file = paste0(dir, "REPOS/data_BISLR_oracle.rds"))
+saveRDS(new_repo, file = paste0(dir, "Labor/REPOS/data_BISLR_oracle.rds"))
