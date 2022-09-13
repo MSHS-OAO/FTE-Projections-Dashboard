@@ -51,7 +51,7 @@ if (length(oracle_file_list) == 0) {
   stop(paste("The repo is already updated."))
   
 }else{
-  paste("Run Line 88.")
+  paste("Continue from line 85.")
   }
 
 answer <- select.list(choices = c("Yes", "No"),
@@ -82,6 +82,15 @@ if (answer == "Yes") {
   oracle_file_list <- rownames(details)[!(rownames(details) %in% repo$Filename)]
 }
 
+writeLines(paste0("MSHQ file lists includes: \n", oracle_file_list))
+answer <- select.list(choices = c("Yes", "No"),
+                      preselect = "Yes",
+                      multiple = F,
+                      title = "Correct files?",
+                      graphics = T)
+if (answer == "No") {
+  paste("Please Start from line 31.")
+}
 
 
 #Read files in MSQ Raw as csv
@@ -135,15 +144,6 @@ if (answer == "No") {
   previous_distribution <- format(dist_dates$END.DATE[which(distribution == format(dist_dates$END.DATE, "%m/%d/%Y"))-1],"%m/%d/%Y")
   
 }
-
-
-
-
-start_dates <- as.Date(c("05/21/2022" ,"07/02/2022"), format = "%m/%d/%Y")
-                         
-end_dates <- as.Date(c("07/02/2022", "07/30/2022"), format = "%m/%d/%Y")
-
-
 
 
 

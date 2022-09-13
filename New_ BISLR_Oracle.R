@@ -51,7 +51,7 @@ bislr_file_list <- rownames(details)[!(rownames(details) %in% repo$Filename)]
 if (length(bislr_file_list) == 0) {
   stop(paste("The repo is already updated."))
 } else{
-  paste("Go to line 98")
+  paste("Continue from line 85")
 }
 
 answer <- select.list(choices = c("Yes", "No"),
@@ -81,6 +81,7 @@ if (answer == "Yes") {
   bislr_file_list <- rownames(details)[!(rownames(details) %in% repo$Filename)]
 }
 
+
 writeLines(paste0("bislr file lists includes: \n", bislr_file_list))
 answer <- select.list(choices = c("Yes", "No"),
                       preselect = "Yes",
@@ -105,8 +106,50 @@ bislr_data_raw <- lapply(bislr_file_list, function(x) {
 })
 
 
+# get the required end_date and start date-------------------------------------
+##Table of distribution dates
+dist_dates <- dates %>%
+  select(END.DATE, PREMIER.DISTRIBUTION) %>%
+  distinct() %>%
+  drop_na() %>%
+  arrange(END.DATE) %>%
+  #filter only on distribution end dates
+  filter(PREMIER.DISTRIBUTION %in% c(TRUE, 1),
+         #filter 3 weeks from run date (21 days) for data collection lag before run date
+         END.DATE < as.POSIXct(Sys.Date() - 21))
 
-# get the required end and start date -----------------------------------------
+
+
+
+#Selecting current and previous distribution dates
+distribution <- format(tail(dist_dates$END.DATE, 
+                            n = length(oracle_file_list)),"%m/%d/%Y")
+previous_distribution <- format(tail(dist_dates$END.DATE, 
+                                     n= length(oracle_file_list)+1 ),"%m/%d/%Y")%>%
+  head(previous_distribution, n=-1)
+
+#Confirming distribution dates
+cat("Current distribution is", distribution,
+    "\nPrevious distribution is", previous_distribution)
+answer <- select.list(choices = c("Yes", "No"),
+                      preselect = "Yes",
+                      multiple = F,
+                      title = "Correct distribution?",
+                      graphics = T)
+if (answer == "No") {
+  distribution <- select.list(choices =
+                                format(sort.POSIXlt(dist_dates$END.DATE, decreasing = T),
+                                       "%m/%d/%Y"),
+                              multiple = T,
+                              title = "Select current distribution",
+                              graphics = T)
+  which(distribution == format(dist_dates$END.DATE, "%m/%d/%Y"))
+  previous_distribution <- format(dist_dates$END.DATE[which(distribution == format(dist_dates$END.DATE, "%m/%d/%Y"))-1],"%m/%d/%Y")
+  
+}
+
+
+
 #Start date is 1 day after the end of the last Premier Distribution
 start_dates <- as.Date(c("2022-05-21", "2022-07-02")) + 1
 
