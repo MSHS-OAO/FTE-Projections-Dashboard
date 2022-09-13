@@ -25,11 +25,12 @@ dir <- paste0("J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/",
 
 # Import data sets ----------------------------------------------------------
 
+## Read in pay cycle file
+dates <- read_xlsx(paste0(dir, "Mapping/MSHS_Pay_Cycle.xlsx"))
+
+
 ## Import the latest aggregated file -----------------------------------------
-repo <- file.info(list.files(path = paste0(dir, "Labor/REPOS/"), full.names = T,
-                                                    pattern = "data_BISLR"))
-repo_file <- rownames(repo)
-repo <- readRDS(repo_file)
+repo <- readRDS(paste0(dir, "Labor/RDS/data_BISLR_oracle.rds"))
 
 ## get max date in repo --------------------------------------------------------
 max(as.Date(repo$End.Date, format = "%m/%d/%Y"))
@@ -46,12 +47,11 @@ details <- details[with(details, order(as.POSIXct(ctime),  decreasing = F)), ]
 bislr_file_list <- rownames(details)[!(rownames(details) %in% repo$Filename)]
 
 
-
-
-
 # check if a new data set is available
 if (length(bislr_file_list) == 0) {
   stop(paste("The repo is already updated."))
+} else{
+  paste("Go to line 98")
 }
 
 answer <- select.list(choices = c("Yes", "No"),
@@ -63,10 +63,10 @@ answer <- select.list(choices = c("Yes", "No"),
 
 if (answer == "No") {
   file_list <-  select.list(choices = rownames(details),
-                            multiple = F,
+                            multiple = T,
                             title = "Select the data you want to update",
                             graphics = T)
-  repo <- repo %>% filter(Filename != file_list)
+  repo <- repo %>% filter(!(Filename %in% file_list))
   bislr_file_list <- rownames(details)[!(rownames(details) %in% repo$Filename)]
 } else{
   paste("Please update the folder first.")
@@ -80,6 +80,17 @@ if (answer == "Yes") {
   details <- details[with(details, order(as.POSIXct(ctime),  decreasing = F)), ]
   bislr_file_list <- rownames(details)[!(rownames(details) %in% repo$Filename)]
 }
+
+writeLines(paste0("bislr file lists includes: \n", bislr_file_list))
+answer <- select.list(choices = c("Yes", "No"),
+                      preselect = "Yes",
+                      multiple = F,
+                      title = "Correct files?",
+                      graphics = T)
+if (answer == "No") {
+  paste("Please Start from line 33.")
+}
+
 
 
 

@@ -21,16 +21,16 @@ memory.limit(size = 8000000)
 dir <- paste0("J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/",
                                      "Universal Data/")
 
-
-
 # Import data --------------------------------------------------------
-## Import the latest aggregated file
-repo <- file.info(list.files(path = paste0(dir, "Labor/REPOS/"), full.names = T,
-                             pattern = "data_MSH_MSQ_oracle"))
-repo_file <- rownames(repo)
-repo <- readRDS(repo_file)
+#Read in pay cycle file
+dates <- read_xlsx(paste0(dir, "Mapping/MSHS_Pay_Cycle.xlsx"))
 
-# get max date in repo
+
+
+## Import the latest aggregated file
+repo <- readRDS(paste0(dir, "Labor/RDS/data_MSH_MSQ_oracle.rds"))
+
+### get max date in repo
 max(as.Date(repo$End.Date, format = "%m/%d/%Y"))
 
 
@@ -49,6 +49,9 @@ oracle_file_list <- rownames(details)[!(rownames(details) %in% repo$Filename)]
 # check if a new data set is available
 if (length(oracle_file_list) == 0) {
   stop(paste("The repo is already updated."))
+  
+}else{
+  paste("Run Line 88.")
   }
 
 answer <- select.list(choices = c("Yes", "No"),
@@ -57,13 +60,12 @@ answer <- select.list(choices = c("Yes", "No"),
                       title = "Is there a new data?",
                       graphics = T)
 
-
 if (answer == "No") {
   file_list <-  select.list(choices = rownames(details),
-                              multiple = F,
+                              multiple = T,
                               title = "Select the data you want to update",
                               graphics = T)
-  repo <- repo %>% filter(Filename != file_list)
+  repo <- repo %>% filter(!(Filename %in% file_list))
   oracle_file_list <- rownames(details)[!(rownames(details) %in% repo$Filename)]
 } else{
   paste("Please update the folder first.")
@@ -92,15 +94,60 @@ oracle_list <- lapply(oracle_file_list, function(x) {
 })
 
 
-
 # get the required end_date and start date-------------------------------------
-start_dates <- as.Date(c("04/23/2022"), format = "%m/%d/%Y")
+##Table of distribution dates
+dist_dates <- dates %>%
+  select(END.DATE, PREMIER.DISTRIBUTION) %>%
+  distinct() %>%
+  drop_na() %>%
+  arrange(END.DATE) %>%
+  #filter only on distribution end dates
+  filter(PREMIER.DISTRIBUTION %in% c(TRUE, 1),
+#filter 3 weeks from run date (21 days) for data collection lag before run date
+         END.DATE < as.POSIXct(Sys.Date() - 21))
+
+
+
+
+#Selecting current and previous distribution dates
+distribution <- format(tail(dist_dates$END.DATE, 
+                            n = length(oracle_file_list)),"%m/%d/%Y")
+previous_distribution <- format(tail(dist_dates$END.DATE, 
+                                n= length(oracle_file_list)+1 ),"%m/%d/%Y")%>%
+                       head(previous_distribution, n=-1)
+
+#Confirming distribution dates
+cat("Current distribution is", distribution,
+    "\nPrevious distribution is", previous_distribution)
+answer <- select.list(choices = c("Yes", "No"),
+                      preselect = "Yes",
+                      multiple = F,
+                      title = "Correct distribution?",
+                      graphics = T)
+if (answer == "No") {
+  distribution <- select.list(choices =
+                      format(sort.POSIXlt(dist_dates$END.DATE, decreasing = T),
+                                       "%m/%d/%Y"),
+                              multiple = T,
+                              title = "Select current distribution",
+                              graphics = T)
+  which(distribution == format(dist_dates$END.DATE, "%m/%d/%Y"))
+  previous_distribution <- format(dist_dates$END.DATE[which(distribution == format(dist_dates$END.DATE, "%m/%d/%Y"))-1],"%m/%d/%Y")
+  
+}
+
+
+
+
+start_dates <- as.Date(c("05/21/2022" ,"07/02/2022"), format = "%m/%d/%Y")
                          
-end_dates <- as.Date(c("05/21/2022"), format = "%m/%d/%Y")
+end_dates <- as.Date(c("07/02/2022", "07/30/2022"), format = "%m/%d/%Y")
 
 
 
-#Filtering each file by start/end date specified
+
+
+# Filtering each file by start/end date specified
 oracle_list <- lapply(1:length(oracle_list), function(x)
   oracle_list[[x]] <- oracle_list[[x]] %>%
     filter(as.Date(End.Date, format = "%m/%d/%Y") <= end_dates[x],
@@ -151,4 +198,4 @@ check1 <- pivot_wider(check, id_cols = PAYROLL, values_from = Hours,
 
 
 #save RDS ----------------------------------------------------------------------
-saveRDS(new_repo, file = paste0(dir, "Labor/REPOS/data_MSH_MSQ_oracle.rds"))
+saveRDS(new_repo, file = paste0(dir, "Labor/RDS/data_MSH_MSQ_oracle.rds"))
