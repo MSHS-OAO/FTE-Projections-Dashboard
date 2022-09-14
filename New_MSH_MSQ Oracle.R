@@ -32,6 +32,7 @@ details <- file.info(list.files(path = paste0(dir,
                                    "Labor/Raw Data/MSHQ Oracle/MSHQ Oracle/"),
                                 pattern = "*.txt", full.names = T)) %>%
                                   arrange(mtime)
+
 details <- details[with(details, order(as.POSIXct(mtime), decreasing = F)), ]
 
 # check if user expects a new data set is available
@@ -40,6 +41,7 @@ answer <- select.list(choices = c("Yes", "No"),
                       multiple = F,
                       title = "Is there a new data?",
                       graphics = T)
+
 
 if (answer == "Yes" &
     length(rownames(details)[!(rownames(details) %in% repo$Filename)]) == 0) {
@@ -58,6 +60,7 @@ if (answer == "Yes" &
                                    graphics = T)
   # remove the update files from current REPO
   repo <- repo %>% filter(!(Filename %in% update_file_list))
+
   # get path(s) of file(s) to be updated within REPO
   oracle_file_list <- rownames(details)[rownames(details) %in% update_file_list]
   print(oracle_file_list)
@@ -94,6 +97,7 @@ start_dates <- as.Date(format(tail(dist_dates$END.DATE,
                               head(previous_distribution, n = -1),
                                 format = "%m/%d/%Y") + 1
 
+
 #Confirming distribution dates
 cat("File end dates are", format(end_dates, "%m/%d/%Y"),
     "\nFile start dates are", format(start_dates, "%m/%d/%Y"))
@@ -113,6 +117,7 @@ if (answer == "No") {
                             n = length(oracle_file_list) + 1), "%m/%d/%Y") %>%
                             head(end_dates, n = -1), format = "%m/%d/%Y") + 1
 }
+
 
 #Filtering each file by start/end date specified
 oracle_list <- lapply(1:length(oracle_list), function(x)
