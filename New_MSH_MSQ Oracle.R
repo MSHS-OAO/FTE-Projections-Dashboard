@@ -25,6 +25,9 @@ dir <- paste0("J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/",
 # Import the latest aggregated file
 repo <- readRDS(paste0(dir, "Labor/RDS/data_MSH_MSQ_oracle.rds"))
 
+# import pay cylcle mapping file
+dates <- read_xlsx(paste0(dir, "Mapping/MSHS_Pay_Cycle.xlsx"))
+
 # visual check for max date in repo
 max(as.Date(repo$End.Date, format = "%m/%d/%Y"))
 
@@ -69,9 +72,7 @@ if (answer == "Yes" &
   print(oracle_file_list)
 }
 
-
-
-#Read files in MSQ Raw as csv
+#Read files in MSHQ Raw as csv
 oracle_list <- lapply(oracle_file_list, function(x) {
   data <- read.csv(x, sep = "~", header = T,
                    stringsAsFactors = F,
@@ -79,8 +80,6 @@ oracle_list <- lapply(oracle_file_list, function(x) {
                    strip.white = TRUE) %>%
     mutate(Filename = x)
 })
-
-
 
 # get the required end_date and start date-------------------------------------
 ##Table of distribution dates
@@ -122,26 +121,26 @@ if (answer == "No") {
   start_dates <- as.Date( format(tail(dist_dates$END.DATE,
                                       n= length(oracle_file_list)+1 ),"%m/%d/%Y")%>%
                             head(end_dates, n=-1), format = "%m/%d/%Y" )+1
-}
+} 
 
 #Filtering each file by start/end date specified
 oracle_list <- lapply(1:length(oracle_list), function(x)
   oracle_list[[x]] <- oracle_list[[x]] %>%
     filter(as.Date(End.Date, format = "%m/%d/%Y") <= end_dates[x],
-           as.Date(Start.Date, format = "%m/%d/%Y") > start_dates[x]))
+           as.Date(Start.Date, format = "%m/%d/%Y") >= start_dates[x]))
 
 
-
+# bind all new/updated data
 oracle <- do.call("rbind", oracle_list)
 
 
-# Remove Duplicate rows and add worked entity column --------------------------
+# Add worked entity column --------------------------
 oracle  <- oracle  %>% mutate(WRKD.ENTITY = substr(WD_COFT, 1, 3),
-                              Hours = as.numeric(Hours), Expense = as.numeric(Expense))
+                              Hours = as.numeric(Hours), 
+                              Expense = as.numeric(Expense))
 
-
+# summarise hours and expenses
 oracle  <- oracle  %>%
-  #group_by_at(c(1:13, 16:34)) %>%
   group_by_at(vars(-Hours, -Expense)) %>%
   summarise(Hours = sum(Hours, na.rm = T),
             Expense = sum(Expense, na.rm = T)) %>%
@@ -175,4 +174,4 @@ check1 <- pivot_wider(check, id_cols = PAYROLL, values_from = Hours,
 
 
 #save RDS ----------------------------------------------------------------------
-saveRDS(new_repo, file = paste0(dir, "Labor/REPOS/data_MSH_MSQ_oracle.rds"))
+saveRDS(new_repo, file = paste0(dir, "Labor/RDS/data_MSH_MSQ_oracle.rds"))
