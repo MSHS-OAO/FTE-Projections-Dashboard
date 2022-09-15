@@ -84,7 +84,7 @@ dist_dates <- dates %>%
   #filter only on distribution end dates
   filter(PREMIER.DISTRIBUTION %in% c(TRUE, 1),
 #filter 3 weeks from run date (21 days) for data collection lag before run date
-         END.DATE < as.POSIXct(Sys.Date() - 21))
+         END.DATE < as.POSIXct(Sys.Date() - 14))
 
 
 #Selecting current and previous distribution dates
@@ -93,7 +93,7 @@ end_dates <- as.Date(format(tail(dist_dates$END.DATE,
                                    format = "%m/%d/%Y")
 start_dates <- as.Date(format(tail(dist_dates$END.DATE,
                             n = length(oracle_file_list) + 1), "%m/%d/%Y") %>%
-                              head(previous_distribution, n = -1),
+                              head(start_dates, n = -1),
                                 format = "%m/%d/%Y") + 1
 
 
@@ -111,11 +111,13 @@ if (answer == "No") {
                            multiple = T,
                            title = "Select end dates",
                            graphics = T)
-  end_dates <- as.Date(end_dates, format = "%m/%d/%Y")
-  start_dates <- as.Date(format(tail(dist_dates$END.DATE,
-                            n = length(oracle_file_list) + 1), "%m/%d/%Y") %>%
-                            head(end_dates, n = -1), format = "%m/%d/%Y") + 1
+  end_dates <- sort(as.Date(end_dates, format = "%m/%d/%Y"))
+  start_dates_index <- sapply(end_dates ,  function(x) grep(x,
+                                                dist_dates$END.DATE )-1)
+  start_dates <- as.Date(dist_dates$END.DATE[start_dates_index],
+                         format= "%m/%d/%Y")+1
 }
+
 
 
 #Filtering each file by start/end date specified
