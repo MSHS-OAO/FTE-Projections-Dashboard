@@ -1,80 +1,172 @@
-library(dplyr)
-library(tidyr)
-library(here)
+
+# MSH MSQ Oracle
+
+rm(list = ls())
+
+# Import Libraries --------------------------------------------------------
+suppressMessages({
+  library(tidyverse)
+  library(dplyr)
+  library(readxl)
+})
+
 
 memory.limit(size = 8000000)
 
-##MSHQ##
-#PP end dates for filtering each raw file
-PPend_list <- list("04/25/2020","05/23/2020","06/20/2020","08/01/2020",
-                   "08/29/2020","09/26/2020","10/24/2020","11/21/2020",
-                   "01/02/2021","01/23/2021","02/27/2021",
-                   "03/27/2021","04/24/2021","05/22/2021","06/19/2021",
-                   "07/31/2021","08/28/2021","09/25/2021","10/23/2021",
-                   "11/20/2021","01/01/2022","01/29/2022","02/26/2022",
-                   "03/26/2022","04/23/2022")
-#file path for all raw files
-folderOracle <- paste0(here(),"/Raw Data/MSHQ Oracle/")
-folderOracle <- "J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/Universal Data/Labor/Raw Data/MSHQ Oracle/MSHQ Oracle"
-#List files from MSHQ Raw folder
-Oracle_file_list <- list.files(path=folderOracle, pattern="*.txt")
-details = file.info(list.files(path = folderOracle, pattern="*.txt", full.names = T)) %>% arrange(mtime)
-Oracle_file_list <- rownames(details)
-#Read files in MSQ Raw as csv
-ORACLElist = lapply(Oracle_file_list,
-                    function(x)read.csv(x, sep = "~", header=T,
-                                        stringsAsFactors = F,
-                                        colClasses = rep("character",32),
-                                        strip.white = TRUE))
-#Remove overlapping dates from raw txt files
-for(i in 1:length(ORACLElist)){
-  if(i == 1){
-    ORACLElist[[i]] <- ORACLElist[[i]] %>%
-      filter(as.Date(End.Date, format = "%m/%d/%Y") <= as.Date(PPend_list[[i]], format = "%m/%d/%Y"))
-  } else if(i == 2 ){
-    ORACLElist[[i]] <- ORACLElist[[i]] %>%
-      filter(as.Date(End.Date, format = "%m/%d/%Y") <= as.Date(PPend_list[[i]], format = "%m/%d/%Y"),
-             as.Date(End.Date, format = "%m/%d/%Y") >= max(as.Date(ORACLElist[[i-1]]$End.Date,format = "%m/%d/%Y")))
-  } else if( i == 11){
-    ORACLElist[[i]] <- ORACLElist[[i]] %>%
-      filter(as.Date(End.Date, format = "%m/%d/%Y") <= as.Date(PPend_list[[i]], format = "%m/%d/%Y"),
-             as.Date(End.Date, format = "%m/%d/%Y") > max(as.Date(ORACLElist[[i-1]]$End.Date,format = "%m/%d/%Y")))
-  } else {
-    ORACLElist[[i]] <- ORACLElist[[i]] %>%
-      filter(as.Date(End.Date, format = "%m/%d/%Y") <= as.Date(PPend_list[[i]], format = "%m/%d/%Y"),
-             as.Date(Start.Date, format = "%m/%d/%Y") > max(as.Date(ORACLElist[[i-1]]$End.Date,format = "%m/%d/%Y")))
-  }
+# Working directory --------------------------------------------------------
+dir <- paste0("J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/",
+              "Universal Data/")
+
+# Import data --------------------------------------------------------
+# Import the latest aggregated file
+repo <- readRDS(paste0(dir, "Labor/RDS/data_MSH_MSQ_oracle.rds"))
+
+# import pay cylcle mapping file
+dates <- read_xlsx(paste0(dir, "Mapping/MSHS_Pay_Cycle.xlsx"))
+
+# visual check for max date in repo
+max(as.Date(repo$End.Date, format = "%m/%d/%Y"))
+
+# Get file names in raw data folder
+details <- file.info(list.files(path = paste0(dir,
+                                   "Labor/Raw Data/MSHQ Oracle/MSHQ Oracle/"),
+                                pattern = "*.txt", full.names = T)) %>%
+                                  arrange(mtime)
+
+details <- details[with(details, order(as.POSIXct(mtime), decreasing = F)), ]
+
+# check if user expects a new data set is available
+answer <- select.list(choices = c("Yes", "No"),
+                      preselect = "Yes",
+                      multiple = F,
+                      title = "Is there a new data?",
+                      graphics = T)
+
+
+if (answer == "Yes" &
+    length(rownames(details)[!(rownames(details) %in% repo$Filename)]) == 0) {
+  # let user know they need to update raw data folder
+  stop("Please update the raw data folder first.")
+} else if (answer == "Yes" &
+      length(rownames(details)[!(rownames(details) %in% repo$Filename)]) > 0) {
+  # get path(s) of file(s) to be appended to REPO file
+  oracle_file_list <- rownames(details)[!(rownames(details) %in% repo$Filename)]
+  print(oracle_file_list)
+} else {
+  # user selects files they would like to update within the REPO file
+  update_file_list <-  select.list(choices = rownames(details),
+                                   multiple = T,
+                                   title = "Select the data you want to update",
+                                   graphics = T)
+  # remove the update files from current REPO
+  repo <- repo %>% filter(!(Filename %in% update_file_list))
+  # get path(s) of file(s) to be updated within REPO
+  oracle_file_list <- rownames(details)[rownames(details) %in% update_file_list]
+  print(oracle_file_list)
+}
+
+#Read files in MSHQ Raw as csv
+oracle_list <- lapply(oracle_file_list, function(x) {
+  data <- read.csv(x, sep = "~", header = T,
+                   stringsAsFactors = F,
+                   colClasses = rep("character", 32),
+                   strip.white = TRUE) %>%
+    mutate(Filename = x)
+})
+
+# get the required end_date and start date-------------------------------------
+##Table of distribution dates
+dist_dates <- dates %>%
+  select(END.DATE, PREMIER.DISTRIBUTION) %>%
+  distinct() %>%
+  drop_na() %>%
+  arrange(END.DATE) %>%
+  #filter only on distribution end dates
+  filter(PREMIER.DISTRIBUTION %in% c(TRUE, 1),
+#filter 3 weeks from run date (21 days) for data collection lag before run date
+         END.DATE < as.POSIXct(Sys.Date() - 21))
+
+
+#Selecting current and previous distribution dates
+end_dates <- as.Date(format(tail(dist_dates$END.DATE,
+                                 n = length(oracle_file_list)), "%m/%d/%Y"),
+                                   format = "%m/%d/%Y")
+start_dates <- as.Date(format(tail(dist_dates$END.DATE,
+                            n = length(oracle_file_list) + 1), "%m/%d/%Y") %>%
+                              head(previous_distribution, n = -1),
+                                format = "%m/%d/%Y") + 1
+
+
+#Confirming distribution dates
+cat("File end dates are", format(end_dates, "%m/%d/%Y"),
+    "\nFile start dates are", format(start_dates, "%m/%d/%Y"))
+answer <- select.list(choices = c("Yes", "No"),
+                      preselect = "Yes",
+                      multiple = F,
+                      title = "Correct dates?",
+                      graphics = T)
+if (answer == "No") {
+  end_dates <- select.list(choices =
+        format(sort.POSIXlt(dist_dates$END.DATE, decreasing = T), "%m/%d/%Y"),
+                           multiple = T,
+                           title = "Select end dates",
+                           graphics = T)
+  end_dates <- as.Date(end_dates, format = "%m/%d/%Y")
+  start_dates <- as.Date(format(tail(dist_dates$END.DATE,
+                            n = length(oracle_file_list) + 1), "%m/%d/%Y") %>%
+                            head(end_dates, n = -1), format = "%m/%d/%Y") + 1
 }
 
 
+#Filtering each file by start/end date specified
+oracle_list <- lapply(1:length(oracle_list), function(x)
+  oracle_list[[x]] <- oracle_list[[x]] %>%
+    filter(as.Date(End.Date, format = "%m/%d/%Y") <= end_dates[x],
+           as.Date(Start.Date, format = "%m/%d/%Y") >= start_dates[x]))
 
-#Bind all MSHQ files
-Oracle = do.call("rbind", ORACLElist)
-#Remove Duplicate rows and add worked entity column
-Oracle <- Oracle %>%
-  mutate(WRKD.ENTITY = substr(Oracle$WD_COFT,1,3),
-         Hours = as.numeric(Hours),
-         Expense = as.numeric(Expense))
-Oracle <- Oracle%>%
-  group_by_at(c(1:13,16:34)) %>%
+
+# bind all new/updated data
+oracle <- do.call("rbind", oracle_list)
+
+
+# Add worked entity column --------------------------
+oracle  <- oracle  %>% mutate(WRKD.ENTITY = substr(WD_COFT, 1, 3),
+                              Hours = as.numeric(Hours),
+                              Expense = as.numeric(Expense))
+
+# summarise hours and expenses
+oracle  <- oracle  %>%
+  group_by_at(vars(-Hours, -Expense)) %>%
   summarise(Hours = sum(Hours, na.rm = T),
-            Expense = sum(Expense,na.rm = T)) %>%
+            Expense = sum(Expense, na.rm = T)) %>%
   ungroup() %>%
   distinct()
-#Determine PAYROLL based on WRKD.ENTITY
-Oracle <- Oracle %>%
-  mutate(PAYROLL = case_when(
-    WRKD.ENTITY == "102" ~ "MSQ",
-    TRUE ~ "MSH"))
 
 
-#Check sum of hours by end date to make sure data follows proper pattern
-check <- Oracle %>%
+
+# Determine PAYROLL based on WRKD.ENTITY  -------------------------------------
+oracle  <- oracle  %>%
+  mutate(PAYROLL = case_when(WRKD.ENTITY == "102" ~ "MSQ",
+                             TRUE ~ "MSH"))
+
+
+# Bind NEW data with repository -----------------------------------------------
+new_repo <- rbind(repo, oracle)
+new_repo <- new_repo %>%
+              distinct()
+
+# Check sum of hours by end date to make sure data follows proper pattern-------
+check <- new_repo %>%
   ungroup() %>%
-  group_by(PAYROLL,End.Date) %>%
+  group_by(PAYROLL, End.Date) %>%
   summarise(Hours = sum(Hours)) %>%
   mutate(End.Date = as.Date(End.Date, format = "%m/%d/%Y")) %>%
-  arrange(End.Date) 
-check1 <- pivot_wider(check,id_cols = PAYROLL,values_from = Hours,names_from = End.Date)
-#Save .rds
-saveRDS(Oracle,file = "J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/Universal Data/Labor/RDS/data_MSH_MSQ_oracle.rds")
+  arrange(End.Date)
+
+check1 <- pivot_wider(check, id_cols = PAYROLL, values_from = Hours,
+                      names_from = End.Date)
+
+
+
+#save RDS ----------------------------------------------------------------------
+saveRDS(new_repo, file = paste0(dir, "Labor/RDS/data_MSH_MSQ_oracle.rds"))
