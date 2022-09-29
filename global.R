@@ -93,9 +93,6 @@ System_Summary <- readRDS("J:/deans/Presidents/SixSigma/MSHS Productivity/Produc
 worked_paycodes <- c('REGULAR', 'OVERTIME', 'OTHER_WORKED', 'EDUCATION',
                      'ORIENTATION', 'AGENCY')
 
-#pre covid pay period end dates
-pre_covid_PP <- as.Date(c('2020-01-04', '2020-01-18', '2020-02-01',
-                          '2020-02-15','2020-02-29'))
 
 
 site_list <- c("MSH", "MSQ", "MSBI", "MSB", "MSM", "MSW", "Corporate")
@@ -133,15 +130,15 @@ report_start_date <- format(as.Date(data$PP.END.DATE[nrow(data)-2]-13, "%B %d %Y
 report_end_date <- format(as.Date(data$PP.END.DATE[nrow(data)], "%B %d %Y"), "%m/%d/%Y")
 
 
-# sites_services_df <- data %>% 
-#   ungroup() %>% 
-#   select(PAYROLL, CORPORATE.SERVICE.LINE) %>% 
-#   filter(!is.na(PAYROLL)) %>% 
-#   distinct()
-# 
-# system_service_lines <- 
-#   service_lines[which(!service_lines %in% c("IT", "HR", "CMO"))]
 
 
+data <- data %>% mutate(service_group = case_when(str_detect(CORPORATE.SERVICE.LINE, "Nursing") ~ "Nursing",
+                                                    str_detect(CORPORATE.SERVICE.LINE, "Radiology") ~ "Radiology",
+                                                    str_detect(CORPORATE.SERVICE.LINE, "Support Services") ~ "Support Services",
+                                                    PAYROLL== "Corporate" ~ "Corporate",
+                                                    TRUE ~ "Other"))
+                                                    
+                                                    
+                                                   
 
 

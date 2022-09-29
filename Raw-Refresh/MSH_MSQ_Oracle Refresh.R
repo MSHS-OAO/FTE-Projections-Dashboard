@@ -112,10 +112,10 @@ if (answer == "No") {
                            title = "Select end dates",
                            graphics = T)
   end_dates <- sort(as.Date(end_dates, format = "%m/%d/%Y"))
-  start_dates_index <- sapply(end_dates ,  function(x) grep(x,
-                                                dist_dates$END.DATE )-1)
+  start_dates_index <- sapply(end_dates,  function(x) grep(x,
+                                                dist_dates$END.DATE) - 1)
   start_dates <- as.Date(dist_dates$END.DATE[start_dates_index],
-                         format= "%m/%d/%Y")+1
+                         format = "%m/%d/%Y") + 1
 }
 
 

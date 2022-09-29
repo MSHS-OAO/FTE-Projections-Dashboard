@@ -3,16 +3,20 @@
 server <- function(input, output, session) {
   
   output$siteName_DateShow <- renderText({
-    paste0("Based on data from ", input$DateRange[1]," to ", input$DateRange[2]) 
+    paste0("Based on data from ", input$DateRange[1]," to ", input$DateRange[2],
+           " for ", paste(sort(input$selectedPayroll), collapse = ', ')) 
            
   })
   
   
   Data_Service  <- eventReactive(input$FiltersUpdate, {
     validate(need(input$selectedPayroll != "" , "Please Select a Campus"), 
+             need(input$selectedGroup != "", "Please Select a Group"),
              need(input$DateRange[1] < input$DateRange[2], "Error: Start date should be earlier than end date."))
     data %>% 
-      filter( PAYROLL %in% input$selectedPayroll, CORPORATE.SERVICE.LINE %in% input$selectedService,
+      filter( PAYROLL %in% input$selectedPayroll,
+              service_group %in% input$selectedGroup,
+              CORPORATE.SERVICE.LINE %in% input$selectedService,
               PP.END.DATE >= as.Date(input$DateRange[1]) &PP.END.DATE  <= as.Date(input$DateRange[2] ))
   }, ignoreNULL = FALSE)
   
@@ -20,17 +24,26 @@ server <- function(input, output, session) {
   
   # Observeevent for services
   observeEvent(input$selectedPayroll,{
-      service_choices <- sort(unique(data$CORPORATE.SERVICE.LINE[data$PAYROLL %in% input$selectedPayroll]))
+      group_choices <- sort(unique(data$service_group[data$PAYROLL %in% input$selectedPayroll]))
       updatePickerInput(session,
-                        inputId = "selectedService",
-                        choices = service_choices,
-                        selected = service_choices[1])
+                        inputId = "selectedGroup",
+                        choices = group_choices,
+                        selected = group_choices[1])
   },
   ignoreInit = TRUE,
   ignoreNULL = FALSE)
   
 
-  
+  # Observeevent for services
+  observeEvent(input$selectedGroup,{
+    service_choices <- sort(unique(data$CORPORATE.SERVICE.LINE[data$service_group %in% input$selectedGroup]))
+    updatePickerInput(session,
+                      inputId = "selectedService",
+                      choices = service_choices,
+                      selected = service_choices[1])
+  },
+  ignoreInit = TRUE,
+  ignoreNULL = FALSE)
   
   
   
