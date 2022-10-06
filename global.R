@@ -115,33 +115,23 @@ data <- data %>%
   pivot_longer(cols = 5:ncol(data),names_to = "PP.END.DATE", values_to = "FTE")
 
 data <- data %>%
-  mutate(DEPARTMENT = case_when(
-    CORPORATE.SERVICE.LINE %in% c("IT", "HR", "CMO") ~ CORPORATE.SERVICE.LINE,
-    is.na(DEFINITION.CODE) ~ "Non-Premier",
-    TRUE ~ paste0(DEFINITION.CODE," - ",toupper(DEFINITION.NAME))), 
+  mutate(
+    DEPARTMENT = case_when(
+      CORPORATE.SERVICE.LINE %in% c("IT", "HR", "CMO") ~ CORPORATE.SERVICE.LINE,
+      is.na(DEFINITION.CODE) ~ "Non-Premier Department",
+      TRUE ~ paste0(DEFINITION.CODE," - ",toupper(DEFINITION.NAME))),
+    CORPORATE.SERVICE.LINE = case_when(
+      is.na(DEFINITION.CODE) ~ "Non-Premier Department",
+      TRUE ~ CORPORATE.SERVICE.LINE),
+    service_group = case_when(
+      str_detect(CORPORATE.SERVICE.LINE, "Nursing") ~ "Nursing",
+      str_detect(CORPORATE.SERVICE.LINE, "Radiology") ~ "Radiology",
+      str_detect(CORPORATE.SERVICE.LINE, "Support Services") ~ "Support Services",
+      PAYROLL == "Corporate" ~ "Corporate",
+      TRUE ~ "Other"),
     DATES = as.character(PP.END.DATE),
     PP.END.DATE = as.Date(PP.END.DATE,format="%Y-%m-%d")) 
 
 #Get Reporting Period data range
 report_start_date <- format(as.Date(data$PP.END.DATE[nrow(data)-2]-13, "%B %d %Y"), "%m/%d/%Y")
 report_end_date <- format(as.Date(data$PP.END.DATE[nrow(data)], "%B %d %Y"), "%m/%d/%Y")
-
-
-data <- 
-
-
-data <- data %>% 
-  mutate( CORPORATE.SERVICE.LINE= case_when(CORPORATE.SERVICE.LINE == "Other" ~ "Non-Premier Department", 
-                                            TRUE ~ CORPORATE.SERVICE.LINE ),
-    
-    service_group = case_when(str_detect(CORPORATE.SERVICE.LINE, "Nursing") ~ "Nursing",
-                                                    str_detect(CORPORATE.SERVICE.LINE, "Radiology") ~ "Radiology",
-                                                    str_detect(CORPORATE.SERVICE.LINE, "Support Services") ~ "Support Services",
-                                                    PAYROLL== "Corporate" ~ "Corporate",
-                                                    TRUE ~ "Other"))
-                      
-                                                    
-                                                    
-                                                   
-
-
