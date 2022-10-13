@@ -89,7 +89,8 @@ data <- data %>%
       PAYROLL == "Corporate" ~ "Corporate",
       TRUE ~ "Other"),
     DATES = as.character(PP.END.DATE),
-    PP.END.DATE = as.Date(PP.END.DATE,format="%Y-%m-%d")) 
+    PP.END.DATE = as.Date(PP.END.DATE,format="%Y-%m-%d"),
+    dates = format(as.Date(PP.END.DATE, "%B %d %Y"), "%m/%d/%Y"))
 
 # (2) Color Theme -----------------------------------------------------------
 
@@ -144,4 +145,7 @@ MountSinai_pal <- function(palette = "main", reverse = FALSE, ...) {
   if (reverse) pal <- rev(pal)
   
   colorRampPalette(pal, ...)
+
 }
+
+
