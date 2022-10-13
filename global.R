@@ -31,17 +31,16 @@ suppressMessages({
 # Maximize R Memory Size 
 memory.limit(size = 8000000)
 
-# (1) Import Data ------------------------------------------------------------
+# (1) Import Data -------------------------------------------------------------
 System_Summary <- readRDS(paste0("J:/deans/Presidents/SixSigma/",
                                  "MSHS Productivity/Productivity/",
                                  "Universal Data/Labor/RDS/",
                                  "System_Summary_Dashboard.rds"))
 
 
-## Worked hour pay code mappings ----------------------------------------------
+## constants ------------------------------------------------------------------
 worked_paycodes <- c('REGULAR', 'OVERTIME', 'OTHER_WORKED', 'EDUCATION',
                      'ORIENTATION', 'AGENCY')
-
 
 report_period_length <- 3
 biweekly_fte <- 75
@@ -58,7 +57,7 @@ data <- System_Summary %>%
            PP.END.DATE >as.Date("5/9/2020",format="%m/%d/%Y"),  
          PROVIDER == 0, 
          INCLUDE.HOURS == 1, 
-         PAY.CODE.MAPPING %in% worked_paycodes) %>%  
+         PAY.CODE.MAPPING %in% worked_paycodes) %>% # will change when task 8 completed 
   group_by(PAYROLL,DEFINITION.CODE,DEFINITION.NAME,
            CORPORATE.SERVICE.LINE,PP.END.DATE) %>%
   summarise(FTE = sum(HOURS, na.rm = T)/biweekly_fte) %>% 
