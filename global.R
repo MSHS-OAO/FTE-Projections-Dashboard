@@ -3,7 +3,7 @@
 
 rm(list=ls())
 
-# Import Libraries -------------------------------------------------------------
+# (0) Import Libraries --------------------------------------------------------
 suppressMessages({
   library(readxl)
   library(tidyverse)
@@ -28,10 +28,71 @@ suppressMessages({
 
 
 
-# ### (0) Maximize R Memory Size 
+# Maximize R Memory Size 
 memory.limit(size = 8000000)
 
-### (1) Set color theme --------------------------------------------------------
+# (1) Import Data ------------------------------------------------------------
+System_Summary <- readRDS(paste0("J:/deans/Presidents/SixSigma/",
+                                 "MSHS Productivity/Productivity/",
+                                 "Universal Data/Labor/RDS/",
+                                 "System_Summary_Dashboard.rds"))
+
+
+## Worked hour pay code mappings ----------------------------------------------
+worked_paycodes <- c('REGULAR', 'OVERTIME', 'OTHER_WORKED', 'EDUCATION',
+                     'ORIENTATION', 'AGENCY')
+
+
+report_period_length <- 3
+biweekly_fte <- 75
+digits_round <- 2
+
+# Get Reporting Period data range
+report_start_date <- format(max(System_Summary$PP.END.DATE)-41, "%m/%d/%Y")
+report_end_date <- format(max(System_Summary$PP.END.DATE), "%m/%d/%Y")
+
+
+## Pre filter data ------------------------------------------------------------
+data <- System_Summary %>%
+  filter(PP.END.DATE < as.Date("3/1/2020",format="%m/%d/%Y") | 
+           PP.END.DATE >as.Date("5/9/2020",format="%m/%d/%Y"),  
+         PROVIDER == 0, 
+         INCLUDE.HOURS == 1, 
+         PAY.CODE.MAPPING %in% worked_paycodes) %>%  
+  group_by(PAYROLL,DEFINITION.CODE,DEFINITION.NAME,
+           CORPORATE.SERVICE.LINE,PP.END.DATE) %>%
+  summarise(FTE = sum(HOURS, na.rm = T)/biweekly_fte) %>% 
+  pivot_wider(id_cols = c(PAYROLL,DEFINITION.CODE,DEFINITION.NAME,
+                          CORPORATE.SERVICE.LINE),
+              values_from = FTE,names_from = PP.END.DATE)
+
+data[,5:ncol(data)][is.na(data[,5:ncol(data)])] <- 0
+
+data <- data %>%
+  pivot_longer(cols = 5:ncol(data),names_to = "PP.END.DATE", values_to = "FTE")
+
+data <- data %>%
+  mutate(
+    DEPARTMENT = case_when(
+      CORPORATE.SERVICE.LINE %in% c("IT", "HR", "CMO") ~ CORPORATE.SERVICE.LINE,
+      is.na(DEFINITION.CODE) ~ "Non-Premier Department",
+      TRUE ~ paste0(DEFINITION.CODE," - ",toupper(DEFINITION.NAME))),
+    CORPORATE.SERVICE.LINE = case_when(
+      is.na(DEFINITION.CODE) ~ "Non-Premier Department",
+      TRUE ~ CORPORATE.SERVICE.LINE),
+    service_group = case_when(
+      str_detect(CORPORATE.SERVICE.LINE, 
+                 "Nursing") ~ "Nursing",
+      str_detect(CORPORATE.SERVICE.LINE, 
+                 "Radiology") ~ "Radiology",
+      str_detect(CORPORATE.SERVICE.LINE, 
+                 "Support Services") ~ "Support Services",
+      PAYROLL == "Corporate" ~ "Corporate",
+      TRUE ~ "Other"),
+    DATES = as.character(PP.END.DATE),
+    PP.END.DATE = as.Date(PP.END.DATE,format="%Y-%m-%d")) 
+
+# (2) Color Theme -----------------------------------------------------------
 
 # Mount Sinai corporate colors "USE THIS TO ADD COLORS"
 MountSinai_colors <- c(
@@ -62,10 +123,12 @@ MountSinai_cols <- function(...) {
 
 # Create palettes
 MountSinai_palettes <- list(
-  `all`   = MountSinai_cols("med blue","dark pink","dark blue","light grey", "light blue",
-                            "light pink", "light purple","med pink","med purple","yellow" ),
+  `all`   = MountSinai_cols("med blue", "dark pink", "dark blue", "light grey",
+                            "light blue", "light pink", "light purple",
+                            "med pink", "med purple", "yellow" ),
   
-  `main`  = MountSinai_cols("med blue","dark pink","dark blue","dark grey","light pink","light blue","light grey"),
+  `main`  = MountSinai_cols("med blue", "dark pink", "dark blue", "dark grey",
+                            "light pink", "light blue", "light grey"),
   
   `pink`  = MountSinai_cols("light pink", "dark pink"),
   
@@ -82,6 +145,7 @@ MountSinai_pal <- function(palette = "main", reverse = FALSE, ...) {
   if (reverse) pal <- rev(pal)
   
   colorRampPalette(pal, ...)
+
 }
 
 
@@ -136,3 +200,4 @@ data <- data %>%
 #Get Reporting Period data range
 report_start_date <- format(as.Date(data$PP.END.DATE[nrow(data)-2]-13, "%B %d %Y"), "%m/%d/%Y")
 report_end_date <- format(as.Date(data$PP.END.DATE[nrow(data)], "%B %d %Y"), "%m/%d/%Y")
+
