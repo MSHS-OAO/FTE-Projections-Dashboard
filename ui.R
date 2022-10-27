@@ -76,12 +76,12 @@ ui <- dashboardPage(
                              fluidRow(
                                
                                box(width = 4, height = "100px", title = "Select Service Line Category:", solidHeader = F,
-                                   pickerInput("mshs_selectedGroup",label= NULL, multiple= T, options = pickerOptions(actionsBox = TRUE),
+                                   pickerInput("mshs_selectedGroup",label= NULL, multiple= F, options = pickerOptions(actionsBox = TRUE),
                                                choices = group_choices ,  selected = "Nursing")),
                                
                                box(width = 4, height = "100px", title = "Select Service Line:", solidHeader = F,
                                    pickerInput("mshs_selectedService",label= NULL, multiple= T, options = pickerOptions(actionsBox = TRUE),
-                                               choices = service_choices,  selected = "Nursing")),
+                                               choices = service_choices,  selected = sort(service_choices)[1])),
                                
                                box(width = 4, height = "100px",
                                    title = "Select Date Range:",  solidHeader = FALSE,

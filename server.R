@@ -160,10 +160,10 @@ server <- function(input, output, session) {
     
     
     kdata <- kdata %>% 
-      group_by(DATES) %>%
+      group_by(dates) %>%
       summarise(FTE = sum(FTE, na.rm = T)) %>%
       mutate(PAYROLL = "MSHS") %>% 
-      select(PAYROLL, DATES, FTE)
+      select(PAYROLL, dates, FTE)
     
     
     
@@ -180,7 +180,7 @@ server <- function(input, output, session) {
     #kdata <- tail(kdata, 10)
     
     ggplotly(
-      ggplot(data = kdata, aes(x = DATES, y = FTE, group = Site, color= Site))+
+      ggplot(data = kdata, aes(x = dates, y = FTE, group = Site, color= Site))+
         geom_line(size=1.5)+
         geom_point(size=2.75)+
         ggtitle(paste0( "MSHS ", input$selectedService, " Worked FTE's By Pay Period"))+
@@ -206,24 +206,26 @@ server <- function(input, output, session) {
     #   filter(CORPORATE.SERVICE.LINE== "Support Services - Patient Transport")
     
     
-    # Estimate Reporting Year Avg
+    # Calculate FYTD Avg
     avg <- kdata %>%
       filter(year(PP.END.DATE) == max(year(data$PP.END.DATE)))%>%
-      group_by(DATES) %>%
+      group_by(dates) %>%
       summarise(FTE = sum(FTE, na.rm = T)) %>%
-      summarise(FTE = mean(FTE, na.rm = T))%>%
-      rename(`Reporting Year Avg.`= FTE)%>%
+      summarise(FTE = as.numeric(format(round(mean(FTE, na.rm = T),
+                                              digits = digits_round),
+                                        nsmall = 2))) %>%
+      rename(`FYTD Avg.`= FTE)%>%
       mutate(Site = "MSHS")
     
     
 
     
     kdata <- kdata %>% 
-      group_by(DATES) %>%
+      group_by(dates) %>%
       summarise(FTE = sum(FTE, na.rm = T)) %>%
       mutate(Site = "MSHS") %>%
       pivot_wider(id_cols = Site,
-                  names_from = DATES,
+                  names_from = dates,
                   values_from = FTE)
     
     
@@ -249,7 +251,7 @@ server <- function(input, output, session) {
                         rownames = FALSE,
                         options = list(
                           columnDefs = list(list(className = 'dt-center', targets = "_all")))) %>%
-      formatStyle(columns = c("Site", "Reporting Period Avg.", "Reporting Year Avg." ), fontWeight = 'bold')
+      formatStyle(columns = c("Site", "Reporting Period Avg.", "FYTD Avg." ), fontWeight = 'bold')
     
     
     
@@ -267,7 +269,7 @@ server <- function(input, output, session) {
     
     
     kdata <- kdata %>% 
-      group_by(PAYROLL, DATES) %>%
+      group_by(PAYROLL, dates) %>%
       summarise(FTE = sum(FTE, na.rm = T)) 
     
   
@@ -285,7 +287,7 @@ server <- function(input, output, session) {
     #kdata <- tail(kdata, 10)
     
       ggplotly(
-      ggplot(data = kdata, aes(x = DATES, y = FTE, group = Site, color= Site))+
+      ggplot(data = kdata, aes(x = dates, y = FTE, group = Site, color= Site))+
         geom_line(size=1.5)+
         geom_point(size=2.75)+
         ggtitle(paste0(paste0(c(input$selectedPayroll, input$selectedService), collapse = ", "), " Worked FTE's By Pay Period"))+
@@ -312,19 +314,21 @@ server <- function(input, output, session) {
     
     avg <- kdata %>%
       filter(year(PP.END.DATE) == max(year(data$PP.END.DATE)))%>%
-      group_by(PAYROLL, DATES) %>%
+      group_by(PAYROLL, dates) %>%
       summarise(FTE = sum(FTE, na.rm = T)) %>%
       group_by(PAYROLL)%>%
-      summarise(FTE = mean(FTE, na.rm = T))%>%
-      rename(`Reporting Year Avg.`= FTE)
+      summarise(FTE = as.numeric(format(round(mean(FTE, na.rm = T),
+                                              digits = digits_round),
+                                        nsmall = 2))) %>%
+      rename(`FYTD Avg.`= FTE)
       
     
     
     kdata <- kdata %>% 
-      group_by(PAYROLL, DATES) %>%
+      group_by(PAYROLL, dates) %>%
       summarise(FTE = sum(FTE, na.rm = T)) %>%
       pivot_wider(id_cols = PAYROLL,
-                  names_from = DATES,
+                  names_from = dates,
                   values_from = FTE)
     
     
@@ -351,7 +355,7 @@ server <- function(input, output, session) {
                         rownames = FALSE,
                         options = list(
                           columnDefs = list(list(className = 'dt-center', targets = "_all")))) %>%
-      formatStyle(columns = c("Site", "Reporting Period Avg.", "Reporting Year Avg."), fontWeight = 'bold')
+      formatStyle(columns = c("Site", "Reporting Period Avg.", "FYTD Avg."), fontWeight = 'bold')
     
     
     
@@ -421,16 +425,18 @@ server <- function(input, output, session) {
     
     avg <- kdata %>%
       filter(year(PP.END.DATE) == max(year(data$PP.END.DATE)))%>%
-      group_by(DEPARTMENT, DATES) %>%
+      group_by(DEPARTMENT, dates) %>%
       summarise(FTE = sum(FTE, na.rm = T)) %>%
       group_by(DEPARTMENT)%>%
-      summarise(FTE = mean(FTE, na.rm = T))%>%
-      rename(`Reporting Year Avg.`= FTE)
+      summarise(FTE = as.numeric(format(round(mean(FTE, na.rm = T),
+                                              digits = digits_round),
+                                        nsmall = 2))) %>%
+      rename(`FYTD Avg.`= FTE)
     
     
     kdata <- kdata %>% 
       pivot_wider(id_cols = DEPARTMENT,
-                  names_from = DATES,
+                  names_from = dates,
                   values_from = FTE)
     
     
@@ -456,7 +462,7 @@ server <- function(input, output, session) {
                         rownames = FALSE,
                         options = list(
                           columnDefs = list(list(className = 'dt-center', targets = "_all")))) %>%
-      formatStyle(columns = c("DEPARTMENT", "Reporting Period Avg.", "Reporting Year Avg."), fontWeight = 'bold')
+      formatStyle(columns = c("DEPARTMENT", "Reporting Period Avg.", "FYTD Avg."), fontWeight = 'bold')
     
     
     
