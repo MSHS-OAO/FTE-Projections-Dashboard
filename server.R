@@ -27,6 +27,7 @@ server <- function(input, output, session) {
   Data_MSHS  <- eventReactive(input$mshs_FiltersUpdate, {
     validate(need(input$mshs_selectedGroup != "", "Please Select a Group"),
              need(input$mshs_DateRange[1] > input$mshs_DateRange[2], "Error: Start date should be earlier than end date."))
+             
     data %>% 
       filter( service_group %in% input$mshs_selectedGroup,
               CORPORATE.SERVICE.LINE %in% input$mshs_selectedService,
@@ -183,7 +184,7 @@ server <- function(input, output, session) {
       ggplot(data = kdata, aes(x = DATES, y = FTE, group = Site, color= Site))+
         geom_line(size=1.5)+
         geom_point(size=2.75)+
-        ggtitle(paste0( "MSHS ", input$selectedService, " Worked FTE's By Pay Period"))+
+        ggtitle(paste0( "MSHS ", isolate(input$mshs_selectedService), " Worked FTE's By Pay Period"))+
         xlab("Pay Period")+
         ylab("FTE (Full Time Equivalent)")+
         scale_color_manual(values=MountSinai_pal("main")(length(kdata$Site)))+
@@ -288,7 +289,7 @@ server <- function(input, output, session) {
       ggplot(data = kdata, aes(x = DATES, y = FTE, group = Site, color= Site))+
         geom_line(size=1.5)+
         geom_point(size=2.75)+
-        ggtitle(paste0(paste0(c(input$selectedPayroll, input$selectedService), collapse = ", "), " Worked FTE's By Pay Period"))+
+        ggtitle(paste0(isolate(paste0(c(input$selectedPayroll, input$selectedService), collapse = ", ")), " Worked FTE's By Pay Period"))+
         xlab("Pay Period")+
         ylab("FTE (Full Time Equivalent)")+
         scale_color_manual(values=MountSinai_pal("main")(length(kdata$Site)))+
@@ -394,7 +395,7 @@ server <- function(input, output, session) {
       ggplot(data = data_service, aes(x = PP.END.DATE , y = FTE, group = DEPARTMENT, color= DEPARTMENT))+
         geom_line(size=1.5)+
         geom_point(size=2.75)+
-        ggtitle(paste0(paste0(c(input$dep_selectedPayroll, input$dep_selectedService), collapse = ", "), " Worked FTE's By Pay Period"))+
+        ggtitle(paste0(isolate(paste0(c(input$dep_selectedPayroll, input$dep_selectedService), collapse = ", ")), " Worked FTE's By Pay Period"))+
         xlab("Pay Period")+
         ylab("FTE (Full Time Equivalent)")+
         scale_color_manual(values=MountSinai_pal("main")(length(data_service$DEPARTMENT)))+
