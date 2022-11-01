@@ -2,7 +2,6 @@
 
 server <- function(input, output, session) {
   
-  
   output$mshs_DateShow <- renderText({
     paste0("Based on data from ", input$mshs_DateRange[length(input$mshs_DateRange)], " to ", input$mshs_DateRange[1], 
            " for MSHS")
@@ -20,8 +19,6 @@ server <- function(input, output, session) {
     
   })
   
-  
-  
   ## eventReactive for MSHS ------------------------------
   
   Data_MSHS  <- eventReactive(input$mshs_FiltersUpdate, {
@@ -32,8 +29,6 @@ server <- function(input, output, session) {
               CORPORATE.SERVICE.LINE %in% input$mshs_selectedService,
               dates %in% input$mshs_DateRange)
   }, ignoreNULL = FALSE)
-  
-  
   
   ## eventReactive for sites ------------------------------
   
@@ -77,9 +72,6 @@ server <- function(input, output, session) {
   },
   ignoreInit = TRUE,
   ignoreNULL = FALSE)
-  
-  
-  
 
   # Observeevent for Site ----------------------------------------------
   
@@ -94,10 +86,6 @@ server <- function(input, output, session) {
   },
   ignoreInit = TRUE,
   ignoreNULL = FALSE)
-  
-  
-  
-  
 
   # Observeevent for services
   observeEvent(input$selectedGroup,{
@@ -113,8 +101,6 @@ server <- function(input, output, session) {
   ignoreInit = TRUE,
   ignoreNULL = FALSE)
   
-
-  
   # Observeevent for Department ----------------------------------------------
   
   # Observeevent for services category
@@ -128,9 +114,6 @@ server <- function(input, output, session) {
   },
   ignoreInit = TRUE,
   ignoreNULL = FALSE)
-  
-  
-  
   
   
   # Observeevent for services
@@ -153,19 +136,12 @@ server <- function(input, output, session) {
   output$mshs_plot <- renderPlotly({
     
     kdata <- Data_MSHS() 
- 
-    
-    # kdata <- data %>% 
-    #    filter(CORPORATE.SERVICE.LINE== "Support Services - Patient Transport")
-    
-    
+
     kdata <- kdata %>% 
       group_by(dates) %>%
       summarise(FTE = sum(FTE, na.rm = T)) %>%
       mutate(PAYROLL = "MSHS") %>% 
       select(PAYROLL, dates, FTE)
-    
-    
     
     kdata[is.na(kdata)] <- 0
     kdata <- kdata %>% 
@@ -175,9 +151,6 @@ server <- function(input, output, session) {
     
     
     kdata[3:length(kdata)] <- round(kdata[3:length(kdata)] , digits_round) 
-   
-    
-    #kdata <- tail(kdata, 10)
     
     ggplotly(
       ggplot(data = kdata, aes(x = dates, y = FTE, group = Site, color = Site))+
@@ -205,11 +178,6 @@ server <- function(input, output, session) {
   output$mshs_table <- renderDT({
     
     kdata <- Data_MSHS() 
-  
-    
-    # kdata <- data %>%
-    #   filter(CORPORATE.SERVICE.LINE== "Support Services - Patient Transport")
-    
     
     # Estimate Reporting Year Avg
     avg <- kdata %>%
@@ -220,9 +188,7 @@ server <- function(input, output, session) {
       rename(`Reporting Year Avg.`= FTE)%>%
       mutate(Site = "MSHS")
     
-    
 
-    
     kdata <- kdata %>% 
       group_by(dates) %>%
       summarise(FTE = sum(FTE, na.rm = T)) %>%
@@ -231,15 +197,10 @@ server <- function(input, output, session) {
                   names_from = dates,
                   values_from = FTE)
     
-    
-    #kdata <- kdata %>% select(PAYROLL, (ncol(kdata)-10):ncol(kdata))
-    
-    
     kdata[is.na(kdata)] <- 0
     kdata <- kdata %>% 
       ungroup() %>% 
       arrange(desc(colnames(kdata)[ncol(kdata)])) 
-    
     
     
     kdata$`Reporting Period Avg.` <- apply(kdata[,(ncol(kdata)-2):ncol(kdata)], 1,mean)
@@ -248,16 +209,13 @@ server <- function(input, output, session) {
     kdata[2:length(kdata)] <- round(kdata[2:length(kdata)] , digits_round)
     
     
-    
     kdata <-  datatable(kdata, 
                         class = 'cell-border stripe',
                         rownames = FALSE,
                         options = list(
                           columnDefs = list(list(className = 'dt-center', targets = "_all")))) %>%
       formatStyle(columns = c("Site", "Reporting Period Avg.", "Reporting Year Avg." ), fontWeight = 'bold')
-    
-    
-    
+  
   })
   
   
@@ -266,11 +224,6 @@ server <- function(input, output, session) {
   output$site_plot <- renderPlotly({
   
     kdata <- Data_Service() 
-    
-    # kdata <- data %>% filter(PAYROLL %in% c("MSH", "MSM")) %>% 
-    #    filter(CORPORATE.SERVICE.LINE== "Support Services - Patient Transport")
-    
-    
     kdata <- kdata %>% 
       group_by(PAYROLL, dates) %>%
       summarise(FTE = sum(FTE, na.rm = T)) 
@@ -318,11 +271,7 @@ server <- function(input, output, session) {
   output$site_table <- renderDT({
     
     kdata <- Data_Service() 
-    
-    # kdata <- data %>%
-    # filter(PAYROLL %in% c("MSH", "MSM")) %>%
-    #   filter(CORPORATE.SERVICE.LINE== "Support Services - Patient Transport")
-    
+
     avg <- kdata %>%
       filter(year(PP.END.DATE) == max(year(data$PP.END.DATE)))%>%
       group_by(PAYROLL, dates) %>%
@@ -330,8 +279,7 @@ server <- function(input, output, session) {
       group_by(PAYROLL)%>%
       summarise(FTE = mean(FTE, na.rm = T))%>%
       rename(`Reporting Year Avg.`= FTE)
-      
-    
+  
     
     kdata <- kdata %>% 
       group_by(PAYROLL, dates) %>%
@@ -340,15 +288,10 @@ server <- function(input, output, session) {
                   names_from = dates,
                   values_from = FTE)
     
-    
-    #kdata <- kdata %>% select(PAYROLL, (ncol(kdata)-10):ncol(kdata))
-    
-    
     kdata[is.na(kdata)] <- 0
     kdata <- kdata %>% 
       ungroup() %>% 
       arrange(desc(colnames(kdata)[ncol(kdata)])) 
-    
     
     
     kdata$`Reporting Period Avg.` <- apply(kdata[,(ncol(kdata)-2):ncol(kdata)], 1,mean)
@@ -365,12 +308,8 @@ server <- function(input, output, session) {
                         options = list(
                           columnDefs = list(list(className = 'dt-center', targets = "_all")))) %>%
       formatStyle(columns = c("Site", "Reporting Period Avg.", "Reporting Year Avg."), fontWeight = 'bold')
-    
-    
-    
+ 
   })
-  
-  
   
   ## department tab -----------------------------------------------
   
@@ -378,24 +317,17 @@ server <- function(input, output, session) {
     
     data_service <- Department_Data() 
 
-    
-    # kdata <- data %>% filter(PAYROLL %in% c("MSH")) %>%
-    #    filter(CORPORATE.SERVICE.LINE== "Support Services - Patient Transport")
-    # 
-    
     data_service <-  data_service %>% 
       pivot_wider(id_cols = c("DEFINITION.CODE","DEFINITION.NAME","DEPARTMENT"),
                   names_from = "dates",
                   values_from = FTE) #pivot dataframe to bring in NAs for missing PP
 
-    #data_service <- data_service[,c(1:3,(ncol(data_service)-9):ncol(data_service))]
     data_service <- data_service  %>% 
       pivot_longer(cols = 4:ncol(data_service),
                    names_to = "dates") %>% 
       mutate(FTE = case_when(
         is.na(value) ~ 0, #if FTE is NA -> 0
         !is.na(value) ~ value), #else leave the value
-        #DATES = as.factor(PP.END.DATE),
         FTE = round(value,digits_round)) #turn dates into factor
   
     ggplotly(
@@ -433,14 +365,7 @@ server <- function(input, output, session) {
   output$department_table <- renderDT({
     
     kdata <- Department_Data() 
-    
-    # kdata <- data %>%
-    # filter(PAYROLL == "MSH") %>%
-    #   filter(CORPORATE.SERVICE.LINE== "Support Services - Patient Transport")
-    
-    #kdata <- tail(kdata, 10)
-    
-    
+
     avg <- kdata %>%
       filter(year(PP.END.DATE) == max(year(data$PP.END.DATE)))%>%
       group_by(DEPARTMENT, dates) %>%
@@ -454,33 +379,26 @@ server <- function(input, output, session) {
       pivot_wider(id_cols = DEPARTMENT,
                   names_from = dates,
                   values_from = FTE)
-    
-    
-    
-    
+
     kdata[is.na(kdata)] <- 0
     kdata <- kdata %>% 
       ungroup() %>% 
       arrange(desc(colnames(kdata)[ncol(kdata)])) 
-    
-    
-    
+ 
     kdata$`Reporting Period Avg.` <- apply(kdata[,(ncol(kdata)-2):ncol(kdata)], 1,mean)
     kdata <- left_join(kdata, avg , by = "DEPARTMENT")
     kdata[2:length(kdata)] <- round(kdata[2:length(kdata)] , digits_round) 
-    
-    
-  
-    
     
     kdata <-  datatable(kdata, 
                         class = 'cell-border stripe',
                         rownames = FALSE,
                         options = list(
-                          columnDefs = list(list(className = 'dt-center', targets = "_all")))) %>%
-      formatStyle(columns = c("DEPARTMENT", "Reporting Period Avg.", "Reporting Year Avg."), fontWeight = 'bold')
-    
-    
+                          columnDefs = list(list(className = 'dt-center',
+                                                 targets = "_all")))) %>%
+      formatStyle(columns = c("DEPARTMENT",
+                              "Reporting Period Avg.",
+                              "Reporting Year Avg."),
+                  fontWeight = 'bold')
     
   })
     
