@@ -199,8 +199,6 @@ server <- function(input, output, session) {
                                         '</sup>')),
              margin = list(l = 75, t = 75))
     
-    
-    
   }) 
   
   
@@ -276,40 +274,39 @@ server <- function(input, output, session) {
     kdata <- kdata %>% 
       group_by(PAYROLL, dates) %>%
       summarise(FTE = sum(FTE, na.rm = T)) 
-    
-  
-    
+
     kdata[is.na(kdata)] <- 0
     kdata <- kdata %>% 
       ungroup() %>% 
       arrange(desc(colnames(kdata)[ncol(kdata)])) 
     
-  
     kdata[3:length(kdata)] <- round(kdata[3:length(kdata)] , digits_round) 
     kdata <- kdata %>%
-      rename(Site= PAYROLL)
+      rename(Site = PAYROLL)
     
-    #kdata <- tail(kdata, 10)
-    
-      ggplotly(
+    ggplotly(
       ggplot(data = kdata, aes(x = dates, y = FTE, group = Site, color = Site))+
         geom_line(size=1.5)+
         geom_point(size=2.75)+
-        ggtitle(label = paste0("MSHS ", input$selectedService, "\n","Worked FTE's By Pay Period"),
-                subtitle = "Worked FTE's By Pay Period")+
+        ggtitle(paste0(paste0(c(input$selectedPayroll, input$selectedService), collapse = ", "), " Worked FTE's By Pay Period"))+
         xlab("Pay Period")+
         ylab("FTE (Full Time Equivalent)")+
         scale_color_manual(values=MountSinai_pal("main")(length(kdata$Site)))+
         scale_y_continuous(limits = c(0, max(kdata$FTE)*1.2))+
         theme(plot.title=element_text(hjust = 0.5, size = 20),
               axis.title = element_text(face="bold"),
-              legend.text=element_text(size = 6))) %>%
-        layout(title = list(text = paste0("MSHS ", isolate(input$selectedService),
-                                          '<br>',
-                                          '<sup>',
-                                          "Worked FTE's By Pay Period",
-                                          '</sup>')),
-               margin = list(l = 75, t = 75))
+              legend.text = element_text(size = 6),
+              axis.text.x = element_text(angle = 45))) %>%
+      layout(title = list(text = paste0(paste0(c(isolate(input$selectedPayroll),
+                                                 if(length(input$selectedService)> 2){
+                                                   paste0('Multiple ',input$selectedGroup,' Departments')
+                                                 }else{isolate(input$selectedService)}),
+                                               collapse = ", "),
+                                        '<br>',
+                                        '<sup>',
+                                        "Worked FTE's By Pay Period",
+                                        '</sup>')),
+             margin = list(l = 75, t = 75))
   
   }) 
   
