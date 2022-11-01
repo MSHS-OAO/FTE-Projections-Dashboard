@@ -160,10 +160,10 @@ server <- function(input, output, session) {
     
     
     kdata <- kdata %>% 
-      group_by(DATES) %>%
+      group_by(dates) %>%
       summarise(FTE = sum(FTE, na.rm = T)) %>%
       mutate(PAYROLL = "MSHS") %>% 
-      select(PAYROLL, DATES, FTE)
+      select(PAYROLL, dates, FTE)
     
     
     
@@ -180,17 +180,24 @@ server <- function(input, output, session) {
     #kdata <- tail(kdata, 10)
     
     ggplotly(
-      ggplot(data = kdata, aes(x = DATES, y = FTE, group = Site, color= Site))+
+      ggplot(data = kdata, aes(x = dates, y = FTE, group = Site, color = Site))+
         geom_line(size=1.5)+
         geom_point(size=2.75)+
-        ggtitle(paste0( "MSHS ", input$selectedService, " Worked FTE's By Pay Period"))+
+        ggtitle(label = 'placeholder')+
         xlab("Pay Period")+
         ylab("FTE (Full Time Equivalent)")+
         scale_color_manual(values=MountSinai_pal("main")(length(kdata$Site)))+
         scale_y_continuous(limits = c(0, max(kdata$FTE)*1.2))+
-        theme(plot.title=element_text(hjust = 0.5, size = 20),
+        theme(plot.title = element_text(hjust = 0.5, size = 20),
               axis.title = element_text(face="bold"),
-              legend.text=element_text(size = 6))) 
+              legend.text = element_text(size = 6),
+              axis.text.x = element_text(angle = 45))) %>%
+      layout(title = list(text = paste0('MSHS ', isolate(input$mshs_selectedService),
+                                        '<br>',
+                                        '<sup>',
+                                        "Worked FTE's By Pay Period",
+                                        '</sup>')),
+             margin = list(l = 75, t = 75))
     
     
     
@@ -209,7 +216,7 @@ server <- function(input, output, session) {
     # Estimate Reporting Year Avg
     avg <- kdata %>%
       filter(year(PP.END.DATE) == max(year(data$PP.END.DATE)))%>%
-      group_by(DATES) %>%
+      group_by(dates) %>%
       summarise(FTE = sum(FTE, na.rm = T)) %>%
       summarise(FTE = mean(FTE, na.rm = T))%>%
       rename(`Reporting Year Avg.`= FTE)%>%
@@ -219,11 +226,11 @@ server <- function(input, output, session) {
 
     
     kdata <- kdata %>% 
-      group_by(DATES) %>%
+      group_by(dates) %>%
       summarise(FTE = sum(FTE, na.rm = T)) %>%
       mutate(Site = "MSHS") %>%
       pivot_wider(id_cols = Site,
-                  names_from = DATES,
+                  names_from = dates,
                   values_from = FTE)
     
     
@@ -267,7 +274,7 @@ server <- function(input, output, session) {
     
     
     kdata <- kdata %>% 
-      group_by(PAYROLL, DATES) %>%
+      group_by(PAYROLL, dates) %>%
       summarise(FTE = sum(FTE, na.rm = T)) 
     
   
@@ -285,19 +292,24 @@ server <- function(input, output, session) {
     #kdata <- tail(kdata, 10)
     
       ggplotly(
-      ggplot(data = kdata, aes(x = DATES, y = FTE, group = Site, color= Site))+
+      ggplot(data = kdata, aes(x = dates, y = FTE, group = Site, color = Site))+
         geom_line(size=1.5)+
         geom_point(size=2.75)+
-        ggtitle(paste0(paste0(c(input$selectedPayroll, input$selectedService), collapse = ", "), " Worked FTE's By Pay Period"))+
+        ggtitle(label = paste0("MSHS ", input$selectedService, "\n","Worked FTE's By Pay Period"),
+                subtitle = "Worked FTE's By Pay Period")+
         xlab("Pay Period")+
         ylab("FTE (Full Time Equivalent)")+
         scale_color_manual(values=MountSinai_pal("main")(length(kdata$Site)))+
         scale_y_continuous(limits = c(0, max(kdata$FTE)*1.2))+
         theme(plot.title=element_text(hjust = 0.5, size = 20),
               axis.title = element_text(face="bold"),
-              legend.text=element_text(size = 6))) 
-     
-   
+              legend.text=element_text(size = 6))) %>%
+        layout(title = list(text = paste0("MSHS ", isolate(input$selectedService),
+                                          '<br>',
+                                          '<sup>',
+                                          "Worked FTE's By Pay Period",
+                                          '</sup>')),
+               margin = list(l = 75, t = 75))
   
   }) 
   
@@ -312,7 +324,7 @@ server <- function(input, output, session) {
     
     avg <- kdata %>%
       filter(year(PP.END.DATE) == max(year(data$PP.END.DATE)))%>%
-      group_by(PAYROLL, DATES) %>%
+      group_by(PAYROLL, dates) %>%
       summarise(FTE = sum(FTE, na.rm = T)) %>%
       group_by(PAYROLL)%>%
       summarise(FTE = mean(FTE, na.rm = T))%>%
@@ -321,10 +333,10 @@ server <- function(input, output, session) {
     
     
     kdata <- kdata %>% 
-      group_by(PAYROLL, DATES) %>%
+      group_by(PAYROLL, dates) %>%
       summarise(FTE = sum(FTE, na.rm = T)) %>%
       pivot_wider(id_cols = PAYROLL,
-                  names_from = DATES,
+                  names_from = dates,
                   values_from = FTE)
     
     
@@ -421,7 +433,7 @@ server <- function(input, output, session) {
     
     avg <- kdata %>%
       filter(year(PP.END.DATE) == max(year(data$PP.END.DATE)))%>%
-      group_by(DEPARTMENT, DATES) %>%
+      group_by(DEPARTMENT, dates) %>%
       summarise(FTE = sum(FTE, na.rm = T)) %>%
       group_by(DEPARTMENT)%>%
       summarise(FTE = mean(FTE, na.rm = T))%>%
@@ -430,7 +442,7 @@ server <- function(input, output, session) {
     
     kdata <- kdata %>% 
       pivot_wider(id_cols = DEPARTMENT,
-                  names_from = DATES,
+                  names_from = dates,
                   values_from = FTE)
     
     

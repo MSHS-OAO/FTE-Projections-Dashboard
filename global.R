@@ -40,7 +40,7 @@ System_Summary <- readRDS(paste0("J:/deans/Presidents/SixSigma/",
 
 ## constants ------------------------------------------------------------------
 worked_paycodes <- c('REGULAR', 'OVERTIME', 'OTHER_WORKED', 'EDUCATION',
-                     'ORIENTATION', 'AGENCY')
+                     'ORIENTATION', 'AGENCY') # delete after new system summary is rewritten as rds
 
 report_period_length <- 3
 biweekly_fte <- 75
