@@ -301,7 +301,7 @@ server <- function(input, output, session) {
                             paste0(paste0(c(isolate(input$selectedPayroll),
                                             if(length(input$selectedService) > 2){
                                               paste0('Multiple ',
-                                                     input$selectedGroup,
+                                                     isolate(input$selectedGroup),
                                                      ' Departments')
                                                  }else{
                                                    isolate(input$selectedService)}),
@@ -387,9 +387,7 @@ server <- function(input, output, session) {
       pivot_wider(id_cols = c("DEFINITION.CODE","DEFINITION.NAME","DEPARTMENT"),
                   names_from = "PP.END.DATE",
                   values_from = FTE) #pivot dataframe to bring in NAs for missing PP
-    
-    
-    
+
     #data_service <- data_service[,c(1:3,(ncol(data_service)-9):ncol(data_service))]
     data_service <- data_service  %>% 
       pivot_longer(cols = 4:ncol(data_service),
@@ -399,24 +397,34 @@ server <- function(input, output, session) {
         !is.na(value) ~ value), #else leave the value
         #DATES = as.factor(PP.END.DATE),
         FTE = round(value,digits_round)) #turn dates into factor
-    
-    
-    
-    
+  
     ggplotly(
-      ggplot(data = data_service, aes(x = PP.END.DATE , y = FTE, group = DEPARTMENT, color= DEPARTMENT))+
-        geom_line(size=1.5)+
-        geom_point(size=2.75)+
-        ggtitle(paste0(paste0(c(input$dep_selectedPayroll, input$dep_selectedService), collapse = ", "), " Worked FTE's By Pay Period"))+
+      ggplot(data = data_service,
+             aes(x = PP.END.DATE , y = FTE, group = DEPARTMENT, color = DEPARTMENT))+
+        geom_line(size = 1.5)+
+        geom_point(size = 2.75)+
+        ggtitle('placeholder')+
         xlab("Pay Period")+
         ylab("FTE (Full Time Equivalent)")+
-        scale_color_manual(values=MountSinai_pal("main")(length(data_service$DEPARTMENT)))+
+        scale_color_manual(values = MountSinai_pal("main")(length(data_service$DEPARTMENT)))+
         scale_y_continuous(limits = c(0, max(data_service$FTE)*1.2))+
-        theme(plot.title=element_text(hjust = 0.5, size = 20),
-              axis.title = element_text(face="bold"),
-              legend.text=element_text(size = 6)))
-    
-    
+        theme(plot.title= element_text(hjust = 0.5, size = 20),
+              axis.title = element_text(face ="bold"),
+              legend.text=element_text(size = 6))) %>%
+      layout(title = list(text = 
+                            paste0(paste0(c(isolate(input$dep_selectedPayroll),
+                                            if(length(input$dep_selectedService) > 2){
+                                              paste0('Multiple ',
+                                                     isolate(input$dep_selectedGroup),
+                                                     ' Departments')
+                                            }else{
+                                              isolate(input$dep_selectedService)}),
+                                          collapse = ", "),
+                                   '<br>',
+                                   '<sup>',
+                                   "Worked FTE's By Pay Period",
+                                   '</sup>')),
+             margin = list(l = 75, t = 75))
     
   }) 
   
