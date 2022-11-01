@@ -288,7 +288,7 @@ server <- function(input, output, session) {
       ggplot(data = kdata, aes(x = dates, y = FTE, group = Site, color = Site))+
         geom_line(size=1.5)+
         geom_point(size=2.75)+
-        ggtitle(paste0(paste0(c(input$selectedPayroll, input$selectedService), collapse = ", "), " Worked FTE's By Pay Period"))+
+        ggtitle(label = 'placeholder')+
         xlab("Pay Period")+
         ylab("FTE (Full Time Equivalent)")+
         scale_color_manual(values=MountSinai_pal("main")(length(kdata$Site)))+
@@ -297,15 +297,19 @@ server <- function(input, output, session) {
               axis.title = element_text(face="bold"),
               legend.text = element_text(size = 6),
               axis.text.x = element_text(angle = 45))) %>%
-      layout(title = list(text = paste0(paste0(c(isolate(input$selectedPayroll),
-                                                 if(length(input$selectedService)> 2){
-                                                   paste0('Multiple ',input$selectedGroup,' Departments')
-                                                 }else{isolate(input$selectedService)}),
+      layout(title = list(text = 
+                            paste0(paste0(c(isolate(input$selectedPayroll),
+                                            if(length(input$selectedService) > 2){
+                                              paste0('Multiple ',
+                                                     input$selectedGroup,
+                                                     ' Departments')
+                                                 }else{
+                                                   isolate(input$selectedService)}),
                                                collapse = ", "),
-                                        '<br>',
-                                        '<sup>',
-                                        "Worked FTE's By Pay Period",
-                                        '</sup>')),
+                                   '<br>',
+                                   '<sup>',
+                                   "Worked FTE's By Pay Period",
+                                   '</sup>')),
              margin = list(l = 75, t = 75))
   
   }) 
