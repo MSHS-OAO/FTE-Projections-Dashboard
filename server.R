@@ -293,13 +293,13 @@ server <- function(input, output, session) {
         ylab("FTE (Full Time Equivalent)")+
         scale_color_manual(values=MountSinai_pal("main")(length(kdata$Site)))+
         scale_y_continuous(limits = c(0, max(kdata$FTE)*1.2))+
-        theme(plot.title=element_text(hjust = 0.5, size = 20),
-              axis.title = element_text(face="bold"),
+        theme(plot.title = element_text(hjust = 0.5, size = 20),
+              axis.title = element_text(face = "bold"),
               legend.text = element_text(size = 6),
               axis.text.x = element_text(angle = 45))) %>%
       layout(title = list(text = 
                             paste0(paste0(c(isolate(input$selectedPayroll),
-                                            if(length(input$selectedService) > 2){
+                                            if(sum(nchar(input$selectedService)) > 35){
                                               paste0('Multiple ',
                                                      isolate(input$selectedGroup),
                                                      ' Departments')
@@ -385,13 +385,13 @@ server <- function(input, output, session) {
     
     data_service <-  data_service %>% 
       pivot_wider(id_cols = c("DEFINITION.CODE","DEFINITION.NAME","DEPARTMENT"),
-                  names_from = "PP.END.DATE",
+                  names_from = "dates",
                   values_from = FTE) #pivot dataframe to bring in NAs for missing PP
 
     #data_service <- data_service[,c(1:3,(ncol(data_service)-9):ncol(data_service))]
     data_service <- data_service  %>% 
       pivot_longer(cols = 4:ncol(data_service),
-                   names_to = "PP.END.DATE") %>% 
+                   names_to = "dates") %>% 
       mutate(FTE = case_when(
         is.na(value) ~ 0, #if FTE is NA -> 0
         !is.na(value) ~ value), #else leave the value
@@ -400,7 +400,7 @@ server <- function(input, output, session) {
   
     ggplotly(
       ggplot(data = data_service,
-             aes(x = PP.END.DATE , y = FTE, group = DEPARTMENT, color = DEPARTMENT))+
+             aes(x = dates , y = FTE, group = DEPARTMENT, color = DEPARTMENT))+
         geom_line(size = 1.5)+
         geom_point(size = 2.75)+
         ggtitle('placeholder')+
@@ -410,10 +410,11 @@ server <- function(input, output, session) {
         scale_y_continuous(limits = c(0, max(data_service$FTE)*1.2))+
         theme(plot.title= element_text(hjust = 0.5, size = 20),
               axis.title = element_text(face ="bold"),
-              legend.text=element_text(size = 6))) %>%
+              legend.text = element_text(size = 6),
+              axis.text.x = element_text(angle = 45))) %>%
       layout(title = list(text = 
                             paste0(paste0(c(isolate(input$dep_selectedPayroll),
-                                            if(length(input$dep_selectedService) > 2){
+                                            if(sum(nchar(input$dep_selectedService)) > 35){
                                               paste0('Multiple ',
                                                      isolate(input$dep_selectedGroup),
                                                      ' Departments')
