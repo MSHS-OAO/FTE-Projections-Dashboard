@@ -39,9 +39,6 @@ System_Summary <- readRDS(paste0("J:/deans/Presidents/SixSigma/",
 
 
 ## constants ------------------------------------------------------------------
-worked_paycodes <- c('REGULAR', 'OVERTIME', 'OTHER_WORKED', 'EDUCATION',
-                     'ORIENTATION', 'AGENCY') # delete after new system summary is rewritten as rds
-
 report_period_length <- 3
 biweekly_fte <- 75
 digits_round <- 2
@@ -57,7 +54,7 @@ data <- System_Summary %>%
            PP.END.DATE >as.Date("5/9/2020",format="%m/%d/%Y"),  
          PROVIDER == 0, 
          INCLUDE.HOURS == 1, 
-         PAY.CODE.MAPPING %in% worked_paycodes) %>% # will change when task 8 completed 
+         WORKED.PAY.CODE == 1) %>%
   group_by(PAYROLL,DEFINITION.CODE,DEFINITION.NAME,
            CORPORATE.SERVICE.LINE,PP.END.DATE) %>%
   summarise(FTE = sum(HOURS, na.rm = T)/biweekly_fte) %>% 
