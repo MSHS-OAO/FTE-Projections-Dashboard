@@ -147,7 +147,7 @@ server <- function(input, output, session) {
     kdata <- kdata %>% 
       ungroup() %>% 
       arrange(desc(colnames(kdata)[ncol(kdata)])) %>%
-      rename(Site= PAYROLL)
+      rename(Site = PAYROLL)
     
     
     kdata[3:length(kdata)] <- round(kdata[3:length(kdata)] , digits_round) 
@@ -342,8 +342,8 @@ server <- function(input, output, session) {
         scale_y_continuous(limits = c(0, max(data_service$FTE)*1.2))+
         theme(plot.title= element_text(hjust = 0.5, size = 20),
               axis.title = element_text(face ="bold"),
-              legend.text = element_text(size = 6),
-              axis.text.x = element_text(angle = 45))) %>%
+              axis.text.x = element_text(angle = 45),
+              legend.text = element_text(size = 6))) %>%
       layout(title = list(text = 
                             paste0(paste0(c(isolate(input$dep_selectedPayroll),
                                             if(sum(nchar(input$dep_selectedService)) > 35){
