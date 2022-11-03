@@ -2,19 +2,34 @@
 
 server <- function(input, output, session) {
   
+
+# Print text output
   output$mshs_DateShow <- renderText({
-    paste0("Based on data from ", input$mshs_DateRange[length(input$mshs_DateRange)], " to ", input$mshs_DateRange[1], 
+    dates_index <- sapply(input$mshs_DateRange,  function(x) grep(x, date_options) + 9)
+    start_date_input <- as.Date(date_options[dates_index], format = "%m/%d/%Y")
+    start_date_input <- format(as.Date(start_date_input, "%B %d %Y"), "%m/%d/%Y")
+    
+    paste0("Based on data from ", min(start_date_input)," to ", max(input$mshs_DateRange),
            " for MSHS")
   })
   
   output$siteName_DateShow <- renderText({
-    paste0("Based on data from ", input$DateRange[1]," to ", input$DateRange[2],
+    dates_index <- sapply(input$DateRange,  function(x) grep(x, date_options) + 9)
+    start_date_input <- as.Date(date_options[dates_index], format = "%m/%d/%Y")
+    start_date_input <- format(as.Date(start_date_input, "%B %d %Y"), "%m/%d/%Y")
+    
+    paste0("Based on data from ", min(start_date_input)," to ", max(input$DateRange),
            " for ", paste(sort(input$selectedPayroll), collapse = ', ')) 
            
   })
   
   output$Department_DateShow <- renderText({
-    paste0("Based on data from ", input$dep_DateRange[1]," to ", input$dep_DateRange[2],
+    
+    dates_index <- sapply(input$dep_DateRange,  function(x) grep(x, date_options) + 9)
+    start_date_input <- as.Date(date_options[dates_index], format = "%m/%d/%Y")
+    start_date_input <- format(as.Date(start_date_input, "%B %d %Y"), "%m/%d/%Y")
+    
+    paste0("Based on data from ", min(start_date_input)," to ", max(input$dep_DateRange),
            " for ", paste(sort(input$dep_selectedPayroll), collapse = ', ')) 
     
   })
@@ -23,11 +38,18 @@ server <- function(input, output, session) {
   
   Data_MSHS  <- eventReactive(input$mshs_FiltersUpdate, {
     validate(need(input$mshs_selectedGroup != "", "Please Select a Group"),
-             need(input$mshs_DateRange[1] > input$mshs_DateRange[2], "Error: Start date should be earlier than end date."))
+            need(input$mshs_DateRange != "", "Please Select a Date"))
+    
+ dates_index <- sapply(input$mshs_DateRange, function(x) grep(x, date_options) + 9)
+    start_date_input <- as.Date(date_options[dates_index], format = "%m/%d/%Y")
+    start_date_input <- format(as.Date(start_date_input, "%B %d %Y"), "%m/%d/%Y")
+
     data %>% 
       filter( service_group %in% input$mshs_selectedGroup,
               CORPORATE.SERVICE.LINE %in% input$mshs_selectedService,
-              dates %in% input$mshs_DateRange)
+              PP.END.DATE >= as.Date(min(start_date_input), format='%m/%d/%Y') &
+          PP.END.DATE <= as.Date(max(input$mshs_DateRange), format='%m/%d/%Y'))
+    
   }, ignoreNULL = FALSE)
   
   ## eventReactive for sites ------------------------------
@@ -35,12 +57,19 @@ server <- function(input, output, session) {
   Data_Service  <- eventReactive(input$FiltersUpdate, {
     validate(need(input$selectedPayroll != "" , "Please Select a Campus"), 
              need(input$selectedGroup != "", "Please Select a Group"),
-             need(input$DateRange[1] < input$DateRange[2], "Error: Start date should be earlier than end date."))
+             need(input$DateRange != "", "Please Select a Date"))
+    
+  dates_index <- sapply(input$DateRange, function(x) grep(x, date_options) + 9)
+  start_date_input <- as.Date(date_options[dates_index], format = "%m/%d/%Y")
+  start_date_input <- format(as.Date(start_date_input, "%B %d %Y"), "%m/%d/%Y")
+    
     data %>% 
       filter( PAYROLL %in% input$selectedPayroll,
               service_group %in% input$selectedGroup,
               CORPORATE.SERVICE.LINE %in% input$selectedService,
-              PP.END.DATE >= as.Date(input$DateRange[1]) &PP.END.DATE  <= as.Date(input$DateRange[2] ))
+              PP.END.DATE >= as.Date(min(start_date_input), format='%m/%d/%Y') &
+                PP.END.DATE <= as.Date(max(input$DateRange), format='%m/%d/%Y'))
+    
   }, ignoreNULL = FALSE)
   
   
@@ -49,18 +78,24 @@ server <- function(input, output, session) {
   Department_Data  <- eventReactive(input$dep_FiltersUpdate, {
     validate(need(input$dep_selectedPayroll != "" , "Please Select a Campus"), 
              need(input$dep_selectedGroup != "", "Please Select a Group"),
-             need(input$dep_DateRange[1] < input$dep_DateRange[2], "Error: Start date should be earlier than end date."))
+             need(input$dep_DateRange != "", "Please Select a Date"))
+    
+    dates_index <- sapply(input$dep_DateRange, function(x) grep(x, date_options) + 9)
+    start_date_input <- as.Date(date_options[dates_index], format = "%m/%d/%Y")
+    start_date_input <- format(as.Date(start_date_input, "%B %d %Y"), "%m/%d/%Y")
+    
+    
     data %>% 
       filter( PAYROLL %in% input$dep_selectedPayroll,
               service_group %in% input$dep_selectedGroup,
               CORPORATE.SERVICE.LINE %in% input$dep_selectedService,
-              PP.END.DATE >= as.Date(input$dep_DateRange[1]) &PP.END.DATE  <= as.Date(input$dep_DateRange[2] ))
+              PP.END.DATE >= as.Date(min(start_date_input), format='%m/%d/%Y') & 
+                PP.END.DATE <= as.Date(max(input$dep_DateRange),format='%m/%d/%Y'))
   }, ignoreNULL = FALSE)
   
   
   # Observeevent for MSHS ----------------------------------------------
-  
-  # Observeevent for services
+  ## Observeevent for services
   observeEvent(input$mshs_selectedGroup,{
     service_choices <- sort(unique(data$CORPORATE.SERVICE.LINE[ 
         data$service_group %in% input$mshs_selectedGroup]))
@@ -74,8 +109,7 @@ server <- function(input, output, session) {
   ignoreNULL = FALSE)
 
   # Observeevent for Site ----------------------------------------------
-  
-  # Observeevent for services category
+  ## Observeevent for services category
   observeEvent(input$selectedPayroll,{
       group_choices <- sort(unique(data$service_group[
                             data$PAYROLL %in% input$selectedPayroll]))
@@ -87,7 +121,7 @@ server <- function(input, output, session) {
   ignoreInit = TRUE,
   ignoreNULL = FALSE)
 
-  # Observeevent for services
+  ## Observeevent for services
   observeEvent(input$selectedGroup,{
     service_choices <- sort(unique(data$CORPORATE.SERVICE.LINE[ 
                             data$PAYROLL %in% input$selectedPayroll &
@@ -103,7 +137,7 @@ server <- function(input, output, session) {
   
   # Observeevent for Department ----------------------------------------------
   
-  # Observeevent for services category
+  ## Observeevent for services category
   observeEvent(input$dep_selectedPayroll,{
     group_choices <- sort(unique(data$dep_service_group[
       data$PAYROLL %in% input$dep_selectedPayroll]))
@@ -116,7 +150,8 @@ server <- function(input, output, session) {
   ignoreNULL = FALSE)
   
   
-  # Observeevent for services
+
+  ## Observeevent for services
   observeEvent(input$dep_selectedGroup,{
     service_choices <- sort(unique(data$CORPORATE.SERVICE.LINE[ 
       data$PAYROLL %in% input$dep_selectedPayroll &
@@ -142,6 +177,7 @@ server <- function(input, output, session) {
       summarise(FTE = sum(FTE, na.rm = T)) %>%
       mutate(PAYROLL = "MSHS") %>% 
       select(PAYROLL, dates, FTE)
+
     
     kdata[is.na(kdata)] <- 0
     kdata <- kdata %>% 
@@ -236,6 +272,7 @@ server <- function(input, output, session) {
     kdata <- kdata %>%
       rename(Site = PAYROLL)
     
+
     ggplotly(
       ggplot(data = kdata, aes(x = dates, y = FTE, group = Site, color = Site))+
         geom_line(size = 1.5)+
