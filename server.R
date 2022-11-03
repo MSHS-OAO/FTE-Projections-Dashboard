@@ -163,7 +163,6 @@ server <- function(input, output, session) {
         scale_y_continuous(limits = c(0, max(kdata$FTE)*1.2))+
         theme(plot.title = element_text(hjust = 0.5, size = 20),
               axis.title = element_text(face ="bold"),
-              axis.text.x = element_text(angle = 45),
               legend.text = element_text(size = 6))) %>%
       layout(title = list(text = paste0('MSHS ', isolate(input$mshs_selectedService),
                                         '<br>',
@@ -248,7 +247,6 @@ server <- function(input, output, session) {
         scale_y_continuous(limits = c(0, max(kdata$FTE)*1.2))+
         theme(plot.title = element_text(hjust = 0.5, size = 20),
               axis.title = element_text(face = "bold"),
-              axis.text.x = element_text(angle = 45),
               legend.text = element_text(size = 6))) %>%
       layout(title = list(text = 
                             paste0(paste0(c(isolate(input$selectedPayroll),
@@ -342,7 +340,6 @@ server <- function(input, output, session) {
         scale_y_continuous(limits = c(0, max(data_service$FTE)*1.2))+
         theme(plot.title= element_text(hjust = 0.5, size = 20),
               axis.title = element_text(face ="bold"),
-              axis.text.x = element_text(angle = 45),
               legend.text = element_text(size = 6))) %>%
       layout(title = list(text = 
                             paste0(paste0(c(isolate(input$dep_selectedPayroll),
