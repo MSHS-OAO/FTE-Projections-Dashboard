@@ -144,7 +144,7 @@ MountSinai_pal <- function(palette = "main", reverse = FALSE, ...) {
   
   if (reverse) pal <- rev(pal)
   
-  colorRampPalette(pal, ...)
+  colorRampPalette(pal, interpolate = "spline", ...)
 
 }
 

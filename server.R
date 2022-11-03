@@ -159,12 +159,12 @@ server <- function(input, output, session) {
         ggtitle(label = 'placeholder')+
         xlab("Pay Period")+
         ylab("FTE (Full Time Equivalent)")+
-        scale_color_manual(values=MountSinai_pal("main")(length(kdata$Site)))+
+        scale_color_manual(values = MountSinai_pal("main")(length(kdata$Site)))+
         scale_y_continuous(limits = c(0, max(kdata$FTE)*1.2))+
         theme(plot.title = element_text(hjust = 0.5, size = 20),
-              axis.title = element_text(face="bold"),
-              legend.text = element_text(size = 6),
-              axis.text.x = element_text(angle = 45))) %>%
+              axis.title = element_text(face ="bold"),
+              axis.text.x = element_text(angle = 45),
+              legend.text = element_text(size = 6))) %>%
       layout(title = list(text = paste0('MSHS ', isolate(input$mshs_selectedService),
                                         '<br>',
                                         '<sup>',
@@ -239,20 +239,20 @@ server <- function(input, output, session) {
     
     ggplotly(
       ggplot(data = kdata, aes(x = dates, y = FTE, group = Site, color = Site))+
-        geom_line(size=1.5)+
-        geom_point(size=2.75)+
+        geom_line(size = 1.5)+
+        geom_point(size = 2.75)+
         ggtitle(label = 'placeholder')+
         xlab("Pay Period")+
         ylab("FTE (Full Time Equivalent)")+
-        scale_color_manual(values=MountSinai_pal("main")(length(kdata$Site)))+
+        scale_color_manual(values = MountSinai_pal("main")(length(kdata$Site)))+
         scale_y_continuous(limits = c(0, max(kdata$FTE)*1.2))+
         theme(plot.title = element_text(hjust = 0.5, size = 20),
               axis.title = element_text(face = "bold"),
-              legend.text = element_text(size = 6),
-              axis.text.x = element_text(angle = 45))) %>%
+              axis.text.x = element_text(angle = 45),
+              legend.text = element_text(size = 6))) %>%
       layout(title = list(text = 
                             paste0(paste0(c(isolate(input$selectedPayroll),
-                                            if(sum(nchar(input$selectedService)) > 35){
+                                            if(sum(nchar(input$selectedService)) > 40){
                                               paste0('Multiple ',
                                                      isolate(input$selectedGroup),
                                                      ' Departments')
@@ -346,7 +346,7 @@ server <- function(input, output, session) {
               legend.text = element_text(size = 6))) %>%
       layout(title = list(text = 
                             paste0(paste0(c(isolate(input$dep_selectedPayroll),
-                                            if(sum(nchar(input$dep_selectedService)) > 35){
+                                            if(sum(nchar(input$dep_selectedService)) > 38){
                                               paste0('Multiple ',
                                                      isolate(input$dep_selectedGroup),
                                                      ' Departments')
