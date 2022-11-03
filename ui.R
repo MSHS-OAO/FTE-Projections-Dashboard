@@ -10,18 +10,8 @@ service_choices <- sort(unique(as.character(data$CORPORATE.SERVICE.LINE[data$PAY
                                                                           data$service_group %in% "Nursing"])))
 
 date_options <- sort(unique(data$PP.END.DATE), decreasing = T)
-
 date_options <- format(as.Date(date_options, "%B %d %Y"), "%m/%d/%Y")
 
-# date_options <- data %>% 
-#   ungroup() %>%
-#   select(PP.END.DATE) %>% 
-#   arrange()%>%
-#   mutate(PP.END.DATE = format(as.Date(PP.END.DATE, "%B %d %Y"), "%m/%d/%Y"))
-
-#date_options <- unique(date_options$PP.END.DATE)
-
-date_choices <- head(date_options , n=10)
   
 
 ui <- dashboardPage(
@@ -82,11 +72,13 @@ ui <- dashboardPage(
                                box(width = 4, height = "100px", title = "Select Service Line:", solidHeader = F,
                                    pickerInput("mshs_selectedService",label= NULL, multiple= T, options = pickerOptions(actionsBox = TRUE),
                                                choices = service_choices,  selected = sort(service_choices)[1])),
-                               
                                box(width = 4, height = "100px",
                                    title = "Select Date Range:",  solidHeader = FALSE,
-                                   pickerInput("mshs_DateRange",label= NULL, multiple= T, options = pickerOptions(actionsBox = TRUE),
-                                               choices = date_options ,  selected = date_choices)),
+                                   pickerInput("mshs_DateRange",label= NULL, multiple= T, 
+                                                options = pickerOptions(
+                                                 actionsBox = TRUE,
+                                                 dropupAuto = FALSE),
+                                               choices = date_options ,  selected = date_options[1])),
                                
                                
                                
@@ -140,14 +132,14 @@ ui <- dashboardPage(
                              
                              box(width = 3, height = "100px", title = "Select Service Line:", solidHeader = F,
                                  pickerInput("selectedService",label= NULL, multiple= T, options = pickerOptions(actionsBox = TRUE),
-                                             choices = service_choices,  selected = sort(service_choices)[1])),
-                             
+                                             choices = service_choices,  selected = sort(service_choices)[1])),                             
                              box(width = 3, height = "100px",
-                                 title = "Select Date Range:",  solidHeader = FALSE, 
-                                 dateRangeInput("DateRange", label = NULL, width = "75%",
-                                                start = start_date, end = max(data$PP.END.DATE), format =  "mm/dd/yyyy",
-                                                min = min(data$PP.END.DATE), max = max(data$PP.END.DATE))),
-                             
+                                 title = "Select Date Range:",  solidHeader = FALSE,
+                                 pickerInput("DateRange",label= NULL, multiple= T, 
+                                             options = pickerOptions(
+                                               actionsBox = TRUE,
+                                               dropupAuto = FALSE),
+                                               choices = date_options ,  selected = date_options[1])),
                              
                              
                              column(5,
@@ -201,12 +193,13 @@ ui <- dashboardPage(
                              box(width = 3, height = "100px", title = "Select Service Line:", solidHeader = F,
                                  pickerInput("dep_selectedService",label= NULL, multiple= T, options = pickerOptions(actionsBox = TRUE),
                                              choices = service_choices,  selected = sort(service_choices)[1])),
-                             
                              box(width = 3, height = "100px",
-                                 title = "Select Date Range:",  solidHeader = FALSE, 
-                                 dateRangeInput("dep_DateRange", label = NULL, width = "75%",
-                                                start = start_date, end = max(data$PP.END.DATE), format =  "mm/dd/yyyy",
-                                                min = min(data$PP.END.DATE), max = max(data$PP.END.DATE))),
+                                 title = "Select Date Range:",  solidHeader = FALSE,
+                                 pickerInput("dep_DateRange",label= NULL, multiple= T, 
+                                             options = pickerOptions(
+                                               actionsBox = TRUE,
+                                               dropupAuto = FALSE),
+                                               choices = date_options ,  selected = date_options[1])),
                              
                              
                              
