@@ -116,7 +116,7 @@ if (answer == "No") {
                                                 dist_dates$END.DATE) - 1)
   start_dates <- as.Date(dist_dates$END.DATE[start_dates_index],
                          format = "%m/%d/%Y") + 1
-}
+
 
 
 
