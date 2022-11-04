@@ -70,15 +70,8 @@ ui <- dashboardPage(
                                                choices = group_choices ,  selected = "Nursing")),
                                
                                box(width = 4, height = "100px", title = "Select Service Line:", solidHeader = F,
-                                   pickerInput("mshs_selectedService",label= NULL, multiple= T, 
-                                               options = pickerOptions(
-                                                 liveSearch = TRUE,
-                                                 actionsBox = TRUE,
-                                                 #selectedTextFormat = "count > 1",
-                                                 #countSelectedText = "{0}/{1} Services",
-                                                 dropupAuto = FALSE),
-                                               choices = service_choices,  selected = "Nursing")),
-                               
+                                   pickerInput("mshs_selectedService",label= NULL, multiple= T, options = pickerOptions(actionsBox = TRUE),
+                                               choices = service_choices,  selected = sort(service_choices)[1])),
                                box(width = 4, height = "100px",
                                    title = "Select Date Range:",  solidHeader = FALSE,
                                    pickerInput("mshs_DateRange",label= NULL, multiple= T, 
@@ -138,15 +131,8 @@ ui <- dashboardPage(
                                              choices = group_choices ,  selected = "Nursing")),
                              
                              box(width = 3, height = "100px", title = "Select Service Line:", solidHeader = F,
-                                 pickerInput("selectedService",label= NULL, multiple= T, 
-                                             options = pickerOptions(
-                                               liveSearch = TRUE,
-                                               actionsBox = TRUE,
-                                               #selectedTextFormat = "count > 1",
-                                               #countSelectedText = "{0}/{1} Services",
-                                               dropupAuto = FALSE),
-                                             choices = service_choices,  selected = "Nursing")),
-                             
+                                 pickerInput("selectedService",label= NULL, multiple= T, options = pickerOptions(actionsBox = TRUE),
+                                             choices = service_choices,  selected = sort(service_choices)[1])),                             
                              box(width = 3, height = "100px",
                                  title = "Select Date Range:",  solidHeader = FALSE,
                                  pickerInput("DateRange",label= NULL, multiple= T, 
@@ -205,15 +191,8 @@ ui <- dashboardPage(
                                              choices = group_choices ,  selected = "Nursing")),
                              
                              box(width = 3, height = "100px", title = "Select Service Line:", solidHeader = F,
-                                 pickerInput("dep_selectedService",label= NULL, multiple= T, 
-                                             options = pickerOptions(
-                                               liveSearch = TRUE,
-                                               actionsBox = TRUE,
-                                               #selectedTextFormat = "count > 1",
-                                               #countSelectedText = "{0}/{1} Services",
-                                               dropupAuto = FALSE),
-                                             choices = service_choices,  selected = "Nursing")),
-                             
+                                 pickerInput("dep_selectedService",label= NULL, multiple= T, options = pickerOptions(actionsBox = TRUE),
+                                             choices = service_choices,  selected = sort(service_choices)[1])),
                              box(width = 3, height = "100px",
                                  title = "Select Date Range:",  solidHeader = FALSE,
                                  pickerInput("dep_DateRange",label= NULL, multiple= T, 

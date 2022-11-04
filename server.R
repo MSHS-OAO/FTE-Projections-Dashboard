@@ -214,13 +214,15 @@ server <- function(input, output, session) {
     
     kdata <- Data_MSHS() 
     
-    # Estimate Reporting Year Avg
+    # Calculate FYTD Avg
     avg <- kdata %>%
       filter(year(PP.END.DATE) == max(year(data$PP.END.DATE)))%>%
       group_by(dates) %>%
       summarise(FTE = sum(FTE, na.rm = T)) %>%
-      summarise(FTE = mean(FTE, na.rm = T))%>%
-      rename(`Reporting Year Avg.`= FTE)%>%
+      summarise(FTE = as.numeric(format(round(mean(FTE, na.rm = T),
+                                              digits = digits_round),
+                                        nsmall = 2))) %>%
+      rename(`FYTD Avg.`= FTE)%>%
       mutate(Site = "MSHS")
     
 
@@ -249,8 +251,7 @@ server <- function(input, output, session) {
                         rownames = FALSE,
                         options = list(
                           columnDefs = list(list(className = 'dt-center', targets = "_all")))) %>%
-      formatStyle(columns = c("Site", "Reporting Period Avg.", "Reporting Year Avg." ), fontWeight = 'bold')
-  
+      formatStyle(columns = c("Site", "Reporting Period Avg.", "FYTD Avg." ), fontWeight = 'bold')
   })
   
   
@@ -312,10 +313,11 @@ server <- function(input, output, session) {
       group_by(PAYROLL, dates) %>%
       summarise(FTE = sum(FTE, na.rm = T)) %>%
       group_by(PAYROLL)%>%
-      summarise(FTE = mean(FTE, na.rm = T))%>%
-      rename(`Reporting Year Avg.`= FTE)
-  
-    
+      summarise(FTE = as.numeric(format(round(mean(FTE, na.rm = T),
+                                              digits = digits_round),
+                                        nsmall = 2))) %>%
+      rename(`FYTD Avg.`= FTE)
+      
     kdata <- kdata %>% 
       group_by(PAYROLL, dates) %>%
       summarise(FTE = sum(FTE, na.rm = T)) %>%
@@ -343,7 +345,6 @@ server <- function(input, output, session) {
                         options = list(
                           columnDefs = list(list(className = 'dt-center', targets = "_all")))) %>%
       formatStyle(columns = c("Site", "Reporting Period Avg.", "Reporting Year Avg."), fontWeight = 'bold')
- 
   })
   
   ## department tab -----------------------------------------------
@@ -405,8 +406,10 @@ server <- function(input, output, session) {
       group_by(DEPARTMENT, dates) %>%
       summarise(FTE = sum(FTE, na.rm = T)) %>%
       group_by(DEPARTMENT)%>%
-      summarise(FTE = mean(FTE, na.rm = T))%>%
-      rename(`Reporting Year Avg.`= FTE)
+      summarise(FTE = as.numeric(format(round(mean(FTE, na.rm = T),
+                                              digits = digits_round),
+                                        nsmall = 2))) %>%
+      rename(`FYTD Avg.`= FTE)
     
     
     kdata <- kdata %>% 
@@ -427,13 +430,8 @@ server <- function(input, output, session) {
                         class = 'cell-border stripe',
                         rownames = FALSE,
                         options = list(
-                          columnDefs = list(list(className = 'dt-center',
-                                                 targets = "_all")))) %>%
-      formatStyle(columns = c("DEPARTMENT",
-                              "Reporting Period Avg.",
-                              "Reporting Year Avg."),
-                  fontWeight = 'bold')
-    
+                          columnDefs = list(list(className = 'dt-center', targets = "_all")))) %>%
+      formatStyle(columns = c("DEPARTMENT", "Reporting Period Avg.", "FYTD Avg."), fontWeight = 'bold')    
   })
     
   

@@ -87,7 +87,7 @@ data <- data %>%
       TRUE ~ "Other"),
     DATES = as.character(PP.END.DATE),
     PP.END.DATE = as.Date(PP.END.DATE,format="%Y-%m-%d"),
-    dates = format(as.Date(PP.END.DATE, "%B %d %Y"), "%m/%d/%Y"))
+    dates = format(as.Date(PP.END.DATE, "%B %d %Y"), "%m/%d/%y"))
 
 # (2) Color Theme -----------------------------------------------------------
 
