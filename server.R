@@ -200,11 +200,20 @@ server <- function(input, output, session) {
         theme(plot.title = element_text(hjust = 0.5, size = 20),
               axis.title = element_text(face ="bold"),
               legend.text = element_text(size = 6))) %>%
-      layout(title = list(text = paste0('MSHS ', isolate(input$mshs_selectedService),
-                                        '<br>',
-                                        '<sup>',
-                                        "Worked FTE's By Pay Period",
-                                        '</sup>')),
+      layout(title = list(text = 
+                            isolate(
+                              paste0(
+                                paste0(c(input$mshs_selectedService,
+                                         if(sum(nchar(input$mshs_selectedService)) > 40){
+                                           paste0('Multiple ',
+                                                  input$mshs_selectedService,
+                                                  ' Departments')
+                                           }else{input$mshs_selectedService}),
+                                       collapse = ", "),
+                                '<br>',
+                                '<sup>',
+                                "Worked FTE's By Pay Period",
+                                '</sup>'))),
              margin = list(l = 75, t = 75))
     
   }) 
@@ -287,18 +296,19 @@ server <- function(input, output, session) {
               axis.title = element_text(face = "bold"),
               legend.text = element_text(size = 6))) %>%
       layout(title = list(text = 
-                            paste0(paste0(c(isolate(input$selectedPayroll),
-                                            if(sum(nchar(input$selectedService)) > 40){
-                                              paste0('Multiple ',
-                                                     isolate(input$selectedGroup),
-                                                     ' Departments')
-                                                 }else{
-                                                   isolate(input$selectedService)}),
-                                               collapse = ", "),
-                                   '<br>',
-                                   '<sup>',
-                                   "Worked FTE's By Pay Period",
-                                   '</sup>')),
+                            isolate(
+                              paste0(
+                                paste0(c(input$selectedPayroll,
+                                         if(sum(nchar(input$selectedService)) > 40){
+                                           paste0('Multiple ',
+                                                  input$selectedGroup,
+                                                  ' Departments')
+                                           }else{input$selectedService}),
+                                       collapse = ", "),
+                                '<br>',
+                                '<sup>',
+                                "Worked FTE's By Pay Period",
+                                '</sup>'))),
              margin = list(l = 75, t = 75))
   
   }) 
@@ -380,18 +390,19 @@ server <- function(input, output, session) {
               axis.title = element_text(face ="bold"),
               legend.text = element_text(size = 6))) %>%
       layout(title = list(text = 
-                            paste0(paste0(c(isolate(input$dep_selectedPayroll),
-                                            if(sum(nchar(input$dep_selectedService)) > 38){
-                                              paste0('Multiple ',
-                                                     isolate(input$dep_selectedGroup),
-                                                     ' Departments')
-                                            }else{
-                                              isolate(input$dep_selectedService)}),
-                                          collapse = ", "),
-                                   '<br>',
-                                   '<sup>',
-                                   "Worked FTE's By Pay Period",
-                                   '</sup>')),
+                            isolate(
+                              paste0(
+                                paste0(c(input$dep_selectedPayroll,
+                                         if(sum(nchar(input$dep_selectedService)) > 40){
+                                           paste0('Multiple ',
+                                                  input$dep_selectedGroup,
+                                                  ' Departments')
+                                           }else{input$dep_selectedService}),
+                                       collapse = ", "),
+                                '<br>',
+                                '<sup>',
+                                "Worked FTE's By Pay Period",
+                                '</sup>'))),
              margin = list(l = 75, t = 75))
     
   }) 
