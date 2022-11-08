@@ -203,10 +203,10 @@ server <- function(input, output, session) {
       layout(title = list(text = 
                             isolate(
                               paste0(
-                                paste0(c(input$mshs_selectedService,
+                                paste0(c('MSHS',
                                          if(sum(nchar(input$mshs_selectedService)) > 40){
                                            paste0('Multiple ',
-                                                  input$mshs_selectedService,
+                                                  input$mshs_selectedGroup,
                                                   ' Departments')
                                            }else{input$mshs_selectedService}),
                                        collapse = ", "),
