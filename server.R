@@ -5,32 +5,66 @@ server <- function(input, output, session) {
 
 # Print text output
   output$mshs_DateShow <- renderText({
-    dates_index <- sapply(input$mshs_DateRange,  function(x) grep(x, date_options) + 9)
-    start_date_input <- as.Date(date_options[dates_index], format = "%m/%d/%Y")
-    start_date_input <- format(as.Date(start_date_input, "%B %d %Y"), "%m/%d/%Y")
+    dates_index <- sapply(input$mshs_DateRange,  function(x) grep(x, date_options) + 10)
+    start_date_input <- as.Date(date_options[dates_index], format = "%m/%d/%y")+1
+    start_date_input <- format(as.Date(start_date_input, "%B %d %Y"), "%m/%d/%y")
     
-    paste0("Based on data from ", min(start_date_input)," to ", max(input$mshs_DateRange),
+    paste0("Based on data from ", start_date_input," to ", input$mshs_DateRange,
            " for MSHS")
   })
   
+  
+  
+  output$mshs_reportingDate <- renderText({
+    
+    reporting_index <- sapply(input$mshs_DateRange,  function(x) grep(x, date_options) + 3)
+    reporting_start_date <- as.Date(date_options[reporting_index], format = "%m/%d/%y")+1
+    reporting_start_date <- format(as.Date( reporting_start_date, "%B %d %Y"), "%m/%d/%y")
+    
+    paste0("Reporting period: ", reporting_start_date," to ", input$mshs_DateRange)
+    
+  })
+  
   output$siteName_DateShow <- renderText({
-    dates_index <- sapply(input$DateRange,  function(x) grep(x, date_options) + 9)
-    start_date_input <- as.Date(date_options[dates_index], format = "%m/%d/%Y")
-    start_date_input <- format(as.Date(start_date_input, "%B %d %Y"), "%m/%d/%Y")
+    dates_index <- sapply(input$DateRange,  function(x) grep(x, date_options) + 10)
+    start_date_input <- as.Date(date_options[dates_index], format = "%m/%d/%y")+1
+    start_date_input <- format(as.Date(start_date_input, "%B %d %Y"), "%m/%d/%y")
     
     paste0("Based on data from ", min(start_date_input)," to ", max(input$DateRange),
            " for ", paste(sort(input$selectedPayroll), collapse = ', ')) 
            
   })
   
+  output$site_reportingDate <- renderText({
+    
+    reporting_index <- sapply(input$DateRange,  function(x) grep(x, date_options) + 3)
+    reporting_start_date <- as.Date(date_options[reporting_index], format = "%m/%d/%y")+1
+    reporting_start_date <- format(as.Date(reporting_start_date, "%B %d %Y"), "%m/%d/%y")
+    
+    paste0("Reporting period: ", min( reporting_start_date)," to ", max(input$DateRange))
+    
+  })
+  
+  
   output$Department_DateShow <- renderText({
     
-    dates_index <- sapply(input$dep_DateRange,  function(x) grep(x, date_options) + 9)
-    start_date_input <- as.Date(date_options[dates_index], format = "%m/%d/%Y")
-    start_date_input <- format(as.Date(start_date_input, "%B %d %Y"), "%m/%d/%Y")
+    dates_index <- sapply(input$dep_DateRange,  function(x) grep(x, date_options) + 10)
+    start_date_input <- as.Date(date_options[dates_index], format = "%m/%d/%y")+1
+    start_date_input <- format(as.Date(start_date_input, "%B %d %Y"), "%m/%d/%y")
     
     paste0("Based on data from ", min(start_date_input)," to ", max(input$dep_DateRange),
            " for ", paste(sort(input$dep_selectedPayroll), collapse = ', ')) 
+    
+  })
+  
+
+  output$Department_reportingDate <- renderText({
+    
+    reporting_index <- sapply(input$dep_DateRange,  function(x) grep(x, date_options) + 3)
+    reporting_start_date <- as.Date(date_options[reporting_index], format = "%m/%d/%y")+1
+    reporting_start_date <- format(as.Date( reporting_start_date, "%B %d %Y"), "%m/%d/%y")
+    
+    paste0("Reporting period: ", min( reporting_start_date)," to ", max(input$dep_DateRange))
     
   })
   
@@ -41,17 +75,18 @@ server <- function(input, output, session) {
             need(input$mshs_DateRange != "", "Please Select a Date"))
     
  dates_index <- sapply(input$mshs_DateRange, function(x) grep(x, date_options) + 9)
-    start_date_input <- as.Date(date_options[dates_index], format = "%m/%d/%Y")
-    start_date_input <- format(as.Date(start_date_input, "%B %d %Y"), "%m/%d/%Y")
+    start_date_input <- as.Date(date_options[dates_index], format = "%m/%d/%y")
+    start_date_input <- format(as.Date(start_date_input, "%B %d %Y"), "%m/%d/%y")
 
     data %>% 
       filter( service_group %in% input$mshs_selectedGroup,
               CORPORATE.SERVICE.LINE %in% input$mshs_selectedService,
-              PP.END.DATE >= as.Date(min(start_date_input), format='%m/%d/%Y') &
-          PP.END.DATE <= as.Date(max(input$mshs_DateRange), format='%m/%d/%Y'))
+              PP.END.DATE >= as.Date(min(start_date_input), format='%m/%d/%y') &
+          PP.END.DATE <= as.Date(max(input$mshs_DateRange), format='%m/%d/%y'))
     
   }, ignoreNULL = FALSE)
   
+
   ## eventReactive for sites ------------------------------
   
   Data_Service  <- eventReactive(input$FiltersUpdate, {
@@ -60,15 +95,15 @@ server <- function(input, output, session) {
              need(input$DateRange != "", "Please Select a Date"))
     
   dates_index <- sapply(input$DateRange, function(x) grep(x, date_options) + 9)
-  start_date_input <- as.Date(date_options[dates_index], format = "%m/%d/%Y")
-  start_date_input <- format(as.Date(start_date_input, "%B %d %Y"), "%m/%d/%Y")
+  start_date_input <- as.Date(date_options[dates_index], format = "%m/%d/%y")
+  start_date_input <- format(as.Date(start_date_input, "%B %d %Y"), "%m/%d/%y")
     
     data %>% 
       filter( PAYROLL %in% input$selectedPayroll,
               service_group %in% input$selectedGroup,
               CORPORATE.SERVICE.LINE %in% input$selectedService,
-              PP.END.DATE >= as.Date(min(start_date_input), format='%m/%d/%Y') &
-                PP.END.DATE <= as.Date(max(input$DateRange), format='%m/%d/%Y'))
+              PP.END.DATE >= as.Date(min(start_date_input), format='%m/%d/%y') &
+                PP.END.DATE <= as.Date(max(input$DateRange), format='%m/%d/%y'))
     
   }, ignoreNULL = FALSE)
   
@@ -81,16 +116,16 @@ server <- function(input, output, session) {
              need(input$dep_DateRange != "", "Please Select a Date"))
     
     dates_index <- sapply(input$dep_DateRange, function(x) grep(x, date_options) + 9)
-    start_date_input <- as.Date(date_options[dates_index], format = "%m/%d/%Y")
-    start_date_input <- format(as.Date(start_date_input, "%B %d %Y"), "%m/%d/%Y")
+    start_date_input <- as.Date(date_options[dates_index], format = "%m/%d/%y")
+    start_date_input <- format(as.Date(start_date_input, "%B %d %Y"), "%m/%d/%y")
     
     
     data %>% 
       filter( PAYROLL %in% input$dep_selectedPayroll,
               service_group %in% input$dep_selectedGroup,
               CORPORATE.SERVICE.LINE %in% input$dep_selectedService,
-              PP.END.DATE >= as.Date(min(start_date_input), format='%m/%d/%Y') & 
-                PP.END.DATE <= as.Date(max(input$dep_DateRange),format='%m/%d/%Y'))
+              PP.END.DATE >= as.Date(min(start_date_input), format='%m/%d/%y') & 
+                PP.END.DATE <= as.Date(max(input$dep_DateRange),format='%m/%d/%y'))
   }, ignoreNULL = FALSE)
   
   
@@ -188,6 +223,8 @@ server <- function(input, output, session) {
     
     kdata[3:length(kdata)] <- round(kdata[3:length(kdata)] , digits_round) 
     
+    
+    
     ggplotly(
       ggplot(data = kdata, aes(x = dates, y = FTE, group = Site, color = Site))+
         geom_line(size=1.5)+
@@ -200,13 +237,22 @@ server <- function(input, output, session) {
         theme(plot.title = element_text(hjust = 0.5, size = 20),
               axis.title = element_text(face ="bold"),
               legend.text = element_text(size = 6))) %>%
-      layout(title = list(text = paste0('MSHS ', isolate(input$mshs_selectedService),
-                                        '<br>',
-                                        '<sup>',
-                                        "Worked FTE's By Pay Period",
-                                        '</sup>')),
+
+        layout(title = list(text = 
+                            isolate(
+                              paste0(
+                                paste0(c('MSHS',
+                                         if(sum(nchar(input$mshs_selectedService)) > 40){
+                                           paste0('Multiple ',
+                                                  input$mshs_selectedGroup,
+                                                  ' Departments')
+                                         }else{input$mshs_selectedService}),
+                                       collapse = ", "),
+                                '<br>',
+                                '<sup>',
+                                "Worked FTE's By Pay Period",
+                                '</sup>'))),
              margin = list(l = 75, t = 75))
-    
   }) 
   
   
@@ -274,33 +320,32 @@ server <- function(input, output, session) {
       rename(Site = PAYROLL)
     
 
-    ggplotly(
-      ggplot(data = kdata, aes(x = dates, y = FTE, group = Site, color = Site))+
-        geom_line(size = 1.5)+
-        geom_point(size = 2.75)+
-        ggtitle(label = 'placeholder')+
-        xlab("Pay Period")+
-        ylab("FTE (Full Time Equivalent)")+
-        scale_color_manual(values = MountSinai_pal("main")(length(kdata$Site)))+
-        scale_y_continuous(limits = c(0, max(kdata$FTE)*1.2))+
-        theme(plot.title = element_text(hjust = 0.5, size = 20),
-              axis.title = element_text(face = "bold"),
-              legend.text = element_text(size = 6))) %>%
-      layout(title = list(text = 
-                            paste0(paste0(c(isolate(input$selectedPayroll),
-                                            if(sum(nchar(input$selectedService)) > 40){
-                                              paste0('Multiple ',
-                                                     isolate(input$selectedGroup),
-                                                     ' Departments')
-                                                 }else{
-                                                   isolate(input$selectedService)}),
-                                               collapse = ", "),
-                                   '<br>',
-                                   '<sup>',
-                                   "Worked FTE's By Pay Period",
-                                   '</sup>')),
-             margin = list(l = 75, t = 75))
-  
+      ggplotly(
+        ggplot(data = kdata, aes(x = dates, y = FTE, group = Site, color = Site))+
+          geom_line(size = 1.5)+
+          geom_point(size = 2.75)+
+          ggtitle(label = 'placeholder')+
+          xlab("Pay Period")+
+          ylab("FTE (Full Time Equivalent)")+
+          scale_color_manual(values = MountSinai_pal("main")(length(kdata$Site)))+
+          scale_y_continuous(limits = c(0, max(kdata$FTE)*1.2))+
+          theme(plot.title = element_text(hjust = 0.5, size = 20),
+                axis.title = element_text(face = "bold"),
+                legend.text = element_text(size = 6))) %>%
+        layout(title = list(text = 
+                              paste0(isolate(paste0(c(input$selectedPayroll,
+                                                      if(sum(nchar(input$selectedService)) > 40){
+                                                        paste0('Multiple ',
+                                                               input$selectedGroup,
+                                                               ' Departments')
+                                                      }else{
+                                                        input$selectedService}),
+                                                    collapse = ", ")),
+                                     '<br>',
+                                     '<sup>',
+                                     "Worked FTE's By Pay Period",
+                                     '</sup>')),
+               margin = list(l = 75, t = 75))  
   }) 
   
   
@@ -380,20 +425,19 @@ server <- function(input, output, session) {
               axis.title = element_text(face ="bold"),
               legend.text = element_text(size = 6))) %>%
       layout(title = list(text = 
-                            paste0(paste0(c(isolate(input$dep_selectedPayroll),
+                            paste0(isolate(paste0(c(input$dep_selectedPayroll,
                                             if(sum(nchar(input$dep_selectedService)) > 38){
                                               paste0('Multiple ',
-                                                     isolate(input$dep_selectedGroup),
+                                                     input$dep_selectedGroup,
                                                      ' Departments')
                                             }else{
-                                              isolate(input$dep_selectedService)}),
-                                          collapse = ", "),
+                                              input$dep_selectedService}),
+                                          collapse = ", ")),
                                    '<br>',
                                    '<sup>',
                                    "Worked FTE's By Pay Period",
                                    '</sup>')),
              margin = list(l = 75, t = 75))
-    
   }) 
   
   

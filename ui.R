@@ -10,7 +10,7 @@ service_choices <- sort(unique(as.character(data$CORPORATE.SERVICE.LINE[data$PAY
                                                                           data$service_group %in% "Nursing"])))
 
 date_options <- sort(unique(data$PP.END.DATE), decreasing = T)
-date_options <- format(as.Date(date_options, "%B %d %Y"), "%m/%d/%Y")
+date_options <- format(as.Date(date_options, "%B %d %Y"), "%m/%d/%y")
 
   
 
@@ -32,8 +32,9 @@ ui <- dashboardPage(
                   column(12, 
                          tags$div("MSHS Worked FTE Dashboard", style = "color:	#221f72; font-weight:bold; font-size:34px; margin-left: 20px" ,
                                   h3("Health System Operations"),
-                                  h4(paste0("Publish Date: ", Sys.Date() )),
-                                  h4(paste0("Reporting Period: ",report_start_date, " to ", report_end_date )))),
+                                  h4(paste0("Publish Date: ", format(as.Date(Sys.Date(), "%B %d %Y"), "%m/%d/%y"))),
+                                  #h4(paste0("Reporting Period: ",report_start_date, " to ", report_end_date ))
+                                  )),
                   column(12, 
                          tags$div( id = "Objective", style= "color:	#221f72; margin-left: 20px",
                                    h3("Description:"),
@@ -54,8 +55,9 @@ ui <- dashboardPage(
           tabItem(tabName = "mshs",
                   div("MSHS Worked FTE Dashboard", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:25px; margin-left: 20px"),
                   textOutput("mshs_DateShow"),
+                  textOutput("mshs_reportingDate"),
                   tags$head(tags$style("#mshs_DateShow{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 18px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
-                  
+                  tags$head(tags$style("#mshs_reportingDate{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 16px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
                   
                   fluidRow(
                     
@@ -70,11 +72,15 @@ ui <- dashboardPage(
                                                choices = group_choices ,  selected = "Nursing")),
                                
                                box(width = 4, height = "100px", title = "Select Service Line:", solidHeader = F,
-                                   pickerInput("mshs_selectedService",label= NULL, multiple= T, options = pickerOptions(actionsBox = TRUE, liveSearch = T),
-                                               choices = service_choices,  selected = sort(service_choices)[1])),
+                                   pickerInput("mshs_selectedService",label= NULL, multiple= T, 
+                                               options = pickerOptions(
+                                                 liveSearch = TRUE,
+                                                 actionsBox = TRUE,
+                                                 dropupAuto = FALSE),
+                                               choices = service_choices,  selected = "Nursing")),
                                box(width = 4, height = "100px",
-                                   title = "Select Date Range:",  solidHeader = FALSE,
-                                   pickerInput("mshs_DateRange",label= NULL, multiple= T, 
+                                   title = "Select Pay Period End Date:",  solidHeader = FALSE,
+                                   pickerInput("mshs_DateRange",label= NULL, multiple= F, 
                                                 options = pickerOptions(
                                                  actionsBox = TRUE,
                                                  dropupAuto = FALSE),
@@ -115,8 +121,9 @@ ui <- dashboardPage(
           tabItem(tabName = "site",
                   div("Hospitals Worked FTE Dashboard", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:25px; margin-left: 20px"),
                   textOutput("siteName_DateShow"),
+                  textOutput("site_reportingDate"),
                   tags$head(tags$style("#siteName_DateShow{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 18px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
-                  
+                  tags$head(tags$style("#site_reportingDate{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 16px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
                   
                   column(11,
                          box(
@@ -131,11 +138,14 @@ ui <- dashboardPage(
                                              choices = group_choices ,  selected = "Nursing")),
                              
                              box(width = 3, height = "100px", title = "Select Service Line:", solidHeader = F,
-                                 pickerInput("selectedService",label= NULL, multiple= T, options = pickerOptions(actionsBox = TRUE, liveSearch = T),
-                                             choices = service_choices,  selected = sort(service_choices)[1])),                             
+                                 pickerInput("selectedService",label= NULL, multiple= T, 
+                                             options = pickerOptions(
+                                               liveSearch = TRUE,
+                                               actionsBox = TRUE),
+                                             choices = service_choices,  selected = "Nursing")),
                              box(width = 3, height = "100px",
-                                 title = "Select Date Range:",  solidHeader = FALSE,
-                                 pickerInput("DateRange",label= NULL, multiple= T, 
+                                 title = "Select Pay Period End Date:",  solidHeader = FALSE,
+                                 pickerInput("DateRange",label= NULL, multiple= F, 
                                              options = pickerOptions(
                                                actionsBox = TRUE,
                                                dropupAuto = FALSE),
@@ -175,7 +185,10 @@ ui <- dashboardPage(
           tabItem(tabName = "department",
                   div("Department Worked FTE Dashboard", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:25px; margin-left: 20px"),
                   textOutput("Department_DateShow"),
+                  textOutput("Department_reportingDate"),
                   tags$head(tags$style("#Department_DateShow{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 18px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
+                  tags$head(tags$style("#Department_reportingDate{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 16px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
+                  
                   
                   
                   column(11,
@@ -191,11 +204,15 @@ ui <- dashboardPage(
                                              choices = group_choices ,  selected = "Nursing")),
                              
                              box(width = 3, height = "100px", title = "Select Service Line:", solidHeader = F,
-                                 pickerInput("dep_selectedService",label= NULL, multiple= T, options = pickerOptions(actionsBox = TRUE, liveSearch = T),
-                                             choices = service_choices,  selected = sort(service_choices)[1])),
+                                 pickerInput("dep_selectedService",label= NULL, multiple= T, 
+                                             options = pickerOptions(
+                                               liveSearch = TRUE,
+                                               actionsBox = TRUE,
+                                               dropupAuto = FALSE),
+                                             choices = service_choices,  selected = "Nursing")),
                              box(width = 3, height = "100px",
-                                 title = "Select Date Range:",  solidHeader = FALSE,
-                                 pickerInput("dep_DateRange",label= NULL, multiple= T, 
+                                 title = "Select Pay Period End Date:",  solidHeader = FALSE,
+                                 pickerInput("dep_DateRange",label= NULL, multiple= F, 
                                              options = pickerOptions(
                                                actionsBox = TRUE,
                                                dropupAuto = FALSE),
