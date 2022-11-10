@@ -2,6 +2,7 @@
 
 server <- function(input, output, session) {
   
+
 # Print text output
   output$mshs_DateShow <- renderText({
     dates_index <- sapply(input$mshs_DateRange,  function(x) grep(x, date_options) + 10)
@@ -56,6 +57,7 @@ server <- function(input, output, session) {
     
   })
   
+
   output$Department_reportingDate <- renderText({
     
     reporting_index <- sapply(input$dep_DateRange,  function(x) grep(x, date_options) + 3)
@@ -65,8 +67,6 @@ server <- function(input, output, session) {
     paste0("Reporting period: ", min( reporting_start_date)," to ", max(input$dep_DateRange))
     
   })
-  
-  
   
   ## eventReactive for MSHS ------------------------------
   
@@ -87,7 +87,6 @@ server <- function(input, output, session) {
   }, ignoreNULL = FALSE)
   
 
-  
   ## eventReactive for sites ------------------------------
   
   Data_Service  <- eventReactive(input$FiltersUpdate, {
@@ -143,9 +142,6 @@ server <- function(input, output, session) {
   },
   ignoreInit = TRUE,
   ignoreNULL = FALSE)
-  
-  
-  
 
   # Observeevent for Site ----------------------------------------------
   ## Observeevent for services category
@@ -159,7 +155,6 @@ server <- function(input, output, session) {
   },
   ignoreInit = TRUE,
   ignoreNULL = FALSE)
-  
 
   ## Observeevent for services
   observeEvent(input$selectedGroup,{
@@ -174,8 +169,6 @@ server <- function(input, output, session) {
   },
   ignoreInit = TRUE,
   ignoreNULL = FALSE)
-  
-
   
   # Observeevent for Department ----------------------------------------------
   
@@ -192,6 +185,7 @@ server <- function(input, output, session) {
   ignoreNULL = FALSE)
   
   
+
   ## Observeevent for services
   observeEvent(input$dep_selectedGroup,{
     service_choices <- sort(unique(data$CORPORATE.SERVICE.LINE[ 
@@ -212,31 +206,22 @@ server <- function(input, output, session) {
   output$mshs_plot <- renderPlotly({
     
     kdata <- Data_MSHS() 
-  
-    
-    # kdata <- data %>% 
-    #    filter(CORPORATE.SERVICE.LINE== "Support Services - Patient Transport")
-    
-    
+
     kdata <- kdata %>% 
       group_by(dates) %>%
       summarise(FTE = sum(FTE, na.rm = T)) %>%
       mutate(PAYROLL = "MSHS") %>% 
       select(PAYROLL, dates, FTE)
-    
-    
+
     
     kdata[is.na(kdata)] <- 0
     kdata <- kdata %>% 
       ungroup() %>% 
       arrange(desc(colnames(kdata)[ncol(kdata)])) %>%
-      rename(Site= PAYROLL)
+      rename(Site = PAYROLL)
     
     
     kdata[3:length(kdata)] <- round(kdata[3:length(kdata)] , digits_round) 
-   
-    
-    #kdata <- tail(kdata, 10)
     
     
     
@@ -252,6 +237,7 @@ server <- function(input, output, session) {
         theme(plot.title = element_text(hjust = 0.5, size = 20),
               axis.title = element_text(face ="bold"),
               legend.text = element_text(size = 6))) %>%
+
         layout(title = list(text = 
                             isolate(
                               paste0(
@@ -267,34 +253,25 @@ server <- function(input, output, session) {
                                 "Worked FTE's By Pay Period",
                                 '</sup>'))),
              margin = list(l = 75, t = 75))
-    
-    
-    
-    
   }) 
   
   
   output$mshs_table <- renderDT({
     
     kdata <- Data_MSHS() 
-  
     
-    # kdata <- data %>%
-    #   filter(CORPORATE.SERVICE.LINE== "Support Services - Patient Transport")
-    
-    
-    # Estimate Reporting Year Avg
+    # Calculate FYTD Avg
     avg <- kdata %>%
       filter(year(PP.END.DATE) == max(year(data$PP.END.DATE)))%>%
       group_by(dates) %>%
       summarise(FTE = sum(FTE, na.rm = T)) %>%
-      summarise(FTE = mean(FTE, na.rm = T))%>%
-      rename(`Reporting Year Avg.`= FTE)%>%
+      summarise(FTE = as.numeric(format(round(mean(FTE, na.rm = T),
+                                              digits = digits_round),
+                                        nsmall = 2))) %>%
+      rename(`FYTD Avg.`= FTE)%>%
       mutate(Site = "MSHS")
     
-    
 
-    
     kdata <- kdata %>% 
       group_by(dates) %>%
       summarise(FTE = sum(FTE, na.rm = T)) %>%
@@ -303,15 +280,10 @@ server <- function(input, output, session) {
                   names_from = dates,
                   values_from = FTE)
     
-    
-    #kdata <- kdata %>% select(PAYROLL, (ncol(kdata)-10):ncol(kdata))
-    
-    
     kdata[is.na(kdata)] <- 0
     kdata <- kdata %>% 
       ungroup() %>% 
       arrange(desc(colnames(kdata)[ncol(kdata)])) 
-    
     
     
     kdata$`Reporting Period Avg.` <- apply(kdata[,(ncol(kdata)-2):ncol(kdata)], 1,mean)
@@ -320,16 +292,12 @@ server <- function(input, output, session) {
     kdata[2:length(kdata)] <- round(kdata[2:length(kdata)] , digits_round)
     
     
-    
     kdata <-  datatable(kdata, 
                         class = 'cell-border stripe',
                         rownames = FALSE,
                         options = list(
                           columnDefs = list(list(className = 'dt-center', targets = "_all")))) %>%
-      formatStyle(columns = c("Site", "Reporting Period Avg.", "Reporting Year Avg." ), fontWeight = 'bold')
-    
-    
-    
+      formatStyle(columns = c("Site", "Reporting Period Avg.", "FYTD Avg." ), fontWeight = 'bold')
   })
   
   
@@ -338,31 +306,20 @@ server <- function(input, output, session) {
   output$site_plot <- renderPlotly({
   
     kdata <- Data_Service() 
-    
-    # kdata <- data %>% filter(PAYROLL %in% c("MSH", "MSM")) %>% 
-    #    filter(CORPORATE.SERVICE.LINE== "Support Services - Patient Transport")
-    
-    
     kdata <- kdata %>% 
       group_by(PAYROLL, dates) %>%
       summarise(FTE = sum(FTE, na.rm = T)) 
-    
-  
-    
+
     kdata[is.na(kdata)] <- 0
     kdata <- kdata %>% 
       ungroup() %>% 
       arrange(desc(colnames(kdata)[ncol(kdata)])) 
     
-  
     kdata[3:length(kdata)] <- round(kdata[3:length(kdata)] , digits_round) 
     kdata <- kdata %>%
-      rename(Site= PAYROLL)
+      rename(Site = PAYROLL)
     
-    #kdata <- tail(kdata, 10)
-    
-     
-      
+
       ggplotly(
         ggplot(data = kdata, aes(x = dates, y = FTE, group = Site, color = Site))+
           geom_line(size = 1.5)+
@@ -388,31 +345,24 @@ server <- function(input, output, session) {
                                      '<sup>',
                                      "Worked FTE's By Pay Period",
                                      '</sup>')),
-               margin = list(l = 75, t = 75))
-     
-   
-  
+               margin = list(l = 75, t = 75))  
   }) 
   
   
   output$site_table <- renderDT({
     
     kdata <- Data_Service() 
-    
-    # kdata <- data %>%
-    # filter(PAYROLL %in% c("MSH", "MSM")) %>%
-    #   filter(CORPORATE.SERVICE.LINE== "Support Services - Patient Transport")
-    
+
     avg <- kdata %>%
       filter(year(PP.END.DATE) == max(year(data$PP.END.DATE)))%>%
       group_by(PAYROLL, dates) %>%
       summarise(FTE = sum(FTE, na.rm = T)) %>%
       group_by(PAYROLL)%>%
-      summarise(FTE = mean(FTE, na.rm = T))%>%
-      rename(`Reporting Year Avg.`= FTE)
+      summarise(FTE = as.numeric(format(round(mean(FTE, na.rm = T),
+                                              digits = digits_round),
+                                        nsmall = 2))) %>%
+      rename(`FYTD Avg.`= FTE)
       
-    
-    
     kdata <- kdata %>% 
       group_by(PAYROLL, dates) %>%
       summarise(FTE = sum(FTE, na.rm = T)) %>%
@@ -420,15 +370,10 @@ server <- function(input, output, session) {
                   names_from = dates,
                   values_from = FTE)
     
-    
-    #kdata <- kdata %>% select(PAYROLL, (ncol(kdata)-10):ncol(kdata))
-    
-    
     kdata[is.na(kdata)] <- 0
     kdata <- kdata %>% 
       ungroup() %>% 
       arrange(desc(colnames(kdata)[ncol(kdata)])) 
-    
     
     
     kdata$`Reporting Period Avg.` <- apply(kdata[,(ncol(kdata)-2):ncol(kdata)], 1,mean)
@@ -445,12 +390,7 @@ server <- function(input, output, session) {
                         options = list(
                           columnDefs = list(list(className = 'dt-center', targets = "_all")))) %>%
       formatStyle(columns = c("Site", "Reporting Period Avg.", "Reporting Year Avg."), fontWeight = 'bold')
-    
-    
-    
   })
-  
-  
   
   ## department tab -----------------------------------------------
   
@@ -458,19 +398,11 @@ server <- function(input, output, session) {
     
     data_service <- Department_Data() 
 
-    
-    # kdata <- data %>% filter(PAYROLL %in% c("MSH")) %>%
-    #    filter(CORPORATE.SERVICE.LINE== "Support Services - Patient Transport")
-    # 
-    
     data_service <-  data_service %>% 
       pivot_wider(id_cols = c("DEFINITION.CODE","DEFINITION.NAME","DEPARTMENT"),
                   names_from = "dates",
                   values_from = FTE) #pivot dataframe to bring in NAs for missing PP
-    
-    
-    
-    #data_service <- data_service[,c(1:3,(ncol(data_service)-9):ncol(data_service))]
+
     data_service <- data_service  %>% 
       pivot_longer(cols = 4:ncol(data_service),
                    names_to = "dates") %>% 
@@ -478,8 +410,7 @@ server <- function(input, output, session) {
         is.na(value) ~ 0, #if FTE is NA -> 0
         !is.na(value) ~ value), #else leave the value
         FTE = round(value,digits_round)) #turn dates into factor
-    
-    
+  
     ggplotly(
       ggplot(data = data_service,
              aes(x = dates , y = FTE, group = DEPARTMENT, color = DEPARTMENT))+
@@ -507,64 +438,44 @@ server <- function(input, output, session) {
                                    "Worked FTE's By Pay Period",
                                    '</sup>')),
              margin = list(l = 75, t = 75))
-    
-    
-    
   }) 
   
   
   output$department_table <- renderDT({
     
     kdata <- Department_Data() 
-    
-    # kdata <- data %>%
-    # filter(PAYROLL == "MSH") %>%
-    #   filter(CORPORATE.SERVICE.LINE== "Support Services - Patient Transport")
-    
-    #kdata <- tail(kdata, 10)
-    
-    
+
     avg <- kdata %>%
       filter(year(PP.END.DATE) == max(year(data$PP.END.DATE)))%>%
       group_by(DEPARTMENT, dates) %>%
       summarise(FTE = sum(FTE, na.rm = T)) %>%
       group_by(DEPARTMENT)%>%
-      summarise(FTE = mean(FTE, na.rm = T))%>%
-      rename(`Reporting Year Avg.`= FTE)
+      summarise(FTE = as.numeric(format(round(mean(FTE, na.rm = T),
+                                              digits = digits_round),
+                                        nsmall = 2))) %>%
+      rename(`FYTD Avg.`= FTE)
     
     
     kdata <- kdata %>% 
       pivot_wider(id_cols = DEPARTMENT,
                   names_from = dates,
                   values_from = FTE)
-    
-    
-    
-    
+
     kdata[is.na(kdata)] <- 0
     kdata <- kdata %>% 
       ungroup() %>% 
       arrange(desc(colnames(kdata)[ncol(kdata)])) 
-    
-    
-    
+ 
     kdata$`Reporting Period Avg.` <- apply(kdata[,(ncol(kdata)-2):ncol(kdata)], 1,mean)
     kdata <- left_join(kdata, avg , by = "DEPARTMENT")
     kdata[2:length(kdata)] <- round(kdata[2:length(kdata)] , digits_round) 
-    
-    
-  
-    
     
     kdata <-  datatable(kdata, 
                         class = 'cell-border stripe',
                         rownames = FALSE,
                         options = list(
                           columnDefs = list(list(className = 'dt-center', targets = "_all")))) %>%
-      formatStyle(columns = c("DEPARTMENT", "Reporting Period Avg.", "Reporting Year Avg."), fontWeight = 'bold')
-    
-    
-    
+      formatStyle(columns = c("DEPARTMENT", "Reporting Period Avg.", "FYTD Avg."), fontWeight = 'bold')    
   })
     
   

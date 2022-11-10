@@ -39,9 +39,6 @@ System_Summary <- readRDS(paste0("J:/deans/Presidents/SixSigma/",
 
 
 ## constants ------------------------------------------------------------------
-worked_paycodes <- c('REGULAR', 'OVERTIME', 'OTHER_WORKED', 'EDUCATION',
-                     'ORIENTATION', 'AGENCY')
-
 report_period_length <- 3
 biweekly_fte <- 75
 digits_round <- 2
@@ -59,7 +56,7 @@ data <- System_Summary %>%
            PP.END.DATE >as.Date("5/9/2020",format="%m/%d/%Y"),  
          PROVIDER == 0, 
          INCLUDE.HOURS == 1, 
-         PAY.CODE.MAPPING %in% worked_paycodes) %>% # will change when task 8 completed 
+         WORKED.PAY.CODE == 1) %>%
   group_by(PAYROLL,DEFINITION.CODE,DEFINITION.NAME,
            CORPORATE.SERVICE.LINE,PP.END.DATE) %>%
   summarise(FTE = sum(HOURS, na.rm = T)/biweekly_fte) %>% 
@@ -93,7 +90,6 @@ data <- data %>%
     DATES = as.character(PP.END.DATE),
     PP.END.DATE = as.Date(PP.END.DATE,format="%Y-%m-%d"),
     dates = format(as.Date(PP.END.DATE, "%B %d %Y"), "%m/%d/%y"))
-
 
 # (2) Color Theme -----------------------------------------------------------
 
@@ -147,7 +143,7 @@ MountSinai_pal <- function(palette = "main", reverse = FALSE, ...) {
   
   if (reverse) pal <- rev(pal)
   
-  colorRampPalette(pal, ...)
+  colorRampPalette(pal, interpolate = "spline", ...)
 
 }
 

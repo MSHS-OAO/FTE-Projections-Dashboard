@@ -78,7 +78,6 @@ ui <- dashboardPage(
                                                  actionsBox = TRUE,
                                                  dropupAuto = FALSE),
                                                choices = service_choices,  selected = "Nursing")),
-                               
                                box(width = 4, height = "100px",
                                    title = "Select Pay Period End Date:",  solidHeader = FALSE,
                                    pickerInput("mshs_DateRange",label= NULL, multiple= F, 
@@ -144,7 +143,6 @@ ui <- dashboardPage(
                                                liveSearch = TRUE,
                                                actionsBox = TRUE),
                                              choices = service_choices,  selected = "Nursing")),
-                             
                              box(width = 3, height = "100px",
                                  title = "Select Pay Period End Date:",  solidHeader = FALSE,
                                  pickerInput("DateRange",label= NULL, multiple= F, 
@@ -212,7 +210,6 @@ ui <- dashboardPage(
                                                actionsBox = TRUE,
                                                dropupAuto = FALSE),
                                              choices = service_choices,  selected = "Nursing")),
-                             
                              box(width = 3, height = "100px",
                                  title = "Select Pay Period End Date:",  solidHeader = FALSE,
                                  pickerInput("dep_DateRange",label= NULL, multiple= F, 
