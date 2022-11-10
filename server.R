@@ -389,7 +389,7 @@ server <- function(input, output, session) {
                         rownames = FALSE,
                         options = list(
                           columnDefs = list(list(className = 'dt-center', targets = "_all")))) %>%
-      formatStyle(columns = c("Site", "Reporting Period Avg.", "Reporting Year Avg."), fontWeight = 'bold')
+      formatStyle(columns = c("Site", "Reporting Period Avg.", "FYTD Avg."), fontWeight = 'bold')
   })
   
   ## department tab -----------------------------------------------
@@ -444,7 +444,7 @@ server <- function(input, output, session) {
   
   output$department_table <- renderDT({
     
-    kdata <- Department_Data() 
+    kdata <- Department_Data()
 
     avg <- kdata %>%
       filter(year(PP.END.DATE) == max(year(data$PP.END.DATE)))%>%
