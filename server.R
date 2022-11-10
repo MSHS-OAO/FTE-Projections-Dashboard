@@ -237,8 +237,7 @@ server <- function(input, output, session) {
         theme(plot.title = element_text(hjust = 0.5, size = 20),
               axis.title = element_text(face ="bold"),
               legend.text = element_text(size = 6))) %>%
-
-        layout(title = list(text = 
+      layout(title = list(text = 
                             isolate(
                               paste0(
                                 paste0(c('MSHS',
@@ -246,7 +245,7 @@ server <- function(input, output, session) {
                                            paste0('Multiple ',
                                                   input$mshs_selectedGroup,
                                                   ' Departments')
-                                         }else{input$mshs_selectedService}),
+                                           }else{input$mshs_selectedService}),
                                        collapse = ", "),
                                 '<br>',
                                 '<sup>',
@@ -320,32 +319,33 @@ server <- function(input, output, session) {
       rename(Site = PAYROLL)
     
 
-      ggplotly(
-        ggplot(data = kdata, aes(x = dates, y = FTE, group = Site, color = Site))+
-          geom_line(size = 1.5)+
-          geom_point(size = 2.75)+
-          ggtitle(label = 'placeholder')+
-          xlab("Pay Period")+
-          ylab("FTE (Full Time Equivalent)")+
-          scale_color_manual(values = MountSinai_pal("main")(length(kdata$Site)))+
-          scale_y_continuous(limits = c(0, max(kdata$FTE)*1.2))+
-          theme(plot.title = element_text(hjust = 0.5, size = 20),
-                axis.title = element_text(face = "bold"),
-                legend.text = element_text(size = 6))) %>%
-        layout(title = list(text = 
-                              paste0(isolate(paste0(c(input$selectedPayroll,
-                                                      if(sum(nchar(input$selectedService)) > 40){
-                                                        paste0('Multiple ',
-                                                               input$selectedGroup,
-                                                               ' Departments')
-                                                      }else{
-                                                        input$selectedService}),
-                                                    collapse = ", ")),
-                                     '<br>',
-                                     '<sup>',
-                                     "Worked FTE's By Pay Period",
-                                     '</sup>')),
-               margin = list(l = 75, t = 75))  
+    ggplotly(
+      ggplot(data = kdata, aes(x = dates, y = FTE, group = Site, color = Site))+
+        geom_line(size = 1.5)+
+        geom_point(size = 2.75)+
+        ggtitle(label = 'placeholder')+
+        xlab("Pay Period")+
+        ylab("FTE (Full Time Equivalent)")+
+        scale_color_manual(values = MountSinai_pal("main")(length(kdata$Site)))+
+        scale_y_continuous(limits = c(0, max(kdata$FTE)*1.2))+
+        theme(plot.title = element_text(hjust = 0.5, size = 20),
+              axis.title = element_text(face = "bold"),
+              legend.text = element_text(size = 6))) %>%
+      layout(title = list(text = 
+                            isolate(
+                              paste0(
+                                paste0(c(input$selectedPayroll,
+                                         if(sum(nchar(input$selectedService)) > 40){
+                                           paste0('Multiple ',
+                                                  input$selectedGroup,
+                                                  ' Departments')
+                                           }else{input$selectedService}),
+                                       collapse = ", "),
+                                '<br>',
+                                '<sup>',
+                                "Worked FTE's By Pay Period",
+                                '</sup>'))),
+             margin = list(l = 75, t = 75))
   }) 
   
   
@@ -425,18 +425,19 @@ server <- function(input, output, session) {
               axis.title = element_text(face ="bold"),
               legend.text = element_text(size = 6))) %>%
       layout(title = list(text = 
-                            paste0(isolate(paste0(c(input$dep_selectedPayroll,
-                                            if(sum(nchar(input$dep_selectedService)) > 38){
-                                              paste0('Multiple ',
-                                                     input$dep_selectedGroup,
-                                                     ' Departments')
-                                            }else{
-                                              input$dep_selectedService}),
-                                          collapse = ", ")),
-                                   '<br>',
-                                   '<sup>',
-                                   "Worked FTE's By Pay Period",
-                                   '</sup>')),
+                            isolate(
+                              paste0(
+                                paste0(c(input$dep_selectedPayroll,
+                                         if(sum(nchar(input$dep_selectedService)) > 40){
+                                           paste0('Multiple ',
+                                                  input$dep_selectedGroup,
+                                                  ' Departments')
+                                           }else{input$dep_selectedService}),
+                                       collapse = ", "),
+                                '<br>',
+                                '<sup>',
+                                "Worked FTE's By Pay Period",
+                                '</sup>'))),
              margin = list(l = 75, t = 75))
   }) 
   
