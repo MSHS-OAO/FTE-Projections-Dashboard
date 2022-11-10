@@ -370,12 +370,28 @@ server <- function(input, output, session) {
 
     data_service <- data_service  %>% 
       pivot_longer(cols = 4:ncol(data_service),
-                   names_to = "dates") %>% 
+                   names_to = "dates") %>%
       mutate(FTE = case_when(
         is.na(value) ~ 0, #if FTE is NA -> 0
         !is.na(value) ~ value), #else leave the value
-        FTE = round(value,digits_round)) #turn dates into factor
-  
+        FTE = round(value,digits_round),#turn dates into factor
+        DEPARTMENT = case_when(
+          nchar(DEPARTMENT) > 20 ~ paste0(
+            substr(DEPARTMENT, 0, 20),
+            '<br>',
+            substr(DEPARTMENT, 20, nchar(DEPARTMENT))),
+          TRUE ~ DEPARTMENT))
+    
+    # paste0(
+    #   substring(DEPARTMENT,
+    #             first = seq(from = 1,
+    #                         to = nchar(DEPARTMENT),
+    #                         by = 20),
+    #             last = seq(from = 1,
+    #                        to = nchar(DEPARTMENT),
+    #                        by = 20)+19),
+    #   collapse = '<br>')
+    
     ggplotly(
       ggplot(data = data_service,
              aes(x = dates , y = FTE, group = DEPARTMENT, color = DEPARTMENT))+
