@@ -374,23 +374,11 @@ server <- function(input, output, session) {
       mutate(FTE = case_when(
         is.na(value) ~ 0, #if FTE is NA -> 0
         !is.na(value) ~ value), #else leave the value
-        FTE = round(value,digits_round),#turn dates into factor
-        DEPARTMENT = case_when(
-          nchar(DEPARTMENT) > 20 ~ paste0(
-            substr(DEPARTMENT, 0, 20),
-            '<br>',
-            substr(DEPARTMENT, 20, nchar(DEPARTMENT))),
-          TRUE ~ DEPARTMENT))
+        FTE = round(value,digits_round)) #turn dates into factor
+    data_service$DEPARTMENT <- sapply(data_service$DEPARTMENT, 
+                                      function(x)
+                                        string_separate_to_lines(x,max_length = 20))
     
-    # paste0(
-    #   substring(DEPARTMENT,
-    #             first = seq(from = 1,
-    #                         to = nchar(DEPARTMENT),
-    #                         by = 20),
-    #             last = seq(from = 1,
-    #                        to = nchar(DEPARTMENT),
-    #                        by = 20)+19),
-    #   collapse = '<br>')
     
     ggplotly(
       ggplot(data = data_service,
