@@ -44,8 +44,10 @@ biweekly_fte <- 75
 digits_round <- 2
 
 # Get Reporting Period data range
-report_start_date <- format(max(System_Summary$PP.END.DATE)-41, "%m/%d/%Y")
-report_end_date <- format(max(System_Summary$PP.END.DATE), "%m/%d/%Y")
+report_start_date <- format(max(System_Summary$PP.END.DATE)-41, "%m/%d/%y")
+report_end_date <- format(max(System_Summary$PP.END.DATE), "%m/%d/%y")
+
+
 
 
 ## Pre filter data ------------------------------------------------------------
