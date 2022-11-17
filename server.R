@@ -405,12 +405,16 @@ server <- function(input, output, session) {
 
     data_service <- data_service  %>% 
       pivot_longer(cols = 4:ncol(data_service),
-                   names_to = "dates") %>% 
+                   names_to = "dates") %>%
       mutate(FTE = case_when(
         is.na(value) ~ 0, #if FTE is NA -> 0
         !is.na(value) ~ value), #else leave the value
         FTE = round(value,digits_round)) #turn dates into factor
-  
+    data_service$DEPARTMENT <- sapply(data_service$DEPARTMENT, 
+                                      function(x)
+                                        string_separate_to_lines(x,max_length = 20))
+    
+    
     ggplotly(
       ggplot(data = data_service,
              aes(x = dates , y = FTE, group = DEPARTMENT, color = DEPARTMENT))+

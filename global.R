@@ -148,3 +148,23 @@ MountSinai_pal <- function(palette = "main", reverse = FALSE, ...) {
 }
 
 
+# Other Functions ---------------------------------------------------------
+string_separate_to_lines <- function(string, max_length){
+  max_lines <- ceiling(nchar(string)/max_length)
+  if(max_lines == 1){
+    return(string)
+  }else if (max_lines > 1){
+    word_list <- unlist(str_split(string, pattern = " ")) #each word as its own vector
+    text_lines <- vector(mode = 'character', length = max_lines)
+    for(x in 1:max_lines){
+      y <- 0
+      while(sum(nchar(paste(word_list[1:y], collapse = " "))) < max_length
+            & y <= length(word_list)){
+        y <- y + 1
+      }
+      text_lines[x] <- paste(word_list[1:y-1], collapse = " ")
+      word_list <- word_list[y:length(word_list)]
+    }
+    return(paste(text_lines, collapse = '<br>'))
+  }
+}
