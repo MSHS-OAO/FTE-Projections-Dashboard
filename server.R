@@ -2,70 +2,109 @@
 
 server <- function(input, output, session) {
   
-
-# Print text output
-  output$mshs_DateShow <- renderText({
-    dates_index <- sapply(input$mshs_DateRange,  function(x) grep(x, date_options) + 10)
-    start_date_input <- as.Date(date_options[dates_index], format = "%m/%d/%y")+1
-    start_date_input <- format(as.Date(start_date_input, "%B %d %Y"), "%m/%d/%y")
+  ## Text output for MSHS -------------------------------
+  mshs_text <- eventReactive(input$mshs_FiltersUpdate, {
     
-    paste0("Based on data from ", start_date_input," to ", input$mshs_DateRange,
-           " for MSHS")
-  })
+  end_date <- isolate(input$mshs_DateRange)
+  dates_index <- sapply(end_date,  function(x) grep(x, date_options) + 10)
+  start_date_input <- as.Date(date_options[dates_index], format = "%m/%d/%y")+1
+  start_date_input <- format(as.Date(start_date_input, "%B %d %Y"), "%m/%d/%y")
+    
+  paste0("Based on data from ", start_date_input," to ", end_date," for MSHS")
+  }, ignoreNULL = FALSE)
+  
+  output$mshs_DateShow  <- renderText({
+    mshs_text()
+  }) 
   
   
+  mshs_reporting <- eventReactive(input$mshs_FiltersUpdate, {
+  
+  end_date <- isolate(input$mshs_DateRange)
+  reporting_index <- sapply(end_date,  function(x) grep(x, date_options) + 3)
+  reporting_start_date <- as.Date(date_options[reporting_index], format = "%m/%d/%y")+1
+  reporting_start_date <- format(as.Date( reporting_start_date, "%B %d %Y"), "%m/%d/%y")
+    
+    paste0("Reporting period: ", reporting_start_date," to ", end_date )
+    
+  }, ignoreNULL = FALSE)
+    
   
   output$mshs_reportingDate <- renderText({
-    
-    reporting_index <- sapply(input$mshs_DateRange,  function(x) grep(x, date_options) + 3)
-    reporting_start_date <- as.Date(date_options[reporting_index], format = "%m/%d/%y")+1
-    reporting_start_date <- format(as.Date( reporting_start_date, "%B %d %Y"), "%m/%d/%y")
-    
-    paste0("Reporting period: ", reporting_start_date," to ", input$mshs_DateRange)
-    
+    mshs_reporting()
   })
   
-  output$siteName_DateShow <- renderText({
-    dates_index <- sapply(input$DateRange,  function(x) grep(x, date_options) + 10)
+  
+  ## text output for Site ---------------------------------------------
+  site_text <- eventReactive(input$FiltersUpdate, {
+    end_date <- isolate(input$DateRange)
+    dates_index <- sapply(end_date,  function(x) grep(x, date_options) + 10)
     start_date_input <- as.Date(date_options[dates_index], format = "%m/%d/%y")+1
     start_date_input <- format(as.Date(start_date_input, "%B %d %Y"), "%m/%d/%y")
     
-    paste0("Based on data from ", min(start_date_input)," to ", max(input$DateRange),
+    paste0("Based on data from ", min(start_date_input)," to ", max(end_date),
            " for ", paste(sort(input$selectedPayroll), collapse = ', ')) 
+    
+  }, ignoreNULL = FALSE)
+  
+  
+  output$siteName_DateShow <- renderText({
+    site_text()
            
   })
   
-  output$site_reportingDate <- renderText({
-    
-    reporting_index <- sapply(input$DateRange,  function(x) grep(x, date_options) + 3)
+  
+  site_reporting <- eventReactive(input$FiltersUpdate, {
+    end_date <- isolate(input$DateRange)
+    reporting_index <- sapply(end_date,  function(x) grep(x, date_options) + 3)
     reporting_start_date <- as.Date(date_options[reporting_index], format = "%m/%d/%y")+1
     reporting_start_date <- format(as.Date(reporting_start_date, "%B %d %Y"), "%m/%d/%y")
     
-    paste0("Reporting period: ", min( reporting_start_date)," to ", max(input$DateRange))
+    paste0("Reporting period: ", min( reporting_start_date)," to ", max(end_date))
     
+  }, ignoreNULL = FALSE)
+  
+  
+  output$site_reportingDate <- renderText({
+    site_reporting()
   })
   
   
-  output$Department_DateShow <- renderText({
+  ## Text output for department -------------------------------------
+  dep_text <- eventReactive(input$dep_FiltersUpdate, {
     
-    dates_index <- sapply(input$dep_DateRange,  function(x) grep(x, date_options) + 10)
+    end_date <- isolate(input$dep_DateRange)
+    dates_index <- sapply(end_date ,  function(x) grep(x, date_options) + 10)
     start_date_input <- as.Date(date_options[dates_index], format = "%m/%d/%y")+1
     start_date_input <- format(as.Date(start_date_input, "%B %d %Y"), "%m/%d/%y")
     
-    paste0("Based on data from ", min(start_date_input)," to ", max(input$dep_DateRange),
+    paste0("Based on data from ", min(start_date_input)," to ", max(end_date),
            " for ", paste(sort(input$dep_selectedPayroll), collapse = ', ')) 
     
+  }, ignoreNULL = FALSE)
+  
+  
+  output$Department_DateShow <- renderText({
+    dep_text()
   })
   
-
-  output$Department_reportingDate <- renderText({
+  
+  dep_reporting <- eventReactive(input$dep_FiltersUpdate, {
     
-    reporting_index <- sapply(input$dep_DateRange,  function(x) grep(x, date_options) + 3)
+    end_date <- isolate(input$dep_DateRange)
+    reporting_index <- sapply(end_date,  function(x) grep(x, date_options) + 3)
     reporting_start_date <- as.Date(date_options[reporting_index], format = "%m/%d/%y")+1
     reporting_start_date <- format(as.Date( reporting_start_date, "%B %d %Y"), "%m/%d/%y")
     
-    paste0("Reporting period: ", min( reporting_start_date)," to ", max(input$dep_DateRange))
+    paste0("Reporting period: ", min( reporting_start_date)," to ", max(end_date))
     
+  }, ignoreNULL = FALSE)
+    
+  
+  
+  output$Department_reportingDate <- renderText({
+
+    dep_reporting()
   })
   
   ## eventReactive for MSHS ------------------------------

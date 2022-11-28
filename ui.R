@@ -18,19 +18,39 @@ ui <- dashboardPage(
       dashboardHeader(title= "MSHS Worked FTE Dashboard", titleWidth = 250),
       
       dashboardSidebar(width = 250,
-                       sidebarMenu(menuItem("Home", tabName = "home", icon = icon("home")),
-                                   menuItem("MSHS", tabName = "mshs", icon = icon("hospital")),
-                                   menuItem("Hospitals", tabName = "site", icon = icon("hospital")),
-                                   menuItem("Department", tabName = "department", icon = icon("hospital"))
+                       
+      # change the navigation bar color                 
+      tags$head(tags$style(HTML('
+                              .navbar {
+                              background-color: #221F72 !important;
+                              }'
+                         ))),
+      
+      #change the logo bar color 
+      tags$head(tags$style(HTML('
+                              .logo {
+                              background-color: #221F72 !important;
+                              }'
+                         ))),
+                       
+      sidebarMenu(menuItem("Home", tabName = "home", icon = icon("home")),
+                  menuItem("MSHS", tabName = "mshs", icon = icon("hospital")),
+              menuItem("Hospitals", tabName = "site", icon = icon("hospital")),
+        menuItem("Department", tabName = "department", icon = icon("hospital"))
                                    )),
                                   
       
       dashboardBody(
         tabItems(
-          ## tab HOME ------------
+          ## tab HOME ----------------------------------------
           tabItem(tabName = "home",
+                  
                   column(12, 
-                         tags$div("MSHS Worked FTE Dashboard", style = "color:	#221f72; font-weight:bold; font-size:34px; margin-left: 20px" ,
+                       tags$img(src = "Sinai_logo_color.png", height = "200px", 
+                           width = "300px", deleteFiles = FALSE)),
+                  
+                  column(12, 
+                         tags$div("MSHS Worked FTE Dashboard", style = "color: #221f72; font-weight:bold; font-size:34px; margin-left: 20px" ,
                                   h3("Health System Operations"),
                                   h4(paste0("Publish Date: ", format(as.Date(Sys.Date(), "%B %d %Y"), "%m/%d/%y"))),
                                   #h4(paste0("Reporting Period: ",report_start_date, " to ", report_end_date ))
@@ -43,15 +63,14 @@ ui <- dashboardPage(
                   
                 
                   column(12,
-                         tags$div(id= "data description", style= "color:	#221f72; font-size:14px; margin-left: 20px",
+                         tags$div(id= "data description", style= "color: #221f72; font-size:14px; margin-left: 20px",
                                   h3("Data Notes"),
                                   h5("* Department does not currently have a Premier productivity report"),
                                   h5("1 FTE = 75 Worked Hours/Pay Period")))
                   
-                  ),
+                   ),
           
           ## tab MSHS --------------------------------------------
-          
           tabItem(tabName = "mshs",
                   div("MSHS Worked FTE Dashboard", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:25px; margin-left: 20px"),
                   textOutput("mshs_DateShow"),
@@ -59,8 +78,13 @@ ui <- dashboardPage(
                   tags$head(tags$style("#mshs_DateShow{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 18px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
                   tags$head(tags$style("#mshs_reportingDate{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 16px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
                   
+                  tags$head(tags$style(HTML("#mshs_FiltersUpdate {background-color: #d80b8c;color: #FFFFFF; font-size: 18px}"))),
+                                            
+                  
                   fluidRow(
                     
+                  tags$style(HTML(".box.box-solid.box-primary>.box-header {background:#221f72; color:#fff}")),
+    
                     column(11,
                            box(
                              title = NULL, width = 12, status = "primary", 
@@ -125,6 +149,9 @@ ui <- dashboardPage(
                   tags$head(tags$style("#siteName_DateShow{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 18px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
                   tags$head(tags$style("#site_reportingDate{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 16px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
                   
+                  tags$head(tags$style(HTML("#FiltersUpdate {background-color: #d80b8c;color: #FFFFFF; font-size: 18px}"))),
+                  
+                  fluidRow(
                   column(11,
                          box(
                            title = NULL, width = 12, status = "primary", 
@@ -153,16 +180,14 @@ ui <- dashboardPage(
                              
                              
                              column(5,
-                                    actionButton("FiltersUpdate", "CLICK TO UPDATE", width = "75%"),
+                                    actionButton("FiltersUpdate", "CLICK TO UPDATE", width = "57%"),
                                     br(),
                                     br()
                              )
                            )
                          )),
                   
-                  
-                  
-            fluidRow(
+            
               column(11,
                      box(title = NULL, status = "primary",
                          solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
@@ -189,8 +214,9 @@ ui <- dashboardPage(
                   tags$head(tags$style("#Department_DateShow{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 18px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
                   tags$head(tags$style("#Department_reportingDate{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 16px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
                   
+                  tags$head(tags$style(HTML("#dep_FiltersUpdate {background-color: #d80b8c;color: #FFFFFF; font-size: 18px}"))),
                   
-                  
+                  fluidRow(
                   column(11,
                          box(
                            title = NULL, width = 12, status = "primary", 
@@ -221,14 +247,14 @@ ui <- dashboardPage(
                              
                              
                              column(5,
-                                    actionButton("dep_FiltersUpdate", "CLICK TO UPDATE", width = "75%"),
+                                    actionButton("dep_FiltersUpdate", "CLICK TO UPDATE", width = "57%"),
                                     br(),
                                     br()
                              )
                            )
                          )),
                   
-                  fluidRow(
+                  
                     column(11,
                            box(title = NULL, status = "primary",
                                solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
