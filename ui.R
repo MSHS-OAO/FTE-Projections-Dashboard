@@ -12,12 +12,22 @@ service_choices <- sort(unique(as.character(data$CORPORATE.SERVICE.LINE[data$PAY
 date_options <- sort(unique(data$PP.END.DATE), decreasing = T)
 date_options <- format(as.Date(date_options, "%B %d %Y"), "%m/%d/%y")
 
+
+
+
+header <- dashboardHeader(title= "MSHS Worked FTE Dashboard", titleWidth = 450)
+header$children[[2]]$children[[2]] <- header$children[[2]]$children[[1]]
+header$children[[2]]$children[[1]] <-  tags$a(href='https://peak.mountsinai.org/',
+                                              tags$img(src='Sinai_logo_white.png',height='100%',width='30%'))
   
 
 ui <- dashboardPage(
-      dashboardHeader(title= "MSHS Worked FTE Dashboard", titleWidth = 250),
+      #dashboardHeader(title= "MSHS Worked FTE Dashboard", titleWidth = 250),
       
-      dashboardSidebar(width = 250,
+      header,
+      
+      
+      dashboardSidebar(width = 300,
                        
       # change the navigation bar color                 
       tags$head(tags$style(HTML('
@@ -32,6 +42,8 @@ ui <- dashboardPage(
                               background-color: #221F72 !important;
                               }'
                          ))),
+      
+    
                        
       sidebarMenu(menuItem("Home", tabName = "home", icon = icon("home")),
                   menuItem("MSHS", tabName = "mshs", icon = icon("hospital")),
