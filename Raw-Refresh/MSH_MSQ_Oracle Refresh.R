@@ -29,7 +29,7 @@ max(as.Date(repo$End.Date, format = "%m/%d/%Y"))
 
 # Get file names in raw data folder
 details <- file.info(list.files(path = paste0(dir,
-                                   "Labor/Raw Data/MSHQ Oracle/MSHQ Oracle/"),
+                                   "Labor/Raw Data/MSHQ Oracle/"),
                                 pattern = "*.txt", full.names = T)) %>%
                                   arrange(mtime)
 
@@ -116,7 +116,7 @@ if (answer == "No") {
                                                 dist_dates$END.DATE) - 1)
   start_dates <- as.Date(dist_dates$END.DATE[start_dates_index],
                          format = "%m/%d/%Y") + 1
-
+}
 
 
 
