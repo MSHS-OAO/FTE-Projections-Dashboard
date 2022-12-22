@@ -44,13 +44,16 @@ answer <- select.list(choices = c("Yes", "No"),
 
 
 if (answer == "Yes" &
-    length(rownames(details)[!(rownames(details) %in% repo$Filename)]) == 0) {
+    length(basename(rownames(details))[!(basename(rownames(details)) 
+                                         %in% repo$Filename)]) == 0) {
   # let user know they need to update raw data folder
   stop("Please update the raw data folder first.")
 } else if (answer == "Yes" &
-      length(rownames(details)[!(rownames(details) %in% repo$Filename)]) > 0) {
+           length(basename(rownames(details))[!(basename(rownames(details)) 
+                                                %in% repo$Filename)]) > 0) {
   # get path(s) of file(s) to be appended to REPO file
-  oracle_file_list <- rownames(details)[!(rownames(details) %in% repo$Filename)]
+  oracle_file_list <- basename(rownames(details))[!(basename(rownames(details)) 
+                                                    %in% repo$Filename)]
   print(oracle_file_list)
 } else {
   # user selects files they would like to update within the REPO file
@@ -61,17 +64,19 @@ if (answer == "Yes" &
   # remove the update files from current REPO
   repo <- repo %>% filter(!(Filename %in% update_file_list))
   # get path(s) of file(s) to be updated within REPO
-  oracle_file_list <- rownames(details)[rownames(details) %in% update_file_list]
+  oracle_file_list <- basename(rownames(details))[basename(rownames(details))
+                                                  %in% basename(update_file_list)]
   print(oracle_file_list)
 }
 
 #Read files in MSHQ Raw as csv
-oracle_list <- lapply(oracle_file_list, function(x) {
+oracle_list <- lapply(paste0(dir, "Labor/Raw Data/MSHQ Oracle/", 
+                             oracle_file_list), function(x) {
   data <- read.csv(x, sep = "~", header = T,
                    stringsAsFactors = F,
                    colClasses = rep("character", 32),
                    strip.white = TRUE) %>%
-    mutate(Filename = x)
+    mutate(Filename = basename(x))
 })
 
 # get the required end_date and start date-------------------------------------
@@ -126,31 +131,13 @@ oracle_list <- lapply(1:length(oracle_list), function(x)
     filter(as.Date(End.Date, format = "%m/%d/%Y") <= end_dates[x],
            as.Date(Start.Date, format = "%m/%d/%Y") >= start_dates[x]))
 
-
 # bind all new/updated data
 oracle <- do.call("rbind", oracle_list)
 
-
-# Add worked entity column --------------------------
-oracle  <- oracle  %>% mutate(WRKD.ENTITY = substr(WD_COFT, 1, 3),
-                              Hours = as.numeric(Hours),
-                              Expense = as.numeric(Expense))
-
-# summarise hours and expenses
-oracle  <- oracle  %>%
-  group_by_at(vars(-Hours, -Expense)) %>%
-  summarise(Hours = sum(Hours, na.rm = T),
-            Expense = sum(Expense, na.rm = T)) %>%
-  ungroup() %>%
-  distinct()
-
-
-
 # Determine PAYROLL based on WRKD.ENTITY  -------------------------------------
 oracle  <- oracle  %>%
-  mutate(PAYROLL = case_when(WRKD.ENTITY == "102" ~ "MSQ",
+  mutate(PAYROLL = case_when(substr(WD_COFT, 1, 3) == "102" ~ "MSQ",
                              TRUE ~ "MSH"))
-
 
 # Bind NEW data with repository -----------------------------------------------
 new_repo <- rbind(repo, oracle)
@@ -161,14 +148,12 @@ new_repo <- new_repo %>%
 check <- new_repo %>%
   ungroup() %>%
   group_by(PAYROLL, End.Date) %>%
-  summarise(Hours = sum(Hours)) %>%
+  summarise(Hours = sum(as.numeric(Hours))) %>%
   mutate(End.Date = as.Date(End.Date, format = "%m/%d/%Y")) %>%
   arrange(End.Date)
 
 check1 <- pivot_wider(check, id_cols = PAYROLL, values_from = Hours,
                       names_from = End.Date)
-
-
 
 #save RDS ----------------------------------------------------------------------
 saveRDS(new_repo, file = paste0(dir, "Labor/RDS/data_MSH_MSQ_oracle.rds"))
