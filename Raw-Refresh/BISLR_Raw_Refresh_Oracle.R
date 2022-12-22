@@ -45,16 +45,18 @@ answer <- select.list(choices = c("Yes", "No"),
                       title = "Is there a new data?",
                       graphics = T)
 
-
 if (answer == "Yes" &
-    length(rownames(details)[!(rownames(details) %in% repo$Filename)]) == 0) {
+    length(basename(rownames(details))[!(basename(rownames(details)) 
+                                         %in% repo$Filename)]) == 0) {
   # let user know they need to update raw data folder
   stop("Please update the raw data folder first.")
 } else if (answer == "Yes" &
-      length(rownames(details)[!(rownames(details) %in% repo$Filename)]) > 0) {
+           length(basename(rownames(details))[!(basename(rownames(details)) 
+                                                %in% repo$Filename)]) > 0) {
   # get path(s) of file(s) to be appended to REPO file
-  bislr_file_list <- rownames(details)[!(rownames(details) %in% repo$Filename)]
-  print(bislr_file_list)
+  oracle_file_list <- basename(rownames(details))[!(basename(rownames(details)) 
+                                                    %in% repo$Filename)]
+  print(oracle_file_list)
 } else {
   # user selects files they would like to update within the REPO file
   update_file_list <-  select.list(choices = rownames(details),
@@ -64,19 +66,18 @@ if (answer == "Yes" &
   # remove the update files from current REPO
   repo <- repo %>% filter(!(Filename %in% update_file_list))
   # get path(s) of file(s) to be updated within REPO
-  bislr_file_list <- rownames(details)[rownames(details) %in% update_file_list]
-  print(bislr_file_list)
+  oracle_file_list <- basename(rownames(details))[basename(rownames(details))
+                                                  %in% basename(update_file_list)]
+  print(oracle_file_list)
 }
 
-#Read files in BISLR Raw as csv
-bislr_data_raw <- lapply(bislr_file_list, function(x) {
-             data <- read.csv(x, as.is = T, strip.white = T,
-                              colClasses = rep("character", 32)) %>%
-             mutate(Filename = x,
-             End.Date =  as.Date(End.Date, format = "%m/%d/%Y"),
-             Start.Date = as.Date(Start.Date, format = "%m/%d/%Y"))
-})
-
+#Read files in MSHQ Raw as csv
+oracle_list <- lapply(paste0(dir, "Labor/Raw Data/BISLR Oracle/", 
+                             oracle_file_list), function(x) {
+                               data <- read.csv(x, as.is = T, strip.white = T,
+                                                colClasses = rep("character", 32)) %>%
+                                 mutate(Filename = basename(x))
+                             })
 
 # get the required end_date and start date-------------------------------------
 ##Table of distribution dates
@@ -95,12 +96,12 @@ dist_dates <- dates %>%
 
 #End date is 1 week after the end of the current Premier Distribution
 end_dates <- as.Date(format(tail(dist_dates$END.DATE,
-                                 n = length(bislr_file_list)), "%m/%d/%Y"),
+                                 n = length(oracle_file_list)), "%m/%d/%Y"),
                      format = "%m/%d/%Y") + 7
 
 #Start date is 1 day after the end of the last Premier Distribution
 start_dates <- as.Date(format(tail(dist_dates$END.DATE,
-                            n = length(bislr_file_list) + 1), "%m/%d/%Y") %>%
+                            n = length(oracle_file_list) + 1), "%m/%d/%Y") %>%
                          head(previous_distribution, n = -1),
                        format = "%m/%d/%Y") + 1
 
@@ -125,13 +126,13 @@ if (answer == "No") {
                          format = "%m/%d/%Y") + 1
 }
 
-
-
 # Filtering each file by start/end date specified------------------------------
-data_bislr <- lapply(1 : length(bislr_data_raw), function(x)
-  bislr_data_raw[[x]] <- bislr_data_raw[[x]] %>%
-    filter(End.Date <= end_dates[x],
-           Start.Date >= start_dates[x]))
+data_bislr <- lapply(1 : length(oracle_list), function(x)
+  oracle_list[[x]] <- oracle_list[[x]] %>%
+    mutate(End.Date = as.Date(End.Date, format = "%m/%d/%Y"),
+           Start.Date = as.Date(Start.Date, format = "%m/%d/%Y")) %>%
+    filter(as.Date(End.Date, format = "%m/%d/%Y") <= end_dates[x],
+           as.Date(Start.Date, format = "%m/%d/%Y") >= start_dates[x]))
 
 
 # Filter overlapping weekly pay cycle in BISLR --------------------------------
@@ -242,6 +243,16 @@ data_bislr <- data_bislr %>%
 new_repo <- rbind(repo, data_bislr)
 new_repo <- new_repo  %>% distinct()
 
+# Check sum of hours by end date to make sure data follows proper pattern-------
+check <- new_repo %>%
+  ungroup() %>%
+  group_by(PAYROLL, End.Date) %>%
+  summarise(Hours = sum(as.numeric(Hours))) %>%
+  mutate(End.Date = as.Date(End.Date, format = "%m/%d/%Y")) %>%
+  arrange(End.Date)
+
+check1 <- pivot_wider(check, id_cols = PAYROLL, values_from = Hours,
+                      names_from = End.Date)
 
 # save RDS -----------------------------------------------------------------
 saveRDS(new_repo, file = paste0(dir, "Labor/RDS/data_BISLR_oracle.rds"))
