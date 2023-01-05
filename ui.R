@@ -47,7 +47,7 @@ ui <- dashboardPage(
                        
       sidebarMenu(menuItem("Home", tabName = "home", icon = icon("home")),
                   menuItem("MSHS", tabName = "mshs", icon = icon("hospital")),
-              menuItem("Hospitals", tabName = "site", icon = icon("hospital")),
+              menuItem("Hospital", tabName = "site", icon = icon("hospital")),
         menuItem("Department", tabName = "department", icon = icon("hospital"))
                                    )),
                                   
@@ -181,7 +181,7 @@ ui <- dashboardPage(
                                              options = pickerOptions(
                                                liveSearch = TRUE,
                                                actionsBox = TRUE),
-                                             choices = service_choices,  selected = "Nursing")),
+                                             choices = service_choices,  selected = "Nursing - Administration")),
                              box(width = 3, height = "100px",
                                  title = "Select Pay Period End Date:",  solidHeader = FALSE,
                                  pickerInput("DateRange",label= NULL, multiple= F, 
@@ -247,7 +247,7 @@ ui <- dashboardPage(
                                                liveSearch = TRUE,
                                                actionsBox = TRUE,
                                                dropupAuto = FALSE),
-                                             choices = service_choices,  selected = "Nursing")),
+                                             choices = service_choices,  selected = "Nursing - Administration")),
                              box(width = 3, height = "100px",
                                  title = "Select Pay Period End Date:",  solidHeader = FALSE,
                                  pickerInput("dep_DateRange",label= NULL, multiple= F, 
