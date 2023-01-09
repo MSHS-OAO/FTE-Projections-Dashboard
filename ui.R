@@ -19,13 +19,11 @@ header <- dashboardHeader(title= "MSHS Worked FTE Dashboard", titleWidth = 450)
 header$children[[2]]$children[[2]] <- header$children[[2]]$children[[1]]
 header$children[[2]]$children[[1]] <-  tags$a(href='https://peak.mountsinai.org/',
                                               tags$img(src='Sinai_logo_white.png',height='100%',width='30%'))
-  
+
 
 ui <- dashboardPage(
-      #dashboardHeader(title= "MSHS Worked FTE Dashboard", titleWidth = 250),
       
       header,
-      
       
       dashboardSidebar(width = 300,
                        
@@ -113,7 +111,7 @@ ui <- dashboardPage(
                                                  liveSearch = TRUE,
                                                  actionsBox = TRUE,
                                                  dropupAuto = FALSE),
-                                               choices = service_choices,  selected = "Nursing")),
+                                               choices = service_choices,  selected = service_choices[1])),
                                box(width = 4, height = "100px",
                                    title = "Select Pay Period End Date:",  solidHeader = FALSE,
                                    pickerInput("mshs_DateRange",label= NULL, multiple= F, 
@@ -181,7 +179,7 @@ ui <- dashboardPage(
                                              options = pickerOptions(
                                                liveSearch = TRUE,
                                                actionsBox = TRUE),
-                                             choices = service_choices,  selected = "Nursing")),
+                                             choices = service_choices,  selected = service_choices[1])),
                              box(width = 3, height = "100px",
                                  title = "Select Pay Period End Date:",  solidHeader = FALSE,
                                  pickerInput("DateRange",label= NULL, multiple= F, 
@@ -247,7 +245,7 @@ ui <- dashboardPage(
                                                liveSearch = TRUE,
                                                actionsBox = TRUE,
                                                dropupAuto = FALSE),
-                                             choices = service_choices,  selected = "Nursing")),
+                                             choices = service_choices,  selected = service_choices[1])),
                              box(width = 3, height = "100px",
                                  title = "Select Pay Period End Date:",  solidHeader = FALSE,
                                  pickerInput("dep_DateRange",label= NULL, multiple= F, 
