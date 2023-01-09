@@ -45,7 +45,7 @@ ui <- dashboardPage(
                        
       sidebarMenu(menuItem("Home", tabName = "home", icon = icon("home")),
                   menuItem("MSHS", tabName = "mshs", icon = icon("hospital")),
-              menuItem("Hospitals", tabName = "site", icon = icon("hospital")),
+              menuItem("Hospital", tabName = "site", icon = icon("hospital")),
         menuItem("Department", tabName = "department", icon = icon("hospital"))
                                    )),
                                   

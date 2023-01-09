@@ -266,9 +266,12 @@ server <- function(input, output, session) {
     
     
     ggplotly(
-      ggplot(data = kdata, aes(x = dates, y = FTE, group = Site, color = Site))+
-        geom_line(size=1.5)+
-        geom_point(size=2.75)+
+      ggplot(data = kdata, 
+             aes(x = dates, y = FTE, group = Site, color = Site,
+                 text = paste0("MSHS", "\n", "DATE: ", dates, "\n", 
+                               "FTEs: ", FTE)))+
+        geom_line(size=1.25)+
+        geom_point(size=2.6)+
         ggtitle(label = 'placeholder')+
         xlab("Pay Period")+
         ylab("FTE (Full Time Equivalent)")+
@@ -276,7 +279,8 @@ server <- function(input, output, session) {
         scale_y_continuous(limits = c(0, max(kdata$FTE)*1.2))+
         theme(plot.title = element_text(hjust = 0.5, size = 20),
               axis.title = element_text(face ="bold"),
-              legend.text = element_text(size = 6))) %>%
+              legend.text = element_text(size = 6)),
+      tooltip = "text") %>%
       layout(title = list(text = 
                             isolate(
                               paste0(
@@ -360,9 +364,12 @@ server <- function(input, output, session) {
     
 
     ggplotly(
-      ggplot(data = kdata, aes(x = dates, y = FTE, group = Site, color = Site))+
-        geom_line(size = 1.5)+
-        geom_point(size = 2.75)+
+      ggplot(data = kdata, 
+             aes(x = dates, y = FTE, group = Site, color = Site,
+                 text = paste0("HOSPITAL: ", Site, "\n", "DATE: ", dates,
+                               "\n", "FTEs: ", FTE)))+
+        geom_line(size = 1.25)+
+        geom_point(size = 2.6)+
         ggtitle(label = 'placeholder')+
         xlab("Pay Period")+
         ylab("FTE (Full Time Equivalent)")+
@@ -370,7 +377,8 @@ server <- function(input, output, session) {
         scale_y_continuous(limits = c(0, max(kdata$FTE)*1.2))+
         theme(plot.title = element_text(hjust = 0.5, size = 20),
               axis.title = element_text(face = "bold"),
-              legend.text = element_text(size = 6))) %>%
+              legend.text = element_text(size = 6)),
+      tooltip = "text") %>%
       layout(title = list(text = 
                             isolate(
                               paste0(
@@ -457,9 +465,11 @@ server <- function(input, output, session) {
     
     ggplotly(
       ggplot(data = data_service,
-             aes(x = dates , y = FTE, group = DEPARTMENT, color = DEPARTMENT))+
-        geom_line(size = 1.5)+
-        geom_point(size = 2.75)+
+             aes(x = dates , y = FTE, group = DEPARTMENT, color = DEPARTMENT,
+                 text = paste0("DEPARTMENT: ", DEPARTMENT, "\n", "DATE: ",
+                               dates, "\n", "FTEs: ", FTE)))+
+        geom_line(size = 1.25)+
+        geom_point(size = 2.6)+
         ggtitle('placeholder')+
         xlab("Pay Period")+
         ylab("FTE (Full Time Equivalent)")+
@@ -467,7 +477,8 @@ server <- function(input, output, session) {
         scale_y_continuous(limits = c(0, max(data_service$FTE)*1.2))+
         theme(plot.title= element_text(hjust = 0.5, size = 20),
               axis.title = element_text(face ="bold"),
-              legend.text = element_text(size = 6))) %>%
+              legend.text = element_text(size = 6)),
+      tooltip = "text") %>%
       layout(title = list(text = 
                             isolate(
                               paste0(
