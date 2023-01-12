@@ -32,15 +32,15 @@ suppressMessages({
 memory.limit(size = 8000000)
 
 # (1) Import Data -------------------------------------------------------------
-System_Summary <- readRDS(paste0("/SharedDrive/deans/Presidents/SixSigma/",
-                                 "MSHS Productivity/Productivity/",
-                                 "Universal Data/Labor/RDS/",
-                                 "System_Summary_Dashboard.rds"))
-
-# System_Summary <- readRDS(paste0("J:/deans/Presidents/SixSigma/",
+# System_Summary <- readRDS(paste0("/SharedDrive/deans/Presidents/SixSigma/",
 #                                  "MSHS Productivity/Productivity/",
 #                                  "Universal Data/Labor/RDS/",
 #                                  "System_Summary_Dashboard.rds"))
+
+System_Summary <- readRDS(paste0("J:/deans/Presidents/SixSigma/",
+                                 "MSHS Productivity/Productivity/",
+                                 "Universal Data/Labor/RDS/",
+                                 "System_Summary_Dashboard.rds"))
 
 ## constants ------------------------------------------------------------------
 report_period_length <- 3
@@ -94,6 +94,24 @@ data <- data %>%
     DATES = as.character(PP.END.DATE),
     PP.END.DATE = as.Date(PP.END.DATE,format="%Y-%m-%d"),
     dates = format(as.Date(PP.END.DATE, "%B %d %Y"), "%m/%d/%y"))
+
+
+# Default 
+#start_date <- max(data$PP.END.DATE) %m-% months(5) 
+start_date <- max(data$PP.END.DATE) - 130 
+
+payroll_choices <- sort( unique(as.character(data$PAYROLL)))
+
+group_choices <- sort(unique(as.character(data$service_group[data$PAYROLL %in% "MSH"])))
+
+service_choices <- sort(unique(as.character(data$CORPORATE.SERVICE.LINE[data$PAYROLL %in% "MSH" & 
+                                                                          data$service_group %in% "Nursing"])))
+
+date_options <- sort(unique(data$PP.END.DATE), decreasing = T)
+date_options <- format(as.Date(date_options, "%B %d %Y"), "%m/%d/%y")
+
+
+
 
 # (2) Color Theme -----------------------------------------------------------
 
@@ -172,3 +190,6 @@ string_separate_to_lines <- function(string, max_length){
     return(paste(text_lines, collapse = "<br>"))
   }
 }
+
+
+

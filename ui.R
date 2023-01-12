@@ -1,16 +1,5 @@
 
-#start_date <- max(data$PP.END.DATE) %m-% months(5) 
-start_date <- max(data$PP.END.DATE) - 130 
 
-payroll_choices <- sort( unique(as.character(data$PAYROLL)))
-
-group_choices <- sort(unique(as.character(data$service_group[data$PAYROLL %in% "MSH"])))
-
-service_choices <- sort(unique(as.character(data$CORPORATE.SERVICE.LINE[data$PAYROLL %in% "MSH" & 
-                                                                          data$service_group %in% "Nursing"])))
-
-date_options <- sort(unique(data$PP.END.DATE), decreasing = T)
-date_options <- format(as.Date(date_options, "%B %d %Y"), "%m/%d/%y")
 
 
 
