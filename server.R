@@ -274,7 +274,7 @@ server <- function(input, output, session) {
         ggtitle(label = 'placeholder')+
         xlab("Pay Period")+
         ylab("FTE (Full Time Equivalent)")+
-        scale_color_manual(values = MountSinai_pal("main")(length(kdata$Site)))+
+        scale_color_manual(values = mount_sinai_pal("main")(length(kdata$Site)))+
         scale_y_continuous(limits = c(0, max(kdata$FTE)*1.2))+
         theme(plot.title = element_text(hjust = 0.5, size = 20),
               axis.title = element_text(face ="bold"),
@@ -372,7 +372,7 @@ server <- function(input, output, session) {
         ggtitle(label = 'placeholder')+
         xlab("Pay Period")+
         ylab("FTE (Full Time Equivalent)")+
-        scale_color_manual(values = MountSinai_pal("main")(length(kdata$Site)))+
+        scale_color_manual(values = mount_sinai_pal("main")(length(kdata$Site)))+
         scale_y_continuous(limits = c(0, max(kdata$FTE)*1.2))+
         theme(plot.title = element_text(hjust = 0.5, size = 20),
               axis.title = element_text(face = "bold"),
@@ -472,7 +472,7 @@ server <- function(input, output, session) {
         ggtitle('placeholder')+
         xlab("Pay Period")+
         ylab("FTE (Full Time Equivalent)")+
-        scale_color_manual(values = MountSinai_pal("main")(length(data_service$DEPARTMENT)))+
+        scale_color_manual(values = mount_sinai_pal("main")(length(data_service$DEPARTMENT)))+
         scale_y_continuous(limits = c(0, max(data_service$FTE)*1.2))+
         theme(plot.title= element_text(hjust = 0.5, size = 20),
               axis.title = element_text(face ="bold"),

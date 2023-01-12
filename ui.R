@@ -1,61 +1,57 @@
+# ui function
 
-
-
-
-
-
-header <- dashboardHeader(title= "MSHS Worked FTE Dashboard", titleWidth = 450)
+header <- dashboardHeader(title = "MSHS Worked FTE Dashboard", titleWidth = 450)
 header$children[[2]]$children[[2]] <- header$children[[2]]$children[[1]]
-header$children[[2]]$children[[1]] <-  tags$a(href='https://peak.mountsinai.org/',
-                                              tags$img(src='Sinai_logo_white.png',height='100%',width='30%'))
+header$children[[2]]$children[[1]] <-
+                                  tags$a(href = "https://peak.mountsinai.org/",
+                                        tags$img(src = "Sinai_logo_white.png",
+                                               height = "100%", width = "30%"))
 
 
 ui <- dashboardPage(
-      
       header,
-      
       dashboardSidebar(width = 300,
-                       
-      # change the navigation bar color                 
-      tags$head(tags$style(HTML('
+      # change the navigation bar color
+      tags$head(tags$style(HTML("
                               .navbar {
                               background-color: #221F72 !important;
-                              }'
+                              }"
                          ))),
-      
-      #change the logo bar color 
-      tags$head(tags$style(HTML('
+      #change the logo bar color
+      tags$head(tags$style(HTML("
                               .logo {
                               background-color: #221F72 !important;
-                              }'
+                              }"
                          ))),
-      
-    
-                       
       sidebarMenu(menuItem("Home", tabName = "home", icon = icon("home")),
                   menuItem("MSHS", tabName = "mshs", icon = icon("hospital")),
               menuItem("Hospital", tabName = "site", icon = icon("hospital")),
         menuItem("Department", tabName = "department", icon = icon("hospital"))
                                    )),
-                                  
-      
       dashboardBody(
         tabItems(
           ## tab HOME ----------------------------------------
           tabItem(tabName = "home",
-                  
-                  column(12, 
-                       tags$img(src = "Sinai_logo_color.png", height = "200px", 
+                  column(12,
+                       tags$img(src = "Sinai_logo_color.png", height = "200px",
                            width = "300px", deleteFiles = FALSE)),
-                  
-                  column(12, 
-                         tags$div("MSHS Worked FTE Dashboard", style = "color: #221f72; font-weight:bold; font-size:34px; margin-left: 20px" ,
+                  column(12,
+                         tags$div("MSHS Worked FTE Dashboard",
+                                  style = "color: #221f72;
+                                           font-weight:bold;
+                                           font-size:34px;
+                                           margin-left: 20px",
                                   h3("Health System Operations"),
-                                  h4(paste0("Publish Date: ", format(as.Date(Sys.Date(), "%B %d %Y"), "%m/%d/%y"))),
-                                  #h4(paste0("Reporting Period: ",report_start_date, " to ", report_end_date ))
+                                  h4(paste0("Publish Date: ",
+                                    format(as.Date(Sys.Date(),
+                                    "%B %d %Y"), "%m/%d/%y"))),
+                                  #h4(paste0("Reporting Period: ",
+                                #report_start_date, " to ", report_end_date ))
                                   )),
-                  column(12, 
-                         tags$div( id = "Objective", style= "color:	#221f72; margin-left: 20px",
+                  column(12,
+                         tags$div(id = "Objective",
+                                  style = "color:	#221f72;
+                                  margin-left: 20px",
                                    h3("Description:"),
                                    p("This dashboard summarizes MSHS Worked FTE by pay period. The data is stratified by hospital and service line.",
                                      style= "font-size:16px"))),
