@@ -245,7 +245,6 @@ server <- function(input, output, session) {
   output$mshs_plot <- renderPlotly({
     
     kdata <- Data_MSHS() 
-    test <<- kdata
 
     kdata <- kdata %>% 
       group_by(dates) %>%

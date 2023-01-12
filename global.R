@@ -1,7 +1,7 @@
 
-# Shiny App for FTE Trend 
+# Shiny App for FTE Trend
 
-rm(list=ls())
+rm(list = ls())
 
 # (0) Import Libraries --------------------------------------------------------
 suppressMessages({
@@ -20,7 +20,7 @@ suppressMessages({
   library(gridExtra)
   library(grid)
   library(scales)
-  library(DT)  
+  library(DT)
   library(knitr)
   library(lubridate)
   library(kableExtra)
@@ -28,15 +28,19 @@ suppressMessages({
 
 
 
-# Maximize R Memory Size 
+# Maximize R Memory Size
 memory.limit(size = 8000000)
 
 # (1) Import Data -------------------------------------------------------------
-System_Summary <- readRDS(paste0("SharedDrive/deans/Presidents/SixSigma/",
+System_Summary <- readRDS(paste0("/SharedDrive/deans/Presidents/SixSigma/",
                                  "MSHS Productivity/Productivity/",
                                  "Universal Data/Labor/RDS/",
                                  "System_Summary_Dashboard.rds"))
 
+# System_Summary <- readRDS(paste0("J:/deans/Presidents/SixSigma/",
+#                                  "MSHS Productivity/Productivity/",
+#                                  "Universal Data/Labor/RDS/",
+#                                  "System_Summary_Dashboard.rds"))
 
 ## constants ------------------------------------------------------------------
 report_period_length <- 3
@@ -155,7 +159,7 @@ string_separate_to_lines <- function(string, max_length){
     return(string)
   }else if (max_lines > 1){
     word_list <- unlist(str_split(string, pattern = " ")) #each word as its own vector
-    text_lines <- vector(mode = 'character', length = max_lines)
+    text_lines <- vector(mode = "character", length = max_lines)
     for(x in 1:max_lines){
       y <- 0
       while(sum(nchar(paste(word_list[1:y], collapse = " "))) < max_length
@@ -165,6 +169,6 @@ string_separate_to_lines <- function(string, max_length){
       text_lines[x] <- paste(word_list[1:y-1], collapse = " ")
       word_list <- word_list[y:length(word_list)]
     }
-    return(paste(text_lines, collapse = '<br>'))
+    return(paste(text_lines, collapse = "<br>"))
   }
 }
