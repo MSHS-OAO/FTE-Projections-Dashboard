@@ -32,15 +32,15 @@ suppressMessages({
 memory.limit(size = 8000000)
 
 # (1) Import Data -------------------------------------------------------------
-# System_Summary <- readRDS(paste0("/SharedDrive/deans/Presidents/SixSigma/",
-#                                  "MSHS Productivity/Productivity/",
-#                                  "Universal Data/Labor/RDS/",
-#                                  "System_Summary_Dashboard.rds"))
-
-System_Summary <- readRDS(paste0("J:/deans/Presidents/SixSigma/",
+System_Summary <- readRDS(paste0("/SharedDrive/deans/Presidents/SixSigma/",
                                  "MSHS Productivity/Productivity/",
                                  "Universal Data/Labor/RDS/",
                                  "System_Summary_Dashboard.rds"))
+
+# System_Summary <- readRDS(paste0("J:/deans/Presidents/SixSigma/",
+#                                  "MSHS Productivity/Productivity/",
+#                                  "Universal Data/Labor/RDS/",
+#                                  "System_Summary_Dashboard.rds"))
 
 ## constants ------------------------------------------------------------------
 report_period_length <- 3
