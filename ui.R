@@ -1,12 +1,14 @@
 # ui function
 
+# define title for ui
 header <- dashboardHeader(title = "MSHS Worked FTE Dashboard", titleWidth = 450)
+
+# define logos for ui
 header$children[[2]]$children[[2]] <- header$children[[2]]$children[[1]]
 header$children[[2]]$children[[1]] <-
                                   tags$a(href = "https://peak.mountsinai.org/",
                                         tags$img(src = "Sinai_logo_white.png",
                                                height = "100%", width = "30%"))
-
 
 ui <- dashboardPage(
       header,
@@ -53,179 +55,154 @@ ui <- dashboardPage(
                                   style = "color:	#221f72;
                                   margin-left: 20px",
                                    h3("Description:"),
-                                   p("This dashboard summarizes MSHS Worked FTE by pay period. The data is stratified by hospital and service line.",
-                                     style= "font-size:16px"))),
-                  
-                
+                                   p(paste("This dashboard summarizes MSHS Worked FTE by pay period. The data is",
+                                            "stratified by hospital and service line."),
+                                     style = "font-size:16px"))),
                   column(12,
-                         tags$div(id= "data description", style= "color: #221f72; font-size:14px; margin-left: 20px",
+                         tags$div(id = "data description", style = "color: #221f72; font-size:14px; margin-left: 20px",
                                   h3("Data Notes"),
                                   h5("* Department does not currently have a Premier productivity report"),
-                                  h5("1 FTE = 75 Worked Hours/Pay Period")))
-                  
-                   ),
+                                  h5("1 FTE = 75 Worked Hours/Pay Period")))),
           
           ## tab MSHS --------------------------------------------
           tabItem(tabName = "mshs",
-                  div("MSHS Worked FTE Dashboard", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:25px; margin-left: 20px"),
+                  div("MSHS Worked FTE Dashboard", style = paste("color:	#221f72; font-family:Calibri; font-weight:bold;",
+                                                                 "font-size:25px; margin-left: 20px")),
                   textOutput("mshs_DateShow"),
                   textOutput("mshs_reportingDate"),
-                  tags$head(tags$style("#mshs_DateShow{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 18px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
-                  tags$head(tags$style("#mshs_reportingDate{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 16px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
-                  
-                  tags$head(tags$style(HTML("#mshs_FiltersUpdate {background-color: #d80b8c;color: #FFFFFF; font-size: 18px}"))),
-                                            
-                  
+                  tags$head(tags$style(paste("#mshs_DateShow{color:#7f7f7f; font-family:Calibri; font-style: italic;",
+                                             "font-size: 18px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left:",
+                                             "20px}"))), hr(),
+                  tags$head(tags$style(paste("#mshs_reportingDate{color:#7f7f7f; font-family:Calibri; font-style: italic;",
+                                             "font-size: 16px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left:",
+                                             "20px}"))), hr(),
+                  tags$head(tags$style(HTML(paste("#mshs_FiltersUpdate {background-color: #d80b8c;color: #FFFFFF;",
+                                                  "font-size: 18px}")))),
                   fluidRow(
-                    
                   tags$style(HTML(".box.box-solid.box-primary>.box-header {background:#221f72; color:#fff}")),
-    
                     column(11,
                            box(
                              title = NULL, width = 12, status = "primary", 
                              solidHeader = TRUE, collapsible = TRUE, closable = TRUE, br(),
                              fluidRow(
-                               
                                box(width = 4, height = "100px", title = "Select Service Line Category:", solidHeader = F,
-                                   pickerInput("mshs_selectedGroup",label= NULL, multiple= F, options = pickerOptions(actionsBox = TRUE),
-                                               choices = group_choices ,  selected = "Nursing")),
-                               
+                                   pickerInput("mshs_selectedGroup", label = NULL, multiple = F,
+                                               options = pickerOptions(actionsBox = TRUE), choices = group_choices,
+                                               selected = "Nursing")),
                                box(width = 4, height = "100px", title = "Select Service Line:", solidHeader = F,
-                                   pickerInput("mshs_selectedService",label= NULL, multiple= T, 
+                                   pickerInput("mshs_selectedService", label = NULL, multiple = T,
                                                options = pickerOptions(
                                                  liveSearch = TRUE,
                                                  actionsBox = TRUE,
                                                  dropupAuto = FALSE),
-                                               choices = service_choices,  selected = service_choices[1])),
+                                               choices = service_choices, selected = service_choices[1])),
                                box(width = 4, height = "100px",
                                    title = "Select Pay Period End Date:",  solidHeader = FALSE,
-                                   pickerInput("mshs_DateRange",label= NULL, multiple= F, 
-                                                options = pickerOptions(
+                                   pickerInput("mshs_DateRange", label = NULL, multiple = F,
+                                               options = pickerOptions(
                                                  actionsBox = TRUE,
                                                  dropupAuto = FALSE),
-                                               choices = date_options ,  selected = date_options[1])),
-                               
-                               
-                               
+                                               choices = date_options, selected = date_options[1])),
                                column(5,
                                       actionButton("mshs_FiltersUpdate", "CLICK TO UPDATE", width = "75%"),
                                       br(),
-                                      br()
-                               )
-                             )
-                           )),
-                    
-                    
+                                      br())))),
                     column(11,
                            box(title = NULL, status = "primary",
                                solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                               plotlyOutput("mshs_plot"),  width= 12 )),
-                    
-                    column(11, 
+                               plotlyOutput("mshs_plot"),  width = 12)),
+                    column(11,
                            box(
-                             title = NULL, width = 12, status = "primary", 
-                             solidHeader = TRUE, collapsible = TRUE, closable = TRUE, 
-                             DTOutput("mshs_table") %>% 
-                               withSpinner(type = 5, color = "#d80b8c")))
-                    
-                    
-                    
-                  ) # Close fluidrow
-          ), # close tabitem mshs
-          
-          
+                             title = NULL, width = 12, status = "primary",
+                             solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                             DTOutput("mshs_table") %>%
+                               withSpinner(type = 5, color = "#d80b8c"))))),
     
-          ## Site Tab -------------------------
-          
+          ## Site Tab ------------------------
           tabItem(tabName = "site",
-                  div("Hospitals Worked FTE Dashboard", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:25px; margin-left: 20px"),
+                  div("Hospitals Worked FTE Dashboard", style = paste("color:	#221f72; font-family:Calibri;",
+                                                                      "font-weight:bold; font-size:25px; margin-left: 20px")),
                   textOutput("siteName_DateShow"),
                   textOutput("site_reportingDate"),
-                  tags$head(tags$style("#siteName_DateShow{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 18px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
-                  tags$head(tags$style("#site_reportingDate{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 16px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
-                  
+                  tags$head(tags$style(paste("#siteName_DateShow{color:#7f7f7f; font-family:Calibri; font-style: italic;",
+                                             "font-size: 18px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left:",
+                                             "20px}"))), hr(),
+                  tags$head(tags$style(paste("#site_reportingDate{color:#7f7f7f; font-family:Calibri; font-style: italic;",
+                                             "font-size: 16px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left:",
+                                             "20px}"))), hr(),
                   tags$head(tags$style(HTML("#FiltersUpdate {background-color: #d80b8c;color: #FFFFFF; font-size: 18px}"))),
-                  
                   fluidRow(
                   column(11,
                          box(
-                           title = NULL, width = 12, status = "primary", 
+                           title = NULL, width = 12, status = "primary",
                            solidHeader = TRUE, collapsible = TRUE, closable = TRUE, br(),
                            fluidRow(
                              box(width = 3, height = "100px", title = "Select Hospital:", solidHeader = F,
-                                 pickerInput("selectedPayroll",label= NULL, multiple= T, options = pickerOptions(actionsBox = TRUE),
-                                             choices = payroll_choices,  selected = "MSH")),
+                                 pickerInput("selectedPayroll", label = NULL, multiple = T,
+                                             options = pickerOptions(actionsBox = TRUE), choices = payroll_choices,
+                                             selected = "MSH")),
                              box(width = 3, height = "100px", title = "Select Service Line Category:", solidHeader = F,
-                                 pickerInput("selectedGroup",label= NULL, multiple= F, options = pickerOptions(actionsBox = TRUE),
-                                             choices = group_choices ,  selected = "Nursing")),
-                             
+                                 pickerInput("selectedGroup", label = NULL, multiple = F,
+                                             options = pickerOptions(actionsBox = TRUE), choices = group_choices,
+                                             selected = "Nursing")),
                              box(width = 3, height = "100px", title = "Select Service Line:", solidHeader = F,
-                                 pickerInput("selectedService",label= NULL, multiple= T, 
+                                 pickerInput("selectedService", label = NULL, multiple = T,
                                              options = pickerOptions(
                                                liveSearch = TRUE,
                                                actionsBox = TRUE),
                                              choices = service_choices,  selected = service_choices[1])),
                              box(width = 3, height = "100px",
                                  title = "Select Pay Period End Date:",  solidHeader = FALSE,
-                                 pickerInput("DateRange",label= NULL, multiple= F, 
+                                 pickerInput("DateRange", label = NULL, multiple = F,
                                              options = pickerOptions(
                                                actionsBox = TRUE,
                                                dropupAuto = FALSE),
-                                               choices = date_options ,  selected = date_options[1])),
-                             
-                             
+                                               choices = date_options,  selected = date_options[1])),
                              column(5,
                                     actionButton("FiltersUpdate", "CLICK TO UPDATE", width = "57%"),
                                     br(),
-                                    br()
-                             )
-                           )
-                         )),
-                  
-            
+                                    br())))),
               column(11,
                      box(title = NULL, status = "primary",
                          solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                         plotlyOutput("site_plot"),  width= 12 )),
-              
-              column(11, 
+                         plotlyOutput("site_plot"),  width = 12)),
+              column(11,
                      box(
-                       title = NULL, width = 12, status = "primary", 
-                       solidHeader = TRUE, collapsible = TRUE, closable = TRUE, 
-                       DTOutput("site_table") %>% 
-                         withSpinner(type = 5, color = "#d80b8c")))
-              
-          
-                     
-                     ) # Close fluidrow
-            ), # close tabitem site
-          
+                       title = NULL, width = 12, status = "primary",
+                       solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                       DTOutput("site_table") %>%
+                         withSpinner(type = 5, color = "#d80b8c"))))),
           ## Department Tab -------------------------
-          
           tabItem(tabName = "department",
-                  div("Department Worked FTE Dashboard", style = "color:	#221f72; font-family:Calibri; font-weight:bold; font-size:25px; margin-left: 20px"),
+                  div("Department Worked FTE Dashboard", style = paste("color:	#221f72; font-family:Calibri;",
+                                                                       "font-weight:bold; font-size:25px; margin-left:",
+                                                                       "20px")),
                   textOutput("Department_DateShow"),
                   textOutput("Department_reportingDate"),
-                  tags$head(tags$style("#Department_DateShow{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 18px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
-                  tags$head(tags$style("#Department_reportingDate{color:#7f7f7f; font-family:Calibri; font-style: italic; font-size: 16px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left: 20px}")), hr(),
-                  
-                  tags$head(tags$style(HTML("#dep_FiltersUpdate {background-color: #d80b8c;color: #FFFFFF; font-size: 18px}"))),
-                  
+                  tags$head(tags$style(paste("#Department_DateShow{color:#7f7f7f; font-family:Calibri; font-style: italic;",
+                                             "font-size: 18px; margin-top: -0.2em; margin-bottom: 0.5em; margin-left:",
+                                             "20px}"))), hr(),
+                  tags$head(tags$style(paste("#Department_reportingDate{color:#7f7f7f; font-family:Calibri; font-style:",
+                                             "italic; font-size: 16px; margin-top: -0.2em; margin-bottom: 0.5em;",
+                                             "margin-left: 20px}"))), hr(),
+                  tags$head(tags$style(HTML(paste("#dep_FiltersUpdate {background-color: #d80b8c;color: #FFFFFF; font-size:",
+                                                  "18px}")))),
                   fluidRow(
                   column(11,
                          box(
-                           title = NULL, width = 12, status = "primary", 
+                           title = NULL, width = 12, status = "primary",
                            solidHeader = TRUE, collapsible = TRUE, closable = TRUE, br(),
                            fluidRow(
                              box(width = 3, height = "100px", title = "Select Hospital:", solidHeader = F,
-                                 pickerInput("dep_selectedPayroll",label= NULL, multiple= F, options = pickerOptions(actionsBox = TRUE),
-                                             choices = payroll_choices,  selected = "MSH")),
+                                 pickerInput("dep_selectedPayroll", label = NULL, multiple = F,
+                                             options = pickerOptions(actionsBox = TRUE), choices = payroll_choices,
+                                             selected = "MSH")),
                              box(width = 3, height = "100px", title = "Select Service Line Category:", solidHeader = F,
-                                 pickerInput("dep_selectedGroup",label= NULL, multiple= F, options = pickerOptions(actionsBox = TRUE),
-                                             choices = group_choices ,  selected = "Nursing")),
-                             
+                                 pickerInput("dep_selectedGroup", label = NULL, multiple = F,
+                                             options = pickerOptions(actionsBox = TRUE), choices = group_choices,
+                                             selected = "Nursing")),
                              box(width = 3, height = "100px", title = "Select Service Line:", solidHeader = F,
-                                 pickerInput("dep_selectedService",label= NULL, multiple= T, 
+                                 pickerInput("dep_selectedService", label = NULL, multiple = T,
                                              options = pickerOptions(
                                                liveSearch = TRUE,
                                                actionsBox = TRUE,
@@ -233,45 +210,22 @@ ui <- dashboardPage(
                                              choices = service_choices,  selected = service_choices[1])),
                              box(width = 3, height = "100px",
                                  title = "Select Pay Period End Date:",  solidHeader = FALSE,
-                                 pickerInput("dep_DateRange",label= NULL, multiple= F, 
+                                 pickerInput("dep_DateRange", label = NULL, multiple = F,
                                              options = pickerOptions(
                                                actionsBox = TRUE,
                                                dropupAuto = FALSE),
-                                               choices = date_options ,  selected = date_options[1])),
-                             
-                             
-                             
+                                               choices = date_options, selected = date_options[1])),
                              column(5,
                                     actionButton("dep_FiltersUpdate", "CLICK TO UPDATE", width = "57%"),
                                     br(),
-                                    br()
-                             )
-                           )
-                         )),
-                  
-                  
+                                    br())))),
                     column(11,
                            box(title = NULL, status = "primary",
                                solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
-                               plotlyOutput("department_plot"),  width= 12 )),
-                    
-                    column(11, 
+                               plotlyOutput("department_plot"), width = 12)),
+                    column(11,
                            box(
-                             title = NULL, width = 12, status = "primary", 
-                             solidHeader = TRUE, collapsible = TRUE, closable = TRUE, 
-                             DTOutput("department_table") %>% 
-                               withSpinner(type = 5, color = "#d80b8c")))
-                    
-                    
-                    
-                  ) # Close fluidrow
-          ) # close tabitem department
-          
-          
-          
-        )# close tabItems
-        
-     
-      
-      ) # close dashboardBody
-) # close dashboardPage
+                             title = NULL, width = 12, status = "primary",
+                             solidHeader = TRUE, collapsible = TRUE, closable = TRUE,
+                             DTOutput("department_table") %>%
+                               withSpinner(type = 5, color = "#d80b8c"))))))))
