@@ -20,13 +20,48 @@ data_site <-
     choices = c("MSHQ", "BISLR"),
     title = "Select Hospitals in dataset")
 
+# data types for column names and column data type
+data_types <- c(PARTNER = "VARCHAR2(6 CHAR)",
+                HOME_FACILITY = "VARCHAR2(6 CHAR)",
+                HOME_DEPARTMENT = "VARCHAR2(15 CHAR)",
+                WORKED_FACILITY = "VARCHAR2(6 CHAR)",
+                WORKED_DEPARTMENT = "VARCHAR2(15 CHAR)",
+                START_DATE = "DATE",
+                END_DATE = "DATE",
+                EMPLOYEE_ID = "VARCHAR2(7 CHAR)",
+                EMPLOYEE_NAME = "VARCHAR2(60 CHAR)",
+                APPROVED_HOURS = "VARCHAR2(6 CHAR)",
+                POSITION_CODE = "VARCHAR2(15 CHAR)",
+                JOBCODE = "VARCHAR2(50 CHAR)",
+                PAYCODE = "VARCHAR2(60 CHAR)",
+                WD_HOURS = "NUMERIC(6,2)",
+                WD_EXPENSE = "NUMERIC(10,2)",
+                HOME_DEPARTMENT_NAME = "VARCHAR2(60 CHAR)",
+                WORKED_DEPARTMENT_NAME = "VARCHAR2(60 CHAR)",
+                POSITION_CODE_DESCRIPTION = "VARCHAR2(80 CHAR)",
+                LOCATION_DESCRIPTION = "VARCHAR2(80 CHAR)",
+                WD_COFT = "VARCHAR2(7 CHAR)",
+                WD_ACCOUNT = "VARCHAR2(6 CHAR)",
+                WD_LOCATION = "VARCHAR2(3 CHAR)",
+                WD_DEPARTMENT = "VARCHAR2(5 CHAR)",
+                WD_FUND_NUMBER = "VARCHAR2(11 CHAR)",
+                HD_COFT = "VARCHAR2(7 CHAR)",
+                HD_LOCATION = "VARCHAR2(80 CHAR)",
+                HD_DEPARTMENT = "VARCHAR2(5 CHAR)",
+                WD_COA = "VARCHAR2(44 CHAR)",
+                HD_COA = "VARCHAR2(44 CHAR)",
+                PAYROLL_NAME = "VARCHAR2(15 CHAR)",
+                REVERSE_MAP_WORKED = "VARCHAR2(45 CHAR)",
+                REVERSE_MAP_HOME = "VARCHAR2(45 CHAR)",
+                FILE_NAME = "VARCHAR2(60 CHAR)")
+
 # set data directory based on data_site user input
 if (data_site == "MSHQ") {
   dir <- paste0("/SharedDrive/deans/Presidents/SixSIgma/Individual Folders/",
-                "Current Employees/Engineers/Greg Lenane/MSHQ Raw")
+                "Current Employees/Engineers/Greg Lenane/MSHQ Raw/")
 } else {
   dir <- paste0("/SharedDrive/deans/Presidents/SixSIgma/Individual Folders/",
-                "Current Employees/Engineers/Greg Lenane/BISLR Raw")
+                "Current Employees/Engineers/Greg Lenane/BISLR Raw/")
 }
 
 # set destination table based on user input for data site
@@ -54,31 +89,35 @@ cat(paste0("The following files will be INSERTED to DATA_", data_site,
            "The following files will be OVERWRITTEN to DATA_",
            data_site, "_ORACLE: \n", paste(overwrite, collapse = "\n")))
 
-# create syntax to delete all overwrite files
-delete_syntax <- paste0("\'",overwrite, "\'", collapse = " OR ")
 
-# create delete query for all overwrite files
-sql_delete <- glue("DELETE FROM 
+if (length(overwrite) > 0) {
+  # create syntax to delete all overwrite files
+  delete_syntax <- paste0("\'",overwrite, "\'", collapse = " OR ")
+  
+  # create delete query for all overwrite files
+  sql_delete <- glue("DELETE FROM 
                         \"{destination_table_sql}\"
                      WHERE
                         FILE_NAME = {delete_syntax};")
+  
+  # try catch for deletion of overwrite files
+  tryCatch({
+    dbBegin(con)
+    dbExecute(con, sql_delete)
+    dbCommit(con)
+    dbDisconnect(con)
+  },
+  error = function(err){
+    print(err)
+    dbRollback(con)
+    dbDisconnect(con)
+    print("error")
+  })
+}
 
-# try catch for deletion of overwrite files
-tryCatch({
-  dbBegin(con)
-  dbExecute(con, sql_delete)
-  dbCommit(con)
-  dbDisconnect(con)
-},
-error = function(err){
-  print(err)
-  dbRollback(con)
-  dbDisconnect(con)
-  print("error")
-})
 
 # function to convert each record of df to insert statement
-get_values <- function(source_table_r = source_table_r, destination_table_sql) {
+get_values <- function(source_table_r = source_table_r) {
   
   PARTNER                   <- source_table_r[1]
   HOME_FACILITY             <- source_table_r[2]
@@ -139,4 +178,61 @@ get_values <- function(source_table_r = source_table_r, destination_table_sql) {
                  '{REVERSE_MAP_HOME}', '{FILE_NAME}')")
   
   return(values)
+}
+
+# loop through insert data files
+for (i in 1:length(data_files)) {
+  # read in ith insert data file
+  source_table_r <- 
+    read.csv(file = paste0(dir, data_files[i]), header = T, sep = "~",
+             stringsAsFactors = F, colClasses = rep("character", 33))
+  
+  # replace column names of source table with DB column names
+  colnames(source_table_r) <- names(data_types)
+  
+  # Convert the each record/row of tibble to INTO clause of insert statment
+  insert_rows <- 
+    lapply(
+      lapply(
+        lapply(split(source_table_r , 
+                     1:nrow(source_table_r)),
+               as.list),
+        as.character),
+      FUN = get_values)
+  
+  # create batches of inserts for insert statements
+  chunk_length <- 250
+  split_queries <- split(insert_rows, 
+                         ceiling(seq_along(insert_rows)/chunk_length))
+  
+  # append each batch of inserts to batch insert list
+  split_queries_values <- list()
+  for (i in 1:length(split_queries)) {
+    row <- glue_collapse(split_queries[[i]], sep = "\n\n")
+    values <- glue('INSERT ALL
+                      {row}
+                    SELECT 1 from DUAL;')
+    split_queries_values <- append(split_queries_values, values)
+  }
+  
+  # execute parallel inserts of 250 record chunks
+  registerDoParallel()
+  outputPar <- foreach(i = 1:length(split_queries_values), 
+                       .packages = c("DBI", "odbc")) %dopar% {
+                         con_loop <- dbConnect(odbc(), "OracleODBC-21_5",
+                                               uid = "lenang01",
+                                               pwd = "A9xXY#fztK")
+                         tryCatch({
+                           dbBegin(con_loop)
+                           dbExecute(con_loop, split_queries_values[[i]])
+                           dbCommit(con_loop)
+                           dbDisconnect(con_loop)
+                         },
+                         error = function(err){
+                           print("error")
+                           dbRollback(con_loop)
+                           dbDisconnect(con_loop)
+                         })
+                       }
+  registerDoSEQ()
 }
