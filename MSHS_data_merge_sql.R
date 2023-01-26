@@ -1,5 +1,3 @@
-####
-
 # load libraries
 suppressMessages({
   library(odbc)
