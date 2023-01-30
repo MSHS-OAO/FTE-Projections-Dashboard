@@ -180,12 +180,21 @@ get_values <- function(source_table_r = source_table_r) {
   return(values)
 }
 
+system.time(
 # loop through insert data files
 for (i in 1:length(data_files)) {
   # read in ith insert data file
   source_table_r <- 
     read.csv(file = paste0(dir, data_files[i]), header = T, sep = "~",
              stringsAsFactors = F, colClasses = rep("character", 33))
+  
+  # escape apostrophe 
+  source_table_r <- as.data.frame(
+    apply(source_table_r, 2, function(y) gsub("'", "''", y))) %>%
+    mutate(
+      Job.Code = case_when(
+        Job.Code == "" ~ "MISSING_JOBCODE",
+        TRUE ~ Job.Code))
   
   # replace column names of source table with DB column names
   colnames(source_table_r) <- names(data_types)
@@ -235,4 +244,4 @@ for (i in 1:length(data_files)) {
                          })
                        }
   registerDoSEQ()
-}
+})
