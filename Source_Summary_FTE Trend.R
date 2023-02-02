@@ -15,7 +15,7 @@ Source_Summary <- function(data){
            INCLUDE.EXPENSES, WORKED.PAY.CODE) %>%
     rename(PAY.CODE = RAW.PAY.CODE,
            PAY.CODE.MAPPING = PAY.CODE.CATEGORY)
-  
+
   #Read in paycycle
   PayCycle <- read_excel("J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/Universal Data/Mapping/MSHS_Pay_Cycle.xlsx")
   PayCycle <- PayCycle %>%
