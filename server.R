@@ -201,7 +201,7 @@ server <- function(input, output, session) {
     kdata <- data_mshs()
     kdata <- kdata %>%
       group_by(dates) %>%
-      summarise(FTE = sum(FTE, na.rm = T)) %>%
+      summarise(FTE = sum(FTE, na.rm = TRUE)) %>%
       mutate(PAYROLL = "MSHS") %>%
       select(PAYROLL, dates, FTE)
     kdata[is.na(kdata)] <- 0
@@ -235,7 +235,8 @@ server <- function(input, output, session) {
                                            paste0("Multiple ",
                                                   input$mshs_selected_group,
                                                   " Departments")
-                                           } else {input$mshs_selected_service}),
+                                           } else {
+                                             input$mshs_selected_service}),
                                        collapse = ", "),
                                 "<br>",
                                 "<sup>",
@@ -250,15 +251,15 @@ server <- function(input, output, session) {
     avg <- kdata %>%
       filter(year(PP.END.DATE) == max(year(data$PP.END.DATE))) %>%
       group_by(dates) %>%
-      summarise(FTE = sum(FTE, na.rm = T)) %>%
-      summarise(FTE = as.numeric(format(round(mean(FTE, na.rm = T),
+      summarise(FTE = sum(FTE, na.rm = TRUE)) %>%
+      summarise(FTE = as.numeric(format(round(mean(FTE, na.rm = TRUE),
                                               digits = digits_round),
                                         nsmall = 2))) %>%
       rename(`FYTD Avg.` = FTE) %>%
       mutate(Site = "MSHS")
     kdata <- kdata %>%
       group_by(dates) %>%
-      summarise(FTE = sum(FTE, na.rm = T)) %>%
+      summarise(FTE = sum(FTE, na.rm = TRUE)) %>%
       mutate(Site = "MSHS") %>%
       pivot_wider(id_cols = Site,
                   names_from = dates,
@@ -281,10 +282,9 @@ server <- function(input, output, session) {
   ## Site tab -----------------------------------------------
   output$site_plot <- renderPlotly({
     kdata <- data_service()
-    test <<- kdata
     kdata <- kdata %>%
       group_by(PAYROLL, dates) %>%
-      summarise(FTE = sum(FTE, na.rm = T))
+      summarise(FTE = sum(FTE, na.rm = TRUE))
     kdata[is.na(kdata)] <- 0
     kdata <- kdata %>%
       ungroup() %>%
@@ -317,7 +317,8 @@ server <- function(input, output, session) {
                                            paste0("Multiple ",
                                                   input$selected_group,
                                                   " Departments")
-                                           } else {input$selected_service}),
+                                           } else {
+                                             input$selected_service}),
                                        collapse = ", "),
                                 "<br>",
                                 "<sup>",
@@ -331,15 +332,15 @@ server <- function(input, output, session) {
     avg <- kdata %>%
       filter(year(PP.END.DATE) == max(year(data$PP.END.DATE))) %>%
       group_by(PAYROLL, dates) %>%
-      summarise(FTE = sum(FTE, na.rm = T)) %>%
+      summarise(FTE = sum(FTE, na.rm = TRUE)) %>%
       group_by(PAYROLL) %>%
-      summarise(FTE = as.numeric(format(round(mean(FTE, na.rm = T),
+      summarise(FTE = as.numeric(format(round(mean(FTE, na.rm = TRUE),
                                               digits = digits_round),
                                         nsmall = 2))) %>%
       rename(`FYTD Avg.` = FTE)
     kdata <- kdata %>%
       group_by(PAYROLL, dates) %>%
-      summarise(FTE = sum(FTE, na.rm = T)) %>%
+      summarise(FTE = sum(FTE, na.rm = TRUE)) %>%
       pivot_wider(id_cols = PAYROLL,
                   names_from = dates,
                   values_from = FTE)
@@ -374,8 +375,7 @@ server <- function(input, output, session) {
         !is.na(value) ~ value), #else leave the value
         FTE = round(value, digits_round)) #turn dates into factor
     data_service$DEPARTMENT <- sapply(data_service$DEPARTMENT,
-                                      function(x)
-                                        string_separate_to_lines(x, max_length = 20))
+                                      function(x) string_separate_to_lines(x, max_length = 20))
     ggplotly(
       ggplot(data = data_service,
              aes(x = dates, y = FTE, group = DEPARTMENT, color = DEPARTMENT,
@@ -400,7 +400,8 @@ server <- function(input, output, session) {
                                            paste0("Multiple ",
                                                   input$dep_selected_group,
                                                   " Departments")
-                                           } else {input$dep_selected_service}),
+                                           } else {
+                                             input$dep_selected_service}),
                                        collapse = ", "),
                                 "<br>",
                                 "<sup>",
@@ -414,9 +415,9 @@ server <- function(input, output, session) {
     avg <- kdata %>%
       filter(year(PP.END.DATE) == max(year(data$PP.END.DATE))) %>%
       group_by(DEPARTMENT, dates) %>%
-      summarise(FTE = sum(FTE, na.rm = T)) %>%
+      summarise(FTE = sum(FTE, na.rm = TRUE)) %>%
       group_by(DEPARTMENT) %>%
-      summarise(FTE = as.numeric(format(round(mean(FTE, na.rm = T),
+      summarise(FTE = as.numeric(format(round(mean(FTE, na.rm = TRUE),
                                               digits = digits_round),
                                         nsmall = 2))) %>%
       rename(`FYTD Avg.` = FTE)
