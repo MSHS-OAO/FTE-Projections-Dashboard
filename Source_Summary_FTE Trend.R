@@ -7,12 +7,15 @@ Source_Summary <- function(data){
   library(readxl)
   library(rstudioapi)
   #Read paycode mapping file and Pay cycle file
-  System_Paycode <- read_xlsx("J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/Universal Data/Mapping/MSHS_Paycode_Mapping.xlsx")
-  System_Paycode <- System_Paycode %>% select(RAW.PAY.CODE, PAY.CODE.NAME,
-                                              PAY.CODE.CATEGORY, INCLUDE.HOURS, 
-                                              INCLUDE.EXPENSES)
-  colnames(System_Paycode) <- c("PAY.CODE","PAY.CODE.NAME","PAY.CODE.MAPPING","INCLUDE.HOURS","INCLUDE.EXPENSES")
-  
+  System_Paycode <- read_xlsx(paste0('J:/deans/Presidents/SixSigma',
+                                     '/MSHS Productivity/Productivity',
+                                     '/Universal Data/Mapping',
+                                     '/MSHS_Paycode_Mapping.xlsx'))%>%
+    select(RAW.PAY.CODE, PAY.CODE.NAME, PAY.CODE.CATEGORY, INCLUDE.HOURS,
+           INCLUDE.EXPENSES, WORKED.PAY.CODE) %>%
+    rename(PAY.CODE = RAW.PAY.CODE,
+           PAY.CODE.MAPPING = PAY.CODE.CATEGORY)
+
   #Read in paycycle
   PayCycle <- read_excel("J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/Universal Data/Mapping/MSHS_Pay_Cycle.xlsx")
   PayCycle <- PayCycle %>%
@@ -34,22 +37,22 @@ Source_Summary <- function(data){
   Summary <- department_paycylce %>%
     select(PAYROLL,WRKD.LOCATION,HOME.LOCATION,DPT.WRKD,DPT.HOME,WRKD.DESCRIPTION,HOME.DESCRIPTION,J.C,J.C.DESCRIPTION,PAY.CODE,END.DATE.y,HOURS,EXPENSE) %>%
     group_by(PAYROLL,WRKD.LOCATION,HOME.LOCATION,DPT.WRKD,DPT.HOME,WRKD.DESCRIPTION,HOME.DESCRIPTION,J.C,J.C.DESCRIPTION,PAY.CODE,END.DATE.y) %>%
-    summarize(HOURS = sum(HOURS, na.rm = T),EXPENSE = sum(EXPENSE, na.rm = T))
-  
-  colnames(Summary)[11] <- "PP.END.DATE"
+    summarize(HOURS = sum(HOURS, na.rm = T),EXPENSE = sum(EXPENSE, na.rm = T)) %>%
+    rename(PP.END.DATE = END.DATE.y)
   
   #Bring in paycode mapping and hours included columns
   row_count <- nrow(Summary)
   Site_Summary <- left_join(Summary,System_Paycode) %>%
-    select(c(1:10),c(15:17),c(11:13))
+    select(-PAY.CODE.NAME)
   if(nrow(Site_Summary) != row_count){
     stop(paste("Row count failed at", basename(getSourceEditorContext()$path)))}
   
   #Bring in cost center mappings
   System_Department <- read_xlsx("J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/Universal Data/Mapping/MSHS_Reporting_Definition_Mapping.xlsx")
   System_Department <- System_Department %>%
-    filter(FTE.TREND == 1) %>%
-    select(COST.CENTER, DEFINITION.CODE, DEFINITION.NAME, CORPORATE.SERVICE.LINE, SITE)
+    filter(FTE.TREND == 1,
+           is.na(CLOSED)) %>%
+    select(ORACLE.COST.CENTER, DEFINITION.CODE, DEFINITION.NAME, CORPORATE.SERVICE.LINE, SITE)
   row_count <- nrow(Site_Summary)
   Site_Summary <- left_join(Site_Summary,System_Department, by = c("DPT.WRKD" = "ORACLE.COST.CENTER")) %>%
     ungroup() %>%
@@ -87,9 +90,9 @@ Source_Summary <- function(data){
   #select correct provider column based on PAYROLL
   Site_Summary <- Site_Summary %>% 
     mutate(PROVIDER = case_when(
-       PAYROLL %in% c("MSM","MSW","MSBI","MSB") ~ PROVIDER.x,
-       PAYROLL %in% c("MSH","MSQ","Corporate") ~ PROVIDER.y)) %>%
-     select(-PROVIDER.x,-PROVIDER.y)
+      PAYROLL %in% c("MSM","MSW","MSBI","MSB") ~ PROVIDER.x,
+      PAYROLL %in% c("MSH","MSQ","Corporate") ~ PROVIDER.y)) %>%
+    select(-PROVIDER.x,-PROVIDER.y)
   
   Site_Summary <- Site_Summary %>% distinct()
   
