@@ -1,5 +1,3 @@
-
-
 server <- function(input, output, session) {
   
   ## Text output for MSHS -------------------------------
