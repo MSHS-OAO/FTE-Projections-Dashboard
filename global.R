@@ -25,8 +25,6 @@ suppressMessages({
   library(kableExtra)
 })
 
-
-
 # Maximize R Memory Size
 memory.limit(size = 8000000)
 
