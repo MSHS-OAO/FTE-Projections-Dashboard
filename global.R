@@ -50,9 +50,6 @@ digits_round <- 2
 report_start_date <- format(max(system_summary$PP.END.DATE) - 41, "%m/%d/%y")
 report_end_date <- format(max(system_summary$PP.END.DATE), "%m/%d/%y")
 
-
-
-
 ## Pre filter data ------------------------------------------------------------
 data <- system_summary %>%
   filter(
