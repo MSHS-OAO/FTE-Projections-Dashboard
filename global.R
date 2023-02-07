@@ -63,7 +63,7 @@ data <- system_summary %>%
     PAYROLL, DEFINITION.CODE, DEFINITION.NAME,
     CORPORATE.SERVICE.LINE, PP.END.DATE
   ) %>%
-  summarise(FTE = sum(HOURS, na.rm = T) / biweekly_fte) %>%
+  summarise(FTE = sum(HOURS, na.rm = TRUE) / biweekly_fte) %>%
   pivot_wider(
     id_cols = c(
       PAYROLL, DEFINITION.CODE, DEFINITION.NAME,
@@ -109,7 +109,6 @@ data <- data %>%
     dates = format(as.Date(PP.END.DATE, "%B %d %Y"), "%m/%d/%y")
   )
 
-
 ## Constants After Data Import-------------------------------------------------
 start_date <- max(data$PP.END.DATE) - 130
 
@@ -124,11 +123,8 @@ service_choices <-
                                                        & data$service_group
                                                        %in% "Nursing"])))
 
-date_options <- sort(unique(data$PP.END.DATE), decreasing = T)
+date_options <- sort(unique(data$PP.END.DATE), decreasing = TRUE)
 date_options <- format(as.Date(date_options, "%B %d %Y"), "%m/%d/%y")
-
-
-
 
 # Color Theme -----------------------------------------------------------
 
@@ -184,7 +180,6 @@ mount_sinai_pal <- function(palette = "main", reverse = FALSE, ...) {
 
   colorRampPalette(pal, interpolate = "spline", ...)
 }
-
 
 # Other Functions ---------------------------------------------------------
 string_separate_to_lines <- function(string, max_length) {

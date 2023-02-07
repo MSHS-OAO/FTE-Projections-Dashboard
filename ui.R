@@ -8,7 +8,7 @@ header$children[[2]]$children[[2]] <- header$children[[2]]$children[[1]]
 header$children[[2]]$children[[1]] <-
                                   tags$a(href = "https://peak.mountsinai.org/",
                                         tags$img(src = "Sinai_logo_white.png",
-                                               height = "100%", width = "30%"))
+                                              height = "100%", width = "30%"))
 
 ui <- dashboardPage(
       header,
@@ -85,12 +85,12 @@ ui <- dashboardPage(
                              title = NULL, width = 12, status = "primary",
                              solidHeader = TRUE, collapsible = TRUE, closable = TRUE, br(),
                              fluidRow(
-                               box(width = 4, height = "100px", title = "Select Service Line Category:", solidHeader = F,
-                                   pickerInput("mshs_selected_group", label = NULL, multiple = F,
+                               box(width = 4, height = "100px", title = "Select Service Line Category:", solidHeader = FALSE,
+                                   pickerInput("mshs_selected_group", label = NULL, multiple = FALSE,
                                                options = pickerOptions(actionsBox = TRUE), choices = group_choices,
                                                selected = "Nursing")),
-                               box(width = 4, height = "100px", title = "Select Service Line:", solidHeader = F,
-                                   pickerInput("mshs_selected_service", label = NULL, multiple = T,
+                               box(width = 4, height = "100px", title = "Select Service Line:", solidHeader = FALSE,
+                                   pickerInput("mshs_selected_service", label = NULL, multiple = FALSE,
                                                options = pickerOptions(
                                                  liveSearch = TRUE,
                                                  actionsBox = TRUE,
@@ -98,7 +98,7 @@ ui <- dashboardPage(
                                                choices = service_choices, selected = service_choices[1])),
                                box(width = 4, height = "100px",
                                    title = "Select Pay Period End Date:",  solidHeader = FALSE,
-                                   pickerInput("mshs_date_range", label = NULL, multiple = F,
+                                   pickerInput("mshs_date_range", label = NULL, multiple = FALSE,
                                                options = pickerOptions(
                                                  actionsBox = TRUE,
                                                  dropupAuto = FALSE),
@@ -137,23 +137,23 @@ ui <- dashboardPage(
                            title = NULL, width = 12, status = "primary",
                            solidHeader = TRUE, collapsible = TRUE, closable = TRUE, br(),
                            fluidRow(
-                             box(width = 3, height = "100px", title = "Select Hospital:", solidHeader = F,
-                                 pickerInput("selected_payroll", label = NULL, multiple = T,
+                             box(width = 3, height = "100px", title = "Select Hospital:", solidHeader = FALSE,
+                                 pickerInput("selected_payroll", label = NULL, multiple = TRUE,
                                              options = pickerOptions(actionsBox = TRUE), choices = payroll_choices,
                                              selected = "MSH")),
-                             box(width = 3, height = "100px", title = "Select Service Line Category:", solidHeader = F,
-                                 pickerInput("selected_group", label = NULL, multiple = F,
+                             box(width = 3, height = "100px", title = "Select Service Line Category:", solidHeader = FALSE,
+                                 pickerInput("selected_group", label = NULL, multiple = FALSE,
                                              options = pickerOptions(actionsBox = TRUE), choices = group_choices,
                                              selected = "Nursing")),
-                             box(width = 3, height = "100px", title = "Select Service Line:", solidHeader = F,
-                                 pickerInput("selected_service", label = NULL, multiple = T,
+                             box(width = 3, height = "100px", title = "Select Service Line:", solidHeader = FALSE,
+                                 pickerInput("selected_service", label = NULL, multiple = TRUE,
                                              options = pickerOptions(
                                                liveSearch = TRUE,
                                                actionsBox = TRUE),
                                              choices = service_choices,  selected = service_choices[1])),
                              box(width = 3, height = "100px",
                                  title = "Select Pay Period End Date:",  solidHeader = FALSE,
-                                 pickerInput("date_range", label = NULL, multiple = F,
+                                 pickerInput("date_range", label = NULL, multiple = FALSE,
                                              options = pickerOptions(
                                                actionsBox = TRUE,
                                                dropupAuto = FALSE),
@@ -193,16 +193,16 @@ ui <- dashboardPage(
                            title = NULL, width = 12, status = "primary",
                            solidHeader = TRUE, collapsible = TRUE, closable = TRUE, br(),
                            fluidRow(
-                             box(width = 3, height = "100px", title = "Select Hospital:", solidHeader = F,
-                                 pickerInput("dep_selected_payroll", label = NULL, multiple = F,
+                             box(width = 3, height = "100px", title = "Select Hospital:", solidHeader = FALSE,
+                                 pickerInput("dep_selected_payroll", label = NULL, multiple = FALSE,
                                              options = pickerOptions(actionsBox = TRUE), choices = payroll_choices,
                                              selected = "MSH")),
-                             box(width = 3, height = "100px", title = "Select Service Line Category:", solidHeader = F,
-                                 pickerInput("dep_selected_group", label = NULL, multiple = F,
+                             box(width = 3, height = "100px", title = "Select Service Line Category:", solidHeader = FALSE,
+                                 pickerInput("dep_selected_group", label = NULL, multiple = FALSE,
                                              options = pickerOptions(actionsBox = TRUE), choices = group_choices,
                                              selected = "Nursing")),
-                             box(width = 3, height = "100px", title = "Select Service Line:", solidHeader = F,
-                                 pickerInput("dep_selected_service", label = NULL, multiple = T,
+                             box(width = 3, height = "100px", title = "Select Service Line:", solidHeader = FALSE,
+                                 pickerInput("dep_selected_service", label = NULL, multiple = TRUE,
                                              options = pickerOptions(
                                                liveSearch = TRUE,
                                                actionsBox = TRUE,
@@ -210,7 +210,7 @@ ui <- dashboardPage(
                                              choices = service_choices,  selected = service_choices[1])),
                              box(width = 3, height = "100px",
                                  title = "Select Pay Period End Date:",  solidHeader = FALSE,
-                                 pickerInput("dep_date_range", label = NULL, multiple = F,
+                                 pickerInput("dep_date_range", label = NULL, multiple = FALSE,
                                              options = pickerOptions(
                                                actionsBox = TRUE,
                                                dropupAuto = FALSE),
