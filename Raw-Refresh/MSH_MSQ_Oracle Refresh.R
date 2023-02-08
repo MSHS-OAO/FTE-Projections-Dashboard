@@ -62,7 +62,7 @@ if (answer == "Yes" &
                                    title = "Select the data you want to update",
                                    graphics = T)
   # remove the update files from current REPO
-  repo <- repo %>% filter(!(Filename %in% update_file_list))
+  repo <- repo %>% filter(!(Filename %in% basename(update_file_list)))
   # get path(s) of file(s) to be updated within REPO
   oracle_file_list <- basename(rownames(details))[basename(rownames(details))
                                                   %in% basename(update_file_list)]
