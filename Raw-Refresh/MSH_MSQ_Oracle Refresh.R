@@ -141,8 +141,6 @@ oracle  <- oracle  %>%
 
 # Bind NEW data with repository -----------------------------------------------
 new_repo <- rbind(repo, oracle)
-new_repo <- new_repo %>%
-              distinct()
 
 # Check sum of hours by end date to make sure data follows proper pattern-------
 check <- new_repo %>%
