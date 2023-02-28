@@ -89,7 +89,7 @@ cat(paste0("The following files will be INSERTED to DATA_", data_site,
            "The following files will be OVERWRITTEN to DATA_",
            data_site, "_ORACLE: \n", paste(overwrite, collapse = "\n")))
 
-
+# delete any files that need to be overwritten
 if (length(overwrite) > 0) {
   # create syntax to delete all overwrite files
   delete_syntax <- paste0("\'",overwrite, "\'", collapse = " OR ")
@@ -188,18 +188,17 @@ for (i in 1:length(data_files)) {
     read.csv(file = paste0(dir, data_files[i]), header = T, sep = "~",
              stringsAsFactors = F, colClasses = rep("character", 33))
   
-  # escape apostrophe 
+  # escape apostrophe and replace blank jobcode
   source_table_r <- as.data.frame(
     apply(source_table_r, 2, function(y) gsub("'", "''", y))) %>%
     mutate(
-      Job.Code = case_when(
-        Job.Code == "" ~ "MISSING_JOBCODE",
-        TRUE ~ Job.Code))
+      JOBCODE = case_when(
+        JOBCODE == "" ~ "MISSING_JOBCODE",
+        TRUE ~ JOBCODE),
+      START_DATE = format(as.Date(START_DATE, format = "%Y-%m-%d"), "%m/%d/%Y"),
+      END_DATE = format(as.Date(END_DATE, format = "%Y-%m-%d"), "%m/%d/%Y"))
   
-  # replace column names of source table with DB column names
-  colnames(source_table_r) <- names(data_types)
-  
-  # Convert the each record/row of tibble to INTO clause of insert statment
+  # convert each record/row of tibble to INTO clause of insert statement
   insert_rows <- 
     lapply(
       lapply(
