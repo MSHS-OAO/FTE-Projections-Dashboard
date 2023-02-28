@@ -23,8 +23,7 @@ row_count <- data.frame(
   source = "",
   sql = "",
   match = "")
-  
-library(stringr)
+
 for (i in 1:length(list.files(dir))) {
   file_name <- mixedsort(list.files(dir))[i]
   
@@ -34,8 +33,10 @@ for (i in 1:length(list.files(dir))) {
   
   row_count$source[i] <- nrow(source_table_r)
   
+  raw_file_name <- unique(source_table_r$FILE_NAME)
+  
   sql_row <- tbl(con, paste0("DATA_", data_site, "_ORACLE")) %>%
-    filter(FILE_NAME == file_name) %>%
+    filter(FILE_NAME == raw_file_name) %>%
     count() %>%
     collect()
   
