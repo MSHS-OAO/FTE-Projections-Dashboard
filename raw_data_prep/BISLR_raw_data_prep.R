@@ -99,9 +99,8 @@ for (i in 1:length(ORACLElist)) {
     mutate(
       JOBCODE = case_when(
         JOBCODE == "" ~ "MISSING_JOBCODE",
-        TRUE ~ JOBCODE
-      )
-    )
+        TRUE ~ JOBCODE),
+      EMPLOYEE_NAME = gsub("\"", "", EMPLOYEE_NAME))
 }
 
 # save each file to folder
