@@ -310,11 +310,15 @@ server <- function(input, output, session) {
       layout(title = list(text =
                             isolate(
                               paste0(
-                                paste0(c(input$selected_payroll,
+                                paste0(c(
+                                  if (length(input$selected_payroll) > 2) {
+                                    paste0("Multiple Hospitals")
+                                  } else {
+                                    input$selected_payroll},
                                          if (sum(nchar(input$selected_service)) > 40) {
                                            paste0("Multiple ",
-                                                  input$selected_group,
-                                                  " Departments")
+                                                  #input$selected_group,
+                                                  "Operational Categories")
                                            } else {
                                              input$selected_service}),
                                        collapse = ", "),
@@ -384,7 +388,7 @@ server <- function(input, output, session) {
         ggtitle("placeholder") +
         xlab("Pay Period") +
         ylab("FTE (Full Time Equivalent)") +
-        scale_color_manual(values = mount_sinai_pal("main")(length(data_service$DEPARTMENT))) +
+        scale_color_manual(values = mount_sinai_pal("all")(length(data_service$DEPARTMENT))) +
         scale_y_continuous(limits = c(0, max(data_service$FTE) * 1.2)) +
         theme(plot.title = element_text(hjust = 0.5, size = 20),
               axis.title = element_text(face = "bold"),
@@ -393,11 +397,15 @@ server <- function(input, output, session) {
       layout(title = list(text =
                             isolate(
                               paste0(
-                                paste0(c(input$dep_selected_payroll,
+                                paste0(c(
+                                         if (length(input$dep_selected_payroll) > 2) {
+                                           paste0("Multiple Hospitals")
+                                         } else {
+                                           input$dep_selected_payroll},
                                          if (sum(nchar(input$dep_selected_service)) > 40) {
                                            paste0("Multiple ",
-                                                  input$dep_selected_group,
-                                                  " Departments")
+                                                  #input$dep_selected_group,
+                                                  "Operational Categories")
                                            } else {
                                              input$dep_selected_service}),
                                        collapse = ", "),
