@@ -10,14 +10,11 @@ suppressMessages({
   library(dplyr)
 })
 
-
-
 memory.limit(size = 8000000)
 
 # Working directory --------------------------------------------------------
 dir <- paste0("J:/deans/Presidents/SixSigma/MSHS Productivity/Productivity/",
                                                        "Universal Data/")
-
 
 # Import data sets ----------------------------------------------------------
 # Import the latest aggregated file
@@ -91,9 +88,7 @@ dist_dates <- dates %>%
 #filter 3 weeks from run date (21 days) for data collection lag before run date
          END.DATE < as.POSIXct(Sys.Date() - 14))
 
-
 #Selecting current and previous distribution dates
-
 #End date is 1 week after the end of the current Premier Distribution
 end_dates <- as.Date(format(tail(dist_dates$END.DATE,
                                  n = length(oracle_file_list)), "%m/%d/%Y"),
@@ -134,11 +129,9 @@ data_bislr <- lapply(1 : length(oracle_list), function(x)
     filter(as.Date(End.Date, format = "%m/%d/%Y") <= end_dates[x],
            as.Date(Start.Date, format = "%m/%d/%Y") >= start_dates[x]))
 
-
 # Filter overlapping weekly pay cycle in BISLR --------------------------------
 #Names of the weekly paycyle names in the payroll name column in data files
 weekly_pc <- c("WEST WEEKLY", "BIB WEEKLY")
-
 
 #Function to delete overlapping weekly pay cycle in BISLR
 delete_weekly <- function(df, pay_cycles) {
@@ -158,14 +151,9 @@ delete_weekly <- function(df, pay_cycles) {
   return(data_export)
 }
 
-
-
 #Applying function
 data_bislr <- lapply(data_bislr, function(x) delete_weekly(x, weekly_pc))
-
 data_bislr <- do.call("rbind", data_bislr)
-
-
   
 # Assigning Payroll values and Removing duplicates ----------------------------
 data_bislr <- data_bislr %>%
@@ -173,9 +161,7 @@ data_bislr <- data_bislr %>%
     Facility.Hospital.Id_Worked == "NY2162" ~ "MSW",
     Facility.Hospital.Id_Worked == "NY2163" ~ "MSM",
     substr(Full.COA.for.Worked, 1, 3) %in% c("402", "410") ~ "MSB",
-    TRUE ~ "MSBI")) %>%
-  distinct()
-
+    TRUE ~ "MSBI"))
 
 # Clean Position.Code.Description -----------------------------------------
 data_bislr <- data_bislr %>%
@@ -241,7 +227,6 @@ data_bislr <- data_bislr %>%
 
 # Bind NEW data with repository ---------------------------------------------
 new_repo <- rbind(repo, data_bislr)
-new_repo <- new_repo  %>% distinct()
 
 # Check sum of hours by end date to make sure data follows proper pattern-------
 check <- new_repo %>%

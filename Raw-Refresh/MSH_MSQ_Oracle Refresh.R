@@ -132,7 +132,9 @@ oracle_list <- lapply(1:length(oracle_list), function(x)
            as.Date(Start.Date, format = "%m/%d/%Y") >= start_dates[x]))
 
 # bind all new/updated data
-oracle <- do.call("rbind", oracle_list)
+oracle <- do.call("rbind", oracle_list) %>%
+  mutate(Start.Date = as.Date(Start.Date, "%m/%d/%Y"),
+         End.Date = as.Date(End.Date, "%m/%d/%Y"))
 
 # Determine PAYROLL based on WRKD.ENTITY  -------------------------------------
 oracle  <- oracle  %>%
