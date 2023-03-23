@@ -143,6 +143,24 @@ mount_sinai_colors <- c(
   `yellow`       = "#E69F00"
 )
 
+# mount_sinai_colors <- c(
+#   `dark purple`  = "#212070",
+#   `dark pink`    = "#d80b8c",
+#   `dark blue`    = "#00aeef",
+#   `dark grey`    = "#7f7f7f",
+#   `yellow`       = "#ffc000",
+#   `purple`       = "#7030a0",
+#   `med purple`   = "#5753d0",
+#   `med pink`     = "#f75dbe",
+#   `med blue`     = "#5cd3ff",
+#   `med grey`     = "#a5a7a5",
+#   `light purple` = "#c7c6ef",
+#   `light pink`   = "#fcc9e9",
+#   `light blue`   = "#c9f0ff",
+#   `light grey`   = "#dddedd"
+# )
+
+
 # Function to extract Mount Sinai colors as hex codes
 # Use Character names of mount_sinai_colors
 
@@ -156,7 +174,7 @@ mount_sinai_cols <- function(...) {
   mount_sinai_colors[cols]
 }
 
-# Create palettes
+#Create palettes
 mount_sinai_palettes <- list(
   `all` = mount_sinai_cols(
     "med blue", "dark pink", "dark blue", "light grey",
@@ -171,6 +189,7 @@ mount_sinai_palettes <- list(
   `blue` = mount_sinai_cols("light blue", "dark blue"),
   `grey` = mount_sinai_cols("light grey", "med blue")
 )
+
 mount_sinai_palettes
 
 mount_sinai_pal <- function(palette = "main", reverse = FALSE, ...) {
@@ -178,7 +197,7 @@ mount_sinai_pal <- function(palette = "main", reverse = FALSE, ...) {
 
   if (reverse) pal <- rev(pal)
 
-  colorRampPalette(pal, interpolate = "spline", ...)
+  colorRampPalette(pal, interpolate = "linear", ...)
 }
 
 # Other Functions ---------------------------------------------------------

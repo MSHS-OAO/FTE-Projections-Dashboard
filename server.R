@@ -231,8 +231,8 @@ server <- function(input, output, session) {
                                 paste0(c("MSHS",
                                          if (sum(nchar(input$mshs_selected_service)) > 40) {
                                            paste0("Multiple ",
-                                                  input$mshs_selected_group,
-                                                  " Departments")
+                                                  #input$mshs_selected_group,
+                                                  "Operational Categories")
                                            } else {
                                              input$mshs_selected_service}),
                                        collapse = ", "),
@@ -272,7 +272,17 @@ server <- function(input, output, session) {
     kdata <-  datatable(kdata,
                         class = "cell-border stripe",
                         rownames = FALSE,
+                        caption = htmltools::tags$caption(
+                          style = 'caption-side: top; text-align: center; color: black;
+                                            font-size:150%; font-weight:bold',
+                          htmltools::em("Worked FTEs by Pay Period")),
                         options = list(
+                          scrollX = TRUE,
+                          sDom  = '<"top">lrt<"bottom">ip',
+                          initComplete = JS(
+                            "function(settings, json) {",
+                            "$(this.api().table().header()).css({'background-color': '#dddedd', 'color': 'black'});",
+                            "}"),
                           columnDefs = list(list(className = "dt-center", targets = "_all")))) %>%
       formatStyle(columns = c("Site", "Reporting Period Avg.", "FYTD Avg."), fontWeight = "bold")
   })
@@ -358,7 +368,17 @@ server <- function(input, output, session) {
     kdata <-  datatable(kdata,
                         class = "cell-border stripe",
                         rownames = FALSE,
+                        caption = htmltools::tags$caption(
+                          style = 'caption-side: top; text-align: center; color: black;
+                                            font-size:150%; font-weight:bold',
+                          htmltools::em("Worked FTEs by Pay Period")),
                         options = list(
+                          scrollX = TRUE,
+                          sDom  = '<"top">lrt<"bottom">ip',
+                          initComplete = JS(
+                            "function(settings, json) {",
+                            "$(this.api().table().header()).css({'background-color': '#dddedd', 'color': 'black'});",
+                            "}"),
                           columnDefs = list(list(className = "dt-center", targets = "_all")))) %>%
       formatStyle(columns = c("Site", "Reporting Period Avg.", "FYTD Avg."), fontWeight = "bold")
   })
@@ -388,7 +408,7 @@ server <- function(input, output, session) {
         ggtitle("placeholder") +
         xlab("Pay Period") +
         ylab("FTE (Full Time Equivalent)") +
-        scale_color_manual(values = mount_sinai_pal("all")(length(data_service$DEPARTMENT))) +
+        scale_color_manual(values = mount_sinai_pal("main")(length(data_service$DEPARTMENT))) +
         scale_y_continuous(limits = c(0, max(data_service$FTE) * 1.2)) +
         theme(plot.title = element_text(hjust = 0.5, size = 20),
               axis.title = element_text(face = "bold"),
@@ -439,9 +459,19 @@ server <- function(input, output, session) {
     kdata <- left_join(kdata, avg, by = "DEPARTMENT")
     kdata[2:length(kdata)] <- round(kdata[2:length(kdata)], digits_round)
     kdata <-  datatable(kdata,
-                        class = "cell-border stripe",
-                        rownames = FALSE,
+                         class = "cell-border stripe",
+                         rownames = FALSE,
+                         caption = htmltools::tags$caption(
+                                   style = 'caption-side: top; text-align: center; color: black;
+                                            font-size:150%; font-weight:bold',
+                                   htmltools::em("Worked FTEs by Pay Period")),
                         options = list(
+                          scrollX = TRUE,
+                          sDom  = '<"top">lrt<"bottom">ip',
+                          initComplete = JS(
+                            "function(settings, json) {",
+                            "$(this.api().table().header()).css({'background-color': '#dddedd', 'color': 'black'});",
+                            "}"),
                           columnDefs = list(list(className = "dt-center", targets = "_all")))) %>%
       formatStyle(columns = c("DEPARTMENT", "Reporting Period Avg.", "FYTD Avg."), fontWeight = "bold")
   })
