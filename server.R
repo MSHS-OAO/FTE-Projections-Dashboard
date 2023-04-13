@@ -7,11 +7,11 @@ server <- function(input, output, session) {
     start_date_input <- as.Date(date_options[dates_index], format = "%m/%d/%y") + 1
     start_date_input <- format(as.Date(start_date_input, "%B %d %Y"), "%m/%d/%y")
     paste0("Based on data from ", start_date_input, " to ", end_date, " for MSHS")
-    }, ignoreNULL = FALSE)
+  }, ignoreNULL = FALSE)
   
   output$mshs_date_show  <- renderText({
     mshs_text()
-    })
+  })
   
   mshs_reporting <- eventReactive(input$mshs_filters_update, {
     end_date <- isolate(input$mshs_date_range)
@@ -19,11 +19,11 @@ server <- function(input, output, session) {
     reporting_start_date <- as.Date(date_options[reporting_index], format = "%m/%d/%y") + 1
     reporting_start_date <- format(as.Date(reporting_start_date, "%B %d %Y"), "%m/%d/%y")
     paste0("Reporting period: ", reporting_start_date, " to ", end_date)
-    }, ignoreNULL = FALSE)
+  }, ignoreNULL = FALSE)
   
   output$mshs_reporting_date <- renderText({
     mshs_reporting()
-    })
+  })
   
   ## text output for Site ---------------------------------------------
   site_text <- eventReactive(input$filters_update, {
@@ -33,11 +33,11 @@ server <- function(input, output, session) {
     start_date_input <- format(as.Date(start_date_input, "%B %d %Y"), "%m/%d/%y")
     paste0("Based on data from ", min(start_date_input), " to ", max(end_date),
            " for ", paste(sort(input$selected_payroll), collapse = ", "))
-    }, ignoreNULL = FALSE)
+  }, ignoreNULL = FALSE)
   
   output$site_name_date_show <- renderText({
     site_text()
-    })
+  })
   
   site_reporting <- eventReactive(input$filters_update, {
     end_date <- isolate(input$date_range)
@@ -45,11 +45,11 @@ server <- function(input, output, session) {
     reporting_start_date <- as.Date(date_options[reporting_index], format = "%m/%d/%y") + 1
     reporting_start_date <- format(as.Date(reporting_start_date, "%B %d %Y"), "%m/%d/%y")
     paste0("Reporting period: ", min(reporting_start_date), " to ", max(end_date))
-    }, ignoreNULL = FALSE)
+  }, ignoreNULL = FALSE)
   
   output$site_reporting_date <- renderText({
     site_reporting()
-    })
+  })
   
   ## Text output for department -------------------------------------
   dep_text <- eventReactive(input$dep_filters_update, {
@@ -59,11 +59,11 @@ server <- function(input, output, session) {
     start_date_input <- format(as.Date(start_date_input, "%B %d %Y"), "%m/%d/%y")
     paste0("Based on data from ", min(start_date_input), " to ", max(end_date),
            " for ", paste(sort(input$dep_selected_payroll), collapse = ", "))
-    }, ignoreNULL = FALSE)
+  }, ignoreNULL = FALSE)
   
   output$department_date_show <- renderText({
     dep_text()
-    })
+  })
   
   dep_reporting <- eventReactive(input$dep_filters_update, {
     end_date <- isolate(input$dep_date_range)
@@ -71,27 +71,27 @@ server <- function(input, output, session) {
     reporting_start_date <- as.Date(date_options[reporting_index], format = "%m/%d/%y") + 1
     reporting_start_date <- format(as.Date(reporting_start_date, "%B %d %Y"), "%m/%d/%y")
     paste0("Reporting period: ", min(reporting_start_date), " to ", max(end_date))
-    }, ignoreNULL = FALSE)
+  }, ignoreNULL = FALSE)
   
   output$department_reporting_date <- renderText({
     dep_reporting()
-    })
+  })
   
   ## eventReactive for MSHS ------------------------------
   data_mshs  <- eventReactive(input$mshs_filters_update, {
     validate(need(input$mshs_selected_group != "", "Please Select a Group"),
-            need(input$mshs_date_range != "", "Please Select a Date"))
+             need(input$mshs_date_range != "", "Please Select a Date"))
     
- dates_index <- sapply(input$mshs_date_range, function(x) grep(x, date_options) + 9)
+    dates_index <- sapply(input$mshs_date_range, function(x) grep(x, date_options) + 9)
     start_date_input <- as.Date(date_options[dates_index], format = "%m/%d/%y")
     start_date_input <- format(as.Date(start_date_input, "%B %d %Y"), "%m/%d/%y")
-
+    
     data %>%
       filter(service_group %in% input$mshs_selected_group,
              CORPORATE.SERVICE.LINE %in% input$mshs_selected_service,
              PP.END.DATE >= as.Date(min(start_date_input), format = "%m/%d/%y") &
                PP.END.DATE <= as.Date(max(input$mshs_date_range), format = "%m/%d/%y"))
-    }, ignoreNULL = FALSE)
+  }, ignoreNULL = FALSE)
   
   ## eventReactive for sites ------------------------------
   data_service  <- eventReactive(input$filters_update, {
@@ -99,17 +99,17 @@ server <- function(input, output, session) {
              need(input$selected_group != "", "Please Select a Group"),
              need(input$date_range != "", "Please Select a Date"))
     
-  dates_index <- sapply(input$date_range, function(x) grep(x, date_options) + 9)
-  start_date_input <- as.Date(date_options[dates_index], format = "%m/%d/%y")
-  start_date_input <- format(as.Date(start_date_input, "%B %d %Y"), "%m/%d/%y")
-  
+    dates_index <- sapply(input$date_range, function(x) grep(x, date_options) + 9)
+    start_date_input <- as.Date(date_options[dates_index], format = "%m/%d/%y")
+    start_date_input <- format(as.Date(start_date_input, "%B %d %Y"), "%m/%d/%y")
+    
     data %>%
       filter(PAYROLL %in% input$selected_payroll,
              service_group %in% input$selected_group,
              CORPORATE.SERVICE.LINE %in% input$selected_service,
              PP.END.DATE >= as.Date(min(start_date_input), format = "%m/%d/%y") &
                PP.END.DATE <= as.Date(max(input$date_range), format = "%m/%d/%y"))
-    }, ignoreNULL = FALSE)
+  }, ignoreNULL = FALSE)
   
   ## eventReactive for department ------------------------------
   department_date  <- eventReactive(input$dep_filters_update, {
@@ -120,14 +120,14 @@ server <- function(input, output, session) {
     dates_index <- sapply(input$dep_date_range, function(x) grep(x, date_options) + 9)
     start_date_input <- as.Date(date_options[dates_index], format = "%m/%d/%y")
     start_date_input <- format(as.Date(start_date_input, "%B %d %Y"), "%m/%d/%y")
-   
+    
     data %>%
       filter(PAYROLL %in% input$dep_selected_payroll,
              service_group %in% input$dep_selected_group,
              CORPORATE.SERVICE.LINE %in% input$dep_selected_service,
              PP.END.DATE >= as.Date(min(start_date_input), format = "%m/%d/%y") &
                PP.END.DATE <= as.Date(max(input$dep_date_range), format = "%m/%d/%y"))
-    }, ignoreNULL = FALSE)
+  }, ignoreNULL = FALSE)
   
   # Observeevent for MSHS ----------------------------------------------
   ## Observeevent for services
@@ -138,35 +138,35 @@ server <- function(input, output, session) {
                       inputId = "mshs_selected_service",
                       choices = service_choices,
                       selected = service_choices[1])
-    },
-    ignoreInit = TRUE,
-    ignoreNULL = FALSE)
-
+  },
+  ignoreInit = TRUE,
+  ignoreNULL = FALSE)
+  
   # Observeevent for Site ----------------------------------------------
   ## Observeevent for services category
   observeEvent(input$selected_payroll, {
-      group_choices <- sort(unique(data$selected_group[
-                            data$PAYROLL %in% input$selected_payroll]))
-      updatePickerInput(session,
-                        inputId = "selected_group",
-                        choices = group_choices,
-                        selected = group_choices[1])
-      },
-      ignoreInit = TRUE,
-      ignoreNULL = FALSE)
-
+    group_choices <- sort(unique(data$selected_group[
+      data$PAYROLL %in% input$selected_payroll]))
+    updatePickerInput(session,
+                      inputId = "selected_group",
+                      choices = group_choices,
+                      selected = group_choices[1])
+  },
+  ignoreInit = TRUE,
+  ignoreNULL = FALSE)
+  
   ## Observeevent for services
   observeEvent(input$selected_group, {
     service_choices <- sort(unique(data$CORPORATE.SERVICE.LINE[
       data$PAYROLL %in% input$selected_payroll &
-                              data$service_group %in% input$selected_group]))
+        data$service_group %in% input$selected_group]))
     updatePickerInput(session,
                       inputId = "selected_service",
                       choices = service_choices,
                       selected = service_choices[1])
-    },
-    ignoreInit = TRUE,
-    ignoreNULL = FALSE)
+  },
+  ignoreInit = TRUE,
+  ignoreNULL = FALSE)
   
   # Observeevent for Department ----------------------------------------------
   ## Observeevent for services category
@@ -177,9 +177,9 @@ server <- function(input, output, session) {
                       inputId = "dep_selected_group",
                       choices = group_choices,
                       selected = group_choices[1])
-    },
-    ignoreInit = TRUE,
-    ignoreNULL = FALSE)
+  },
+  ignoreInit = TRUE,
+  ignoreNULL = FALSE)
   
   ## Observeevent for services
   observeEvent(input$dep_selected_group, {
@@ -190,9 +190,9 @@ server <- function(input, output, session) {
                       inputId = "dep_selected_service",
                       choices = service_choices,
                       selected = service_choices[1])
-    },
-    ignoreInit = TRUE,
-    ignoreNULL = FALSE)
+  },
+  ignoreInit = TRUE,
+  ignoreNULL = FALSE)
   
   ## MSHS Tab ---------------------------------------------------
   output$mshs_plot <- renderPlotly({
@@ -219,7 +219,7 @@ server <- function(input, output, session) {
         ggtitle(label = "placeholder") +
         xlab("Pay Period") +
         ylab("FTE (Full Time Equivalent)") +
-        scale_color_manual(values = mount_sinai_pal("main")(length(kdata$Site))) +
+        scale_color_manual(values = mount_sinai_pal("blue")(length(kdata$Site)))+
         scale_y_continuous(limits = c(0, max(kdata$FTE) * 1.2)) +
         theme(plot.title = element_text(hjust = 0.5, size = 20),
               axis.title = element_text(face = "bold"),
@@ -231,10 +231,9 @@ server <- function(input, output, session) {
                                 paste0(c("MSHS",
                                          if (sum(nchar(input$mshs_selected_service)) > 40) {
                                            paste0("Multiple ",
-                                                  input$mshs_selected_group,
-                                                  " Departments")
-                                           } else {
-                                             input$mshs_selected_service}),
+                                                  "Operational Categories")
+                                         } else {
+                                           input$mshs_selected_service}),
                                        collapse = ", "),
                                 "<br>",
                                 "<sup>",
@@ -272,7 +271,17 @@ server <- function(input, output, session) {
     kdata <-  datatable(kdata,
                         class = "cell-border stripe",
                         rownames = FALSE,
+                        caption = htmltools::tags$caption(
+                          style = 'caption-side: top; text-align: center; color: black;
+                                            font-size:150%; font-weight:bold',
+                          htmltools::em("Worked FTEs by Pay Period")),
                         options = list(
+                          scrollX = TRUE,
+                          sDom  = '<"top">lrt<"bottom">ip',
+                          initComplete = JS(
+                            "function(settings, json) {",
+                            "$(this.api().table().header()).css({'background-color': '#dddedd', 'color': 'black'});",
+                            "}"),
                           columnDefs = list(list(className = "dt-center", targets = "_all")))) %>%
       formatStyle(columns = c("Site", "Reporting Period Avg.", "FYTD Avg."), fontWeight = "bold")
   })
@@ -290,7 +299,7 @@ server <- function(input, output, session) {
     kdata[3:length(kdata)] <- round(kdata[3:length(kdata)], digits_round)
     kdata <- kdata %>%
       rename(Site = PAYROLL)
-  
+    
     ggplotly(
       ggplot(data = kdata,
              aes(x = dates, y = FTE, group = Site, color = Site,
@@ -301,7 +310,7 @@ server <- function(input, output, session) {
         ggtitle(label = "placeholder") +
         xlab("Pay Period") +
         ylab("FTE (Full Time Equivalent)") +
-        scale_color_manual(values = mount_sinai_pal("main")(length(kdata$Site))) +
+        scale_color_mount_sinai("main")+
         scale_y_continuous(limits = c(0, max(kdata$FTE) * 1.2)) +
         theme(plot.title = element_text(hjust = 0.5, size = 20),
               axis.title = element_text(face = "bold"),
@@ -310,14 +319,17 @@ server <- function(input, output, session) {
       layout(title = list(text =
                             isolate(
                               paste0(
-                                paste0(c(input$selected_payroll,
-                                         if (sum(nchar(input$selected_service)) > 40) {
-                                           paste0("Multiple ",
-                                                  input$selected_group,
-                                                  " Departments")
-                                           } else {
-                                             input$selected_service}),
-                                       collapse = ", "),
+                                paste0(c(
+                                  if (length(input$selected_payroll) > 2) {
+                                    paste0("Multiple Hospitals")
+                                  } else {
+                                    input$selected_payroll},
+                                  if (sum(nchar(input$selected_service)) > 40) {
+                                    paste0("Multiple ",
+                                           "Operational Categories")
+                                  } else {
+                                    input$selected_service}),
+                                  collapse = ", "),
                                 "<br>",
                                 "<sup>",
                                 "Worked FTE's By Pay Period",
@@ -354,7 +366,17 @@ server <- function(input, output, session) {
     kdata <-  datatable(kdata,
                         class = "cell-border stripe",
                         rownames = FALSE,
+                        caption = htmltools::tags$caption(
+                          style = 'caption-side: top; text-align: center; color: black;
+                                            font-size:150%; font-weight:bold',
+                          htmltools::em("Worked FTEs by Pay Period")),
                         options = list(
+                          scrollX = TRUE,
+                          sDom  = '<"top">lrt<"bottom">ip',
+                          initComplete = JS(
+                            "function(settings, json) {",
+                            "$(this.api().table().header()).css({'background-color': '#dddedd', 'color': 'black'});",
+                            "}"),
                           columnDefs = list(list(className = "dt-center", targets = "_all")))) %>%
       formatStyle(columns = c("Site", "Reporting Period Avg.", "FYTD Avg."), fontWeight = "bold")
   })
@@ -362,6 +384,7 @@ server <- function(input, output, session) {
   ## department tab -----------------------------------------------
   output$department_plot <- renderPlotly({
     data_service <- department_date()
+    data_test <<-  data_service
     data_service <-  data_service %>%
       pivot_wider(id_cols = c("DEFINITION.CODE", "DEFINITION.NAME", "DEPARTMENT"),
                   names_from = "dates",
@@ -384,7 +407,7 @@ server <- function(input, output, session) {
         ggtitle("placeholder") +
         xlab("Pay Period") +
         ylab("FTE (Full Time Equivalent)") +
-        scale_color_manual(values = mount_sinai_pal("main")(length(data_service$DEPARTMENT))) +
+        scale_color_mount_sinai("main")+
         scale_y_continuous(limits = c(0, max(data_service$FTE) * 1.2)) +
         theme(plot.title = element_text(hjust = 0.5, size = 20),
               axis.title = element_text(face = "bold"),
@@ -393,14 +416,18 @@ server <- function(input, output, session) {
       layout(title = list(text =
                             isolate(
                               paste0(
-                                paste0(c(input$dep_selected_payroll,
-                                         if (sum(nchar(input$dep_selected_service)) > 40) {
-                                           paste0("Multiple ",
-                                                  input$dep_selected_group,
-                                                  " Departments")
-                                           } else {
-                                             input$dep_selected_service}),
-                                       collapse = ", "),
+                                paste0(c(
+                                  if (length(input$dep_selected_payroll) > 2) {
+                                    paste0("Multiple Hospitals")
+                                  } else {
+                                    input$dep_selected_payroll},
+                                  if (sum(nchar(input$dep_selected_service)) > 40) {
+                                    paste0("Multiple ",
+                                           #input$dep_selected_group,
+                                           "Operational Categories")
+                                  } else {
+                                    input$dep_selected_service}),
+                                  collapse = ", "),
                                 "<br>",
                                 "<sup>",
                                 "Worked FTE's By Pay Period",
@@ -433,7 +460,17 @@ server <- function(input, output, session) {
     kdata <-  datatable(kdata,
                         class = "cell-border stripe",
                         rownames = FALSE,
+                        caption = htmltools::tags$caption(
+                          style = 'caption-side: top; text-align: center; color: black;
+                                            font-size:150%; font-weight:bold',
+                          htmltools::em("Worked FTEs by Pay Period")),
                         options = list(
+                          scrollX = TRUE,
+                          sDom  = '<"top">lrt<"bottom">ip',
+                          initComplete = JS(
+                            "function(settings, json) {",
+                            "$(this.api().table().header()).css({'background-color': '#dddedd', 'color': 'black'});",
+                            "}"),
                           columnDefs = list(list(className = "dt-center", targets = "_all")))) %>%
       formatStyle(columns = c("DEPARTMENT", "Reporting Period Avg.", "FYTD Avg."), fontWeight = "bold")
   })
