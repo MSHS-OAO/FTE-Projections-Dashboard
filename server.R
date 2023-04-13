@@ -219,7 +219,7 @@ server <- function(input, output, session) {
         ggtitle(label = "placeholder") +
         xlab("Pay Period") +
         ylab("FTE (Full Time Equivalent)") +
-        scale_color_manual(values = mount_sinai_pal("main")(length(kdata$Site))) +
+        scale_color_manual(values = mount_sinai_pal("blue")(length(kdata$Site)))+
         scale_y_continuous(limits = c(0, max(kdata$FTE) * 1.2)) +
         theme(plot.title = element_text(hjust = 0.5, size = 20),
               axis.title = element_text(face = "bold"),
@@ -231,7 +231,6 @@ server <- function(input, output, session) {
                                 paste0(c("MSHS",
                                          if (sum(nchar(input$mshs_selected_service)) > 40) {
                                            paste0("Multiple ",
-                                                  #input$mshs_selected_group,
                                                   "Operational Categories")
                                            } else {
                                              input$mshs_selected_service}),
@@ -311,7 +310,7 @@ server <- function(input, output, session) {
         ggtitle(label = "placeholder") +
         xlab("Pay Period") +
         ylab("FTE (Full Time Equivalent)") +
-        scale_color_manual(values = mount_sinai_pal("main")(length(kdata$Site))) +
+        scale_color_mount_sinai("main")+
         scale_y_continuous(limits = c(0, max(kdata$FTE) * 1.2)) +
         theme(plot.title = element_text(hjust = 0.5, size = 20),
               axis.title = element_text(face = "bold"),
@@ -327,7 +326,6 @@ server <- function(input, output, session) {
                                     input$selected_payroll},
                                          if (sum(nchar(input$selected_service)) > 40) {
                                            paste0("Multiple ",
-                                                  #input$selected_group,
                                                   "Operational Categories")
                                            } else {
                                              input$selected_service}),
@@ -386,6 +384,7 @@ server <- function(input, output, session) {
   ## department tab -----------------------------------------------
   output$department_plot <- renderPlotly({
     data_service <- department_date()
+    data_test <<-  data_service
     data_service <-  data_service %>%
       pivot_wider(id_cols = c("DEFINITION.CODE", "DEFINITION.NAME", "DEPARTMENT"),
                   names_from = "dates",
@@ -408,7 +407,7 @@ server <- function(input, output, session) {
         ggtitle("placeholder") +
         xlab("Pay Period") +
         ylab("FTE (Full Time Equivalent)") +
-        scale_color_manual(values = mount_sinai_pal("main")(length(data_service$DEPARTMENT))) +
+        scale_color_mount_sinai("main")+
         scale_y_continuous(limits = c(0, max(data_service$FTE) * 1.2)) +
         theme(plot.title = element_text(hjust = 0.5, size = 20),
               axis.title = element_text(face = "bold"),

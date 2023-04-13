@@ -26,20 +26,20 @@ suppressMessages({
 })
 
 # Maximize R Memory Size
-memory.limit(size = 8000000)
+#memory.limit(size = 8000000)
 
 # Import Data -------------------------------------------------------------
- system_summary <- readRDS(paste0(
-  "/SharedDrive/deans/Presidents/SixSigma/",
-  "MSHS Productivity/Productivity/",
-  "Universal Data/Labor/RDS/",
-  "system_summary_dashboard.rds"
-))
+#system_summary <- readRDS(paste0(
+#   "/SharedDrive/deans/Presidents/SixSigma/",
+#   "MSHS Productivity/Productivity/",
+#   "Universal Data/Labor/RDS/",
+#   "system_summary_dashboard.rds"
+# ))
 
-# system_summary <- readRDS(paste0("J:/deans/Presidents/SixSigma/",
-#                                  "MSHS Productivity/Productivity/",
-#                                  "Universal Data/Labor/RDS/",
-#                                  "system_summary_dashboard.rds"))
+system_summary <- readRDS(paste0("J:/deans/Presidents/SixSigma/",
+                                 "MSHS Productivity/Productivity/",
+                                 "Universal Data/Labor/RDS/",
+                                 "system_summary_dashboard.rds"))
 
 ## constants ------------------------------------------------------------------
 report_period_length <- 3
@@ -132,7 +132,7 @@ date_options <- format(as.Date(date_options, "%B %d %Y"), "%m/%d/%y")
 mount_sinai_colors <- c(
   `light pink`   = "#fcc9e9",
   `med pink`     = "#fa93d4",
-  `dark pink`    = "#d80b8c",
+  `dark pink`    = "#DC298D",
   `light purple` = "#c7c6ef",
   `med purple`   = "#8f8ce0",
   `light blue`   = "#5cd3ff",
@@ -140,26 +140,9 @@ mount_sinai_colors <- c(
   `dark blue`    = "#212070",
   `light grey`   = "#b2b3b2",
   `dark grey`    = "#686868",
-  `yellow`       = "#E69F00"
+  `yellow`       = "#E69F00",
+  `navy`         = "#00002D"
 )
-
-# mount_sinai_colors <- c(
-#   `dark purple`  = "#212070",
-#   `dark pink`    = "#d80b8c",
-#   `dark blue`    = "#00aeef",
-#   `dark grey`    = "#7f7f7f",
-#   `yellow`       = "#ffc000",
-#   `purple`       = "#7030a0",
-#   `med purple`   = "#5753d0",
-#   `med pink`     = "#f75dbe",
-#   `med blue`     = "#5cd3ff",
-#   `med grey`     = "#a5a7a5",
-#   `light purple` = "#c7c6ef",
-#   `light pink`   = "#fcc9e9",
-#   `light blue`   = "#c9f0ff",
-#   `light grey`   = "#dddedd"
-# )
-
 
 # Function to extract Mount Sinai colors as hex codes
 # Use Character names of mount_sinai_colors
@@ -174,6 +157,7 @@ mount_sinai_cols <- function(...) {
   mount_sinai_colors[cols]
 }
 
+
 #Create palettes
 mount_sinai_palettes <- list(
   `all` = mount_sinai_cols(
@@ -182,22 +166,30 @@ mount_sinai_palettes <- list(
     "med pink", "med purple", "yellow"
   ),
   `main` = mount_sinai_cols(
-    "med blue", "dark pink", "dark blue", "dark grey",
-    "light pink", "light blue", "light grey"
+    "navy", "dark blue", "med blue", "dark pink", "dark grey"
   ),
   `pink` = mount_sinai_cols("light pink", "dark pink"),
   `blue` = mount_sinai_cols("light blue", "dark blue"),
   `grey` = mount_sinai_cols("light grey", "med blue")
 )
 
-mount_sinai_palettes
-
 mount_sinai_pal <- function(palette = "main", reverse = FALSE, ...) {
   pal <- mount_sinai_palettes[[palette]]
 
   if (reverse) pal <- rev(pal)
 
-  colorRampPalette(pal, interpolate = "linear", ...)
+  colorRampPalette(pal, interpolate = "spline", ...)
+}
+
+#Scale Function for ggplot can be used instead of scale_color_manual
+scale_color_mount_sinai <- function(palette = "all", discrete = TRUE, reverse = FALSE, ...) {
+  pal <- mount_sinai_pal(palette = palette, reverse = reverse)
+
+  if (discrete) {
+    discrete_scale("colour", mount_sinai_palettes, palette = pal, ...)
+  } else {
+    scale_color_gradientn(colours = pal(256), ...)
+  }
 }
 
 # Other Functions ---------------------------------------------------------
